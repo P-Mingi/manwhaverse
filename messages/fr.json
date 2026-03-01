@@ -83,6 +83,7 @@
     "report": "Signaler"
   },
   "profile": {
+    "myProfile": "Mon Profil",
     "memberSince": "Membre depuis {date}",
     "titles": "Titres",
     "reviewsWritten": "Critiques",
@@ -90,12 +91,19 @@
     "following": "Abonnements",
     "follow": "Suivre",
     "unfollow": "Ne plus suivre",
-    "editProfile": "Modifier le profil"
+    "editProfile": "Modifier le profil",
+    "readingStreak": "Jours consécutifs",
+    "chaptersRead": "Chapitres lus",
+    "completed": "Complétés",
+    "myLibrary": "Ma Bibliothèque",
+    "viewAll": "Voir tout"
   },
   "auth": {
     "signIn": "Connexion",
     "signUp": "Inscription",
     "signInWith": "Se connecter avec {provider}",
+    "signInDescription": "Connectez-vous avec votre compte favori",
+    "termsNotice": "En vous connectant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité.",
     "email": "E-mail",
     "password": "Mot de passe",
     "forgotPassword": "Mot de passe oublié ?",

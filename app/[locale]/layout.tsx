@@ -6,6 +6,10 @@ import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import type { Locale } from '@/i18n/routing'
 import { playfairDisplay, dmSans, jetbrainsMono } from '@/app/fonts'
+import { SessionProvider } from '@/components/providers/SessionProvider'
+import { Header } from '@/components/layouts/Header'
+import { MobileNav } from '@/components/layouts/MobileNav'
+import { Footer } from '@/components/layouts/Footer'
 import '@/app/globals.css'
 
 interface LocaleLayoutProps {
@@ -74,7 +78,14 @@ export default async function LocaleLayout({
         className={`${playfairDisplay.variable} ${dmSans.variable} ${jetbrainsMono.variable} bg-base text-text-primary antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <SessionProvider>
+            <Header />
+            <div className="min-h-screen pb-16 md:pb-0">
+              {children}
+            </div>
+            <Footer locale={locale} />
+            <MobileNav />
+          </SessionProvider>
         </NextIntlClientProvider>
       </body>
     </html>

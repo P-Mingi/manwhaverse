@@ -1,13 +1,21 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-import { getManhwaBySlug, getTopManhwaSlugs } from '@/lib/db/manhwa'
+import { getManhwaBySlug, getTopManhwaSlugs, getRelatedManhwas } from '@/lib/db/manhwa'
+import { getReviewsForManhwa } from '@/lib/db/review'
+import { getLibraryEntry } from '@/lib/db/library'
+import { getUser } from '@/lib/auth/session'
 import { generateManhwaMetadata } from '@/lib/seo/metadata'
 import { generateManhwaJsonLd, generateBreadcrumbJsonLd } from '@/lib/seo/jsonld'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { ManhwaHero } from '@/components/features/ManhwaHero'
 import { SynopsisSection } from '@/components/features/SynopsisSection'
 import { TropeList } from '@/components/features/TropeList'
+import { ManhwaCard } from '@/components/features/ManhwaCard'
+import { LibraryButton } from '@/components/features/LibraryButton'
+import { ReviewCard } from '@/components/features/ReviewCard'
+import { ReviewForm } from '@/components/features/ReviewForm'
 
 export const revalidate = 3600 // ISR: 1 hour
 
@@ -36,10 +44,18 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
   if (!manhwa) notFound()
 
   const t = await getTranslations({ locale, namespace: 'manhwa' })
+  const user = await getUser()
   const title = locale === 'fr' ? (manhwa.title_fr ?? manhwa.title_en) : manhwa.title_en
   const synopsis = locale === 'fr'
     ? (manhwa.synopsis_fr ?? manhwa.synopsis_en)
     : manhwa.synopsis_en
+
+  // Fetch library entry and reviews in parallel
+  const [libraryEntry, { reviews }, related] = await Promise.all([
+    user ? getLibraryEntry(user.id, manhwa.id) : null,
+    getReviewsForManhwa(manhwa.id),
+    getRelatedManhwas(manhwa.id, 6),
+  ])
 
   const breadcrumbs = generateBreadcrumbJsonLd([
     { name: 'Home', url: `/${locale}` },
@@ -53,6 +69,11 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
       <JsonLd data={breadcrumbs} />
 
       <ManhwaHero manhwa={manhwa} locale={locale} />
+
+      {/* Library action */}
+      <div className="mx-auto max-w-5xl px-4 pt-4">
+        <LibraryButton manhwaId={manhwa.id} currentStatus={libraryEntry?.status ?? null} />
+      </div>
 
       <div className="mx-auto max-w-5xl px-4 py-8">
         {/* Tab-like sections */}
@@ -196,6 +217,43 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
             )}
           </aside>
         </div>
+
+        {/* Reviews section */}
+        <section className="mt-10">
+          <h2 className="mb-4 font-display text-lg font-semibold">{t('reviews')}</h2>
+
+          {user && (
+            <div className="mb-6">
+              <ReviewForm manhwaId={manhwa.id} />
+            </div>
+          )}
+
+          {reviews.length > 0 ? (
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  currentUserId={user?.id}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-text-muted">No reviews yet. Be the first!</p>
+          )}
+        </section>
+
+        {/* Similar titles */}
+        {related.length > 0 && (
+          <section className="mt-10">
+            <h2 className="mb-4 font-display text-lg font-semibold">{t('similar')}</h2>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+              {related.map((m) => (
+                <ManhwaCard key={m.id} manhwa={m} locale={locale} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </>
   )

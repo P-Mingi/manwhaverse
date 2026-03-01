@@ -83,6 +83,7 @@
     "report": "Report"
   },
   "profile": {
+    "myProfile": "My Profile",
     "memberSince": "Member since {date}",
     "titles": "Titles",
     "reviewsWritten": "Reviews",
@@ -90,12 +91,19 @@
     "following": "Following",
     "follow": "Follow",
     "unfollow": "Unfollow",
-    "editProfile": "Edit Profile"
+    "editProfile": "Edit Profile",
+    "readingStreak": "Day streak",
+    "chaptersRead": "Chapters read",
+    "completed": "Completed",
+    "myLibrary": "My Library",
+    "viewAll": "View all"
   },
   "auth": {
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signInWith": "Sign in with {provider}",
+    "signInDescription": "Connect with your favorite account",
+    "termsNotice": "By signing in, you agree to our Terms of Service and Privacy Policy.",
     "email": "Email",
     "password": "Password",
     "forgotPassword": "Forgot password?",
