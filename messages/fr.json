@@ -98,6 +98,16 @@
     "myLibrary": "Ma Bibliothèque",
     "viewAll": "Voir tout"
   },
+  "settings": {
+    "title": "Paramètres",
+    "displayName": "Nom d'affichage",
+    "bio": "Bio",
+    "bioPlaceholder": "Parlez-nous de vous...",
+    "bioMax": "300 caractères max",
+    "language": "Langue",
+    "save": "Enregistrer",
+    "saved": "Enregistré !"
+  },
   "auth": {
     "signIn": "Connexion",
     "signUp": "Inscription",

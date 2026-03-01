@@ -98,6 +98,16 @@
     "myLibrary": "My Library",
     "viewAll": "View all"
   },
+  "settings": {
+    "title": "Settings",
+    "displayName": "Display Name",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us about yourself...",
+    "bioMax": "300 characters max",
+    "language": "Language",
+    "save": "Save",
+    "saved": "Saved!"
+  },
   "auth": {
     "signIn": "Sign In",
     "signUp": "Sign Up",
