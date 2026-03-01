@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* ─── Colors: Base ─── */
+  --color-base: #0D0D0F;
+  --color-surface: #13141A;
+  --color-elevated: #1C1E27;
+  --color-border: #252836;
+
+  /* ─── Colors: Crystal System ─── */
+  --color-crystal-gold: #C9A84C;
+  --color-crystal-blue: #4A9EFF;
+  --color-crystal-red: #E05252;
+  --color-crystal-void: #555970;
+
+  /* ─── Colors: Text ─── */
+  --color-text-primary: #E8E4D9;
+  --color-text-secondary: #8B8FA8;
+  --color-text-muted: #4A4E63;
+
+  /* ─── Colors: Semantic ─── */
+  --color-success: #4ADE80;
+  --color-warning: #FBBF24;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  /* ─── Colors: Background/Foreground ─── */
+  --color-background: var(--color-base);
+  --color-foreground: var(--color-text-primary);
+
+  /* ─── Typography ─── */
+  --font-display: var(--font-playfair-display);
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* ─── Border Radius ─── */
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+}
+
+/* ─── Base Styles ─── */
+body {
+  background: var(--color-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Crystal Animation Keyframes ─── */
+@keyframes crystal-fill {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes crystal-shimmer {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stagger-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Scrollbar (minimal, dark) ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}

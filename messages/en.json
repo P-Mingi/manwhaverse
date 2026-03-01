@@ -1,0 +1,110 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "notFound": "Not found",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "submit": "Submit",
+    "back": "Back",
+    "seeAll": "See all",
+    "showMore": "Show more",
+    "showLess": "Show less"
+  },
+  "nav": {
+    "home": "Home",
+    "search": "Search",
+    "library": "My Library",
+    "profile": "Profile",
+    "feed": "Feed",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "settings": "Settings"
+  },
+  "home": {
+    "hero": {
+      "tagline": "Your manhwa universe, one scroll at a time",
+      "cta": "Start Tracking",
+      "ctaSecondary": "Browse Manhwa"
+    },
+    "topThisWeek": "Top This Week",
+    "discoverByTrope": "Discover by Trope",
+    "communityActivity": "Community Activity",
+    "hiddenGems": "Hidden Gems"
+  },
+  "manhwa": {
+    "chapters": "{count, plural, one {# chapter} other {# chapters}}",
+    "synopsis": "Synopsis",
+    "tropes": "Tropes",
+    "genres": "Genres",
+    "similar": "Similar Titles",
+    "reviews": "Reviews",
+    "info": "Info",
+    "community": "Community",
+    "addToLibrary": "Add to Library",
+    "readLegally": "Read Legally",
+    "status": {
+      "ONGOING": "Ongoing",
+      "COMPLETED": "Completed",
+      "HIATUS": "Hiatus",
+      "CANCELLED": "Cancelled",
+      "NOT_YET_RELEASED": "Not Yet Released"
+    },
+    "score": {
+      "referenceScore": "Reference Score",
+      "communityScore": "Community Score",
+      "beFirstToRate": "Be among the first to rate this",
+      "basedOnVotes": "Based on {count} votes",
+      "source": "Source: {platform}"
+    }
+  },
+  "library": {
+    "title": "My Library",
+    "reading": "Reading",
+    "completed": "Completed",
+    "onHold": "On Hold",
+    "dropped": "Dropped",
+    "planToRead": "Plan to Read",
+    "rereading": "Rereading",
+    "empty": "No titles in this category yet",
+    "addFirst": "Add your first manhwa!"
+  },
+  "review": {
+    "writeReview": "Write a Review",
+    "writeMicroReview": "Write a Quick Take",
+    "placeholder": "Share your thoughts...",
+    "spoilerWarning": "Contains spoilers",
+    "popular": "Popular",
+    "recent": "Recent",
+    "helpful": "Helpful",
+    "report": "Report"
+  },
+  "profile": {
+    "memberSince": "Member since {date}",
+    "titles": "Titles",
+    "reviewsWritten": "Reviews",
+    "followers": "Followers",
+    "following": "Following",
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "editProfile": "Edit Profile"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signInWith": "Sign in with {provider}",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  },
+  "seo": {
+    "siteName": "ManhwaVerse",
+    "defaultTitle": "ManhwaVerse — Track, Discover & Share Manhwa",
+    "defaultDescription": "The community-driven platform for manhwa & manhua readers. Track your reading, discover new titles, and share reviews."
+  }
+}

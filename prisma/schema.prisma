@@ -1,0 +1,824 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ═══════════════════════════════════════════════════
+// CONTENU PRINCIPAL
+// ═══════════════════════════════════════════════════
+
+model Manhwa {
+  id            String            @id @default(cuid())
+  slug          String            @unique
+
+  // Titres
+  title_en      String
+  title_kr      String?
+  title_fr      String?
+  title_alt     String[]
+
+  // Contenu
+  synopsis_en   String?           @db.Text
+  synopsis_fr   String?           @db.Text
+
+  // Médias
+  cover_url     String?
+  cover_cf_id   String?
+  banner_url    String?
+
+  // Metadata
+  type          ContentType       @default(MANHWA)
+  status        PublicationStatus @default(ONGOING)
+  chapter_count Int?
+  volume_count  Int?
+  release_year  Int?
+  end_year      Int?
+  origin_country String           @default("KR")
+  demographic   String?
+
+  // Scores ManhwaVerse (dénormalisés)
+  score_avg     Float?
+  score_stddev  Float?
+  score_count   Int               @default(0)
+  review_count  Int               @default(0)
+  list_count    Int               @default(0)
+  reader_count  Int               @default(0)
+  favorite_count Int              @default(0)
+  waitlist_count Int              @default(0)
+
+  // Scores externes agrégés
+  ext_score_mal           Float?
+  ext_score_mal_count     Int?
+  ext_score_anilist       Float?
+  ext_score_anilist_count Int?
+  ext_score_kitsu         Float?
+  ext_score_kitsu_count   Int?
+  ext_scores_updated_at   DateTime?
+  ext_score_composite     Float?
+
+  // Trending
+  trending_score Float            @default(0)
+  trending_fr    Float            @default(0)
+  trending_en    Float            @default(0)
+
+  // Sources externes
+  anilist_id    Int?              @unique
+  mal_id        Int?              @unique
+  mangadex_id   String?           @unique
+  kitsu_id      String?           @unique
+
+  // Contrôle
+  is_published  Boolean           @default(true)
+  is_verified   Boolean           @default(false)
+  data_source   String[]
+  created_at    DateTime          @default(now())
+  updated_at    DateTime          @updatedAt
+  deleted_at    DateTime?
+
+  // Relations
+  creator_links       ManhwaCreator[]
+  genre_links         ManhwaGenre[]
+  trope_links         ManhwaTrope[]
+  library_entries     UserLibrary[]
+  reviews             Review[]
+  list_items          ListItem[]
+  quotes              Quote[]
+  arcs                Arc[]
+  releases            Release[]
+  read_links          ReadLink[]
+  waitlists           Waitlist[]
+  similar_to          SimilarManhwa[]          @relation("source")
+  similar_from        SimilarManhwa[]          @relation("target")
+  relations_as_source ManhwaRelation[]         @relation("rel_source")
+  relations_as_target ManhwaRelation[]         @relation("rel_target")
+  score_history       ScoreHistory[]
+  external_snapshots  ExternalScoreSnapshot[]
+
+  @@index([slug])
+  @@index([type, status])
+  @@index([score_avg(sort: Desc)])
+  @@index([trending_score(sort: Desc)])
+  @@index([release_year])
+}
+
+enum ContentType {
+  MANHWA
+  MANHUA
+}
+
+enum PublicationStatus {
+  ONGOING
+  COMPLETED
+  HIATUS
+  CANCELLED
+}
+
+// ── Arcs narratifs
+model Arc {
+  id            String     @id @default(cuid())
+  manhwa_id     String
+  manhwa        Manhwa     @relation(fields: [manhwa_id], references: [id])
+
+  name_en       String
+  name_fr       String?
+  chapter_start Int
+  chapter_end   Int?
+  position      Int
+
+  score_avg     Float?
+  score_count   Int        @default(0)
+
+  arc_scores    ArcScore[]
+
+  created_at    DateTime   @default(now())
+
+  @@index([manhwa_id, position])
+}
+
+model ArcScore {
+  id         String   @id @default(cuid())
+  arc_id     String
+  arc        Arc      @relation(fields: [arc_id], references: [id])
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  score      Float
+  created_at DateTime @default(now())
+
+  @@unique([arc_id, user_id])
+}
+
+// ── Liens de lecture légaux
+model ReadLink {
+  id            String  @id @default(cuid())
+  manhwa_id     String
+  manhwa        Manhwa  @relation(fields: [manhwa_id], references: [id])
+  platform      String
+  url           String
+  is_free       Boolean @default(false)
+  is_official   Boolean @default(true)
+  language      String
+  is_affiliate  Boolean @default(false)
+  affiliate_url String?
+}
+
+// ── Titres similaires
+model SimilarManhwa {
+  id          String   @id @default(cuid())
+  source_id   String
+  source      Manhwa   @relation("source", fields: [source_id], references: [id])
+  target_id   String
+  target      Manhwa   @relation("target", fields: [target_id], references: [id])
+  similarity  Float
+  reasons     String[]
+  computed_at DateTime @default(now())
+
+  @@unique([source_id, target_id])
+  @@index([source_id, similarity(sort: Desc)])
+}
+
+// ── Relations entre manhwas
+model ManhwaRelation {
+  id            String       @id @default(cuid())
+  source_id     String
+  source        Manhwa       @relation("rel_source", fields: [source_id], references: [id])
+  target_id     String
+  target        Manhwa       @relation("rel_target", fields: [target_id], references: [id])
+  relation_type RelationType
+
+  @@unique([source_id, target_id, relation_type])
+}
+
+enum RelationType {
+  ADAPTATION
+  SOURCE
+  SEQUEL
+  PREQUEL
+  SIDE_STORY
+  ALTERNATIVE
+  LIGHT_NOVEL
+}
+
+// ── Évolution du score dans le temps
+model ScoreHistory {
+  id           String   @id @default(cuid())
+  manhwa_id    String
+  manhwa       Manhwa   @relation(fields: [manhwa_id], references: [id])
+  score        Float
+  reader_count Int
+  recorded_at  DateTime @default(now())
+
+  @@index([manhwa_id, recorded_at])
+}
+
+// ── Historique des scores externes
+model ExternalScoreSnapshot {
+  id          String           @id @default(cuid())
+  manhwa_id   String
+  manhwa      Manhwa           @relation(fields: [manhwa_id], references: [id])
+  platform    ExternalPlatform
+  score       Float
+  score_raw   Float
+  vote_count  Int?
+  recorded_at DateTime         @default(now())
+
+  @@unique([manhwa_id, platform, recorded_at])
+  @@index([manhwa_id, platform, recorded_at(sort: Desc)])
+}
+
+enum ExternalPlatform {
+  MAL
+  ANILIST
+  KITSU
+}
+
+// ── Releases
+model Release {
+  id                 String   @id @default(cuid())
+  manhwa_id          String
+  manhwa             Manhwa   @relation(fields: [manhwa_id], references: [id])
+  chapter            Int
+  chapter_title      String?
+  platform           String
+  url                String?
+  released_at        DateTime
+  created_at         DateTime @default(now())
+  notifications_sent Boolean  @default(false)
+
+  @@unique([manhwa_id, chapter, platform])
+  @@index([released_at(sort: Desc)])
+}
+
+// ═══════════════════════════════════════════════════
+// CRÉATEURS
+// ═══════════════════════════════════════════════════
+
+model Creator {
+  id             String          @id @default(cuid())
+  slug           String          @unique
+  name           String
+  name_native    String?
+  bio_en         String?         @db.Text
+  bio_fr         String?         @db.Text
+  avatar_url     String?
+  nationality    String?
+  birth_year     Int?
+
+  avg_score      Float?
+  total_readers  Int             @default(0)
+  follower_count Int             @default(0)
+
+  anilist_id     Int?
+
+  works          ManhwaCreator[]
+  followers      CreatorFollow[]
+
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+}
+
+model ManhwaCreator {
+  manhwa_id  String
+  manhwa     Manhwa      @relation(fields: [manhwa_id], references: [id])
+  creator_id String
+  creator    Creator     @relation(fields: [creator_id], references: [id])
+  role       CreatorRole
+
+  @@id([manhwa_id, creator_id, role])
+}
+
+enum CreatorRole {
+  AUTHOR
+  ILLUSTRATOR
+  BOTH
+}
+
+model CreatorFollow {
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  creator_id String
+  creator    Creator  @relation(fields: [creator_id], references: [id])
+  created_at DateTime @default(now())
+
+  @@id([user_id, creator_id])
+}
+
+// ═══════════════════════════════════════════════════
+// GENRES & TROPES
+// ═══════════════════════════════════════════════════
+
+model Genre {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  name_en        String
+  name_fr        String
+  description_en String?       @db.Text
+  description_fr String?       @db.Text
+  color          String?
+  manhwa_count   Int           @default(0)
+
+  manhwa_links   ManhwaGenre[]
+}
+
+model ManhwaGenre {
+  manhwa_id String
+  manhwa    Manhwa @relation(fields: [manhwa_id], references: [id])
+  genre_id  String
+  genre     Genre  @relation(fields: [genre_id], references: [id])
+
+  @@id([manhwa_id, genre_id])
+}
+
+model Trope {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  name           String
+  description_en String?       @db.Text
+  description_fr String?       @db.Text
+  category       TropeCategory
+  manhwa_count   Int           @default(0)
+
+  manhwa_links   ManhwaTrope[]
+}
+
+enum TropeCategory {
+  PROTAGONIST_TYPE
+  NARRATIVE
+  SETTING
+  THEME
+  AMBIANCE
+}
+
+model ManhwaTrope {
+  manhwa_id   String
+  manhwa      Manhwa  @relation(fields: [manhwa_id], references: [id])
+  trope_id    String
+  trope       Trope   @relation(fields: [trope_id], references: [id])
+  upvotes     Int     @default(0)
+  downvotes   Int     @default(0)
+  added_by    String?
+  is_verified Boolean @default(false)
+
+  @@id([manhwa_id, trope_id])
+  @@index([manhwa_id, upvotes(sort: Desc)])
+}
+
+// ═══════════════════════════════════════════════════
+// UTILISATEURS
+// ═══════════════════════════════════════════════════
+
+model User {
+  id                      String            @id // Supabase Auth UID
+  username                String            @unique
+  display_name            String?
+  avatar_url              String?
+  bio                     String?           @db.VarChar(300)
+  locale                  String            @default("en")
+
+  // Paramètres de lecture
+  reading_pace            Float?
+
+  // Paramètres notifs
+  notif_new_chapter       Boolean           @default(true)
+  notif_review_liked      Boolean           @default(true)
+  notif_new_follower      Boolean           @default(true)
+  notif_weekly_digest     Boolean           @default(true)
+  notif_email             Boolean           @default(true)
+
+  // Gamification
+  reader_class            String?
+  influence_score         Float             @default(0)
+  reading_streak          Int               @default(0)
+  longest_streak          Int               @default(0)
+  last_read_at            DateTime?
+
+  // Stats dénormalisées
+  total_chapters_read     Int               @default(0)
+  total_manhwas_completed Int               @default(0)
+
+  // Premium
+  is_premium              Boolean           @default(false)
+  premium_until           DateTime?
+
+  // Contrôle
+  is_banned               Boolean           @default(false)
+  created_at              DateTime          @default(now())
+  updated_at              DateTime          @updatedAt
+
+  // Relations
+  library                 UserLibrary[]
+  reviews                 Review[]
+  review_likes            ReviewLike[]
+  lists                   ManhwaList[]
+  list_votes              ListVote[]
+  follows                 Follow[]          @relation("follower")
+  followers               Follow[]          @relation("following")
+  creator_follows         CreatorFollow[]
+  quotes                  Quote[]
+  quote_votes             QuoteVote[]
+  arc_scores              ArcScore[]
+  trope_votes             TropeVote[]
+  notifications           Notification[]
+  activities              Activity[]
+  waitlists               Waitlist[]
+  reading_rooms           RoomMember[]
+  journal_entries         JournalEntry[]
+  achievements            UserAchievement[]
+}
+
+// ── Bibliothèque utilisateur
+model UserLibrary {
+  id            String        @id @default(cuid())
+  user_id       String
+  user          User          @relation(fields: [user_id], references: [id])
+  manhwa_id     String
+  manhwa        Manhwa        @relation(fields: [manhwa_id], references: [id])
+
+  status        ReadingStatus
+  progress      Int           @default(0)
+
+  score         Float?
+  score_private Float?
+  is_favorite   Boolean       @default(false)
+
+  started_at    DateTime?
+  completed_at  DateTime?
+
+  private_tags  String[]
+
+  reread_count  Int           @default(0)
+  reread_score  Float?
+
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+
+  @@unique([user_id, manhwa_id])
+  @@index([user_id, status])
+  @@index([user_id, updated_at(sort: Desc)])
+}
+
+enum ReadingStatus {
+  READING
+  COMPLETED
+  ON_HOLD
+  DROPPED
+  PLAN_TO_READ
+  REREADING
+}
+
+// ── Journal de lecture (privé)
+model JournalEntry {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  manhwa_id  String
+  chapter    Int?
+  content    String   @db.Text
+  created_at DateTime @default(now())
+
+  @@index([user_id, manhwa_id])
+}
+
+// ── Waitlist
+model Waitlist {
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  manhwa_id   String
+  manhwa      Manhwa   @relation(fields: [manhwa_id], references: [id])
+  created_at  DateTime @default(now())
+  notified_at DateTime?
+
+  @@id([user_id, manhwa_id])
+}
+
+// ═══════════════════════════════════════════════════
+// REVIEWS & QUOTES
+// ═══════════════════════════════════════════════════
+
+model Review {
+  id               String     @id @default(cuid())
+  user_id          String
+  user             User       @relation(fields: [user_id], references: [id])
+  manhwa_id        String
+  manhwa           Manhwa     @relation(fields: [manhwa_id], references: [id])
+
+  content          String     @db.Text
+  score            Float?
+  is_micro         Boolean    @default(false)
+  has_spoilers     Boolean    @default(false)
+
+  score_story      Float?
+  score_art        Float?
+  score_characters Float?
+  score_world      Float?
+
+  audience_tag     String?
+
+  likes_count      Int        @default(0)
+
+  imported_from    String?
+  import_url       String?
+
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt
+  deleted_at       DateTime?
+
+  likes            ReviewLike[]
+
+  @@index([manhwa_id, likes_count(sort: Desc)])
+  @@index([manhwa_id, created_at(sort: Desc)])
+  @@index([user_id])
+}
+
+model ReviewLike {
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  review_id  String
+  review     Review   @relation(fields: [review_id], references: [id])
+  created_at DateTime @default(now())
+
+  @@id([user_id, review_id])
+}
+
+model Quote {
+  id         String      @id @default(cuid())
+  manhwa_id  String
+  manhwa     Manhwa      @relation(fields: [manhwa_id], references: [id])
+  user_id    String
+  user       User        @relation(fields: [user_id], references: [id])
+
+  content    String      @db.VarChar(500)
+  chapter    Int?
+  character  String?
+
+  votes      Int         @default(0)
+
+  created_at DateTime    @default(now())
+  deleted_at DateTime?
+
+  quote_votes QuoteVote[]
+
+  @@index([manhwa_id, votes(sort: Desc)])
+}
+
+model QuoteVote {
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  quote_id   String
+  quote      Quote    @relation(fields: [quote_id], references: [id])
+  value      Int
+  created_at DateTime @default(now())
+
+  @@id([user_id, quote_id])
+}
+
+model TropeVote {
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  manhwa_id  String
+  trope_id   String
+  value      Int
+  created_at DateTime @default(now())
+
+  @@id([user_id, manhwa_id, trope_id])
+}
+
+// ═══════════════════════════════════════════════════
+// LISTES COMMUNAUTAIRES
+// ═══════════════════════════════════════════════════
+
+model ManhwaList {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  user_id     String
+  user        User       @relation(fields: [user_id], references: [id])
+
+  title       String
+  description String?    @db.Text
+  is_public   Boolean    @default(true)
+  is_collab   Boolean    @default(false)
+
+  og_title    String?
+
+  likes_count Int        @default(0)
+  item_count  Int        @default(0)
+
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  items       ListItem[]
+  votes       ListVote[]
+}
+
+model ListItem {
+  id        String     @id @default(cuid())
+  list_id   String
+  list      ManhwaList @relation(fields: [list_id], references: [id])
+  manhwa_id String
+  manhwa    Manhwa     @relation(fields: [manhwa_id], references: [id])
+  position  Int
+  note      String?    @db.VarChar(500)
+
+  added_at  DateTime   @default(now())
+
+  @@unique([list_id, manhwa_id])
+  @@index([list_id, position])
+}
+
+model ListVote {
+  user_id    String
+  user       User       @relation(fields: [user_id], references: [id])
+  list_id    String
+  list       ManhwaList @relation(fields: [list_id], references: [id])
+  created_at DateTime   @default(now())
+
+  @@id([user_id, list_id])
+}
+
+// ═══════════════════════════════════════════════════
+// SOCIAL
+// ═══════════════════════════════════════════════════
+
+model Follow {
+  follower_id  String
+  follower     User     @relation("follower", fields: [follower_id], references: [id])
+  following_id String
+  following    User     @relation("following", fields: [following_id], references: [id])
+  created_at   DateTime @default(now())
+
+  @@id([follower_id, following_id])
+  @@index([following_id])
+}
+
+model Activity {
+  id         String       @id @default(cuid())
+  user_id    String
+  user       User         @relation(fields: [user_id], references: [id])
+  type       ActivityType
+  manhwa_id  String?
+  metadata   Json?
+  created_at DateTime     @default(now())
+
+  @@index([user_id, created_at(sort: Desc)])
+  @@index([created_at(sort: Desc)])
+}
+
+enum ActivityType {
+  ADDED_TO_LIBRARY
+  COMPLETED
+  RATED
+  REVIEWED
+  CREATED_LIST
+  STARTED_READING
+  FAVORITED
+}
+
+// ── Reading Rooms
+model ReadingRoom {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  manhwa_id   String
+  title       String
+  description String?
+  is_public   Boolean       @default(true)
+  max_members Int           @default(20)
+
+  created_by  String
+  created_at  DateTime      @default(now())
+
+  members     RoomMember[]
+  messages    RoomMessage[]
+}
+
+model RoomMember {
+  room_id   String
+  room      ReadingRoom @relation(fields: [room_id], references: [id])
+  user_id   String
+  user      User        @relation(fields: [user_id], references: [id])
+  progress  Int         @default(0)
+  joined_at DateTime    @default(now())
+
+  @@id([room_id, user_id])
+}
+
+model RoomMessage {
+  id          String      @id @default(cuid())
+  room_id     String
+  room        ReadingRoom @relation(fields: [room_id], references: [id])
+  user_id     String
+  content     String      @db.VarChar(1000)
+  chapter_ref Int?
+  reaction    String?
+  created_at  DateTime    @default(now())
+
+  @@index([room_id, chapter_ref])
+}
+
+// ═══════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════
+
+model Notification {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  type       String
+  data       Json
+  read       Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@index([user_id, read, created_at(sort: Desc)])
+}
+
+// ═══════════════════════════════════════════════════
+// GAMIFICATION
+// ═══════════════════════════════════════════════════
+
+model Achievement {
+  id             String            @id @default(cuid())
+  slug           String            @unique
+  name_en        String
+  name_fr        String
+  description_en String
+  description_fr String
+  icon           String
+  category       String
+
+  users          UserAchievement[]
+}
+
+model UserAchievement {
+  user_id        String
+  user           User        @relation(fields: [user_id], references: [id])
+  achievement_id String
+  achievement    Achievement @relation(fields: [achievement_id], references: [id])
+  unlocked_at    DateTime    @default(now())
+
+  @@id([user_id, achievement_id])
+}
+
+// ═══════════════════════════════════════════════════
+// MODÉRATION
+// ═══════════════════════════════════════════════════
+
+model Report {
+  id           String    @id @default(cuid())
+  reporter_id  String
+  content_type String
+  content_id   String
+  reason       String
+  status       String    @default("pending")
+  created_at   DateTime  @default(now())
+  resolved_at  DateTime?
+  resolved_by  String?
+
+  @@index([status, created_at])
+  @@index([content_type, content_id])
+}
+
+model ModerationLog {
+  id          String   @id @default(cuid())
+  action      String
+  target_id   String
+  target_type String
+  reason      String
+  created_at  DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════════════
+// AUTOMATISATION & ADMIN
+// ═══════════════════════════════════════════════════
+
+model SocialPostQueue {
+  id           String    @id @default(cuid())
+  platform     String
+  content      String    @db.Text
+  image_url    String?
+  manhwa_id    String?
+  scheduled_at DateTime?
+  posted_at    DateTime?
+  post_url     String?
+  status       String    @default("pending")
+  error        String?
+  created_at   DateTime  @default(now())
+
+  @@index([status, scheduled_at])
+}
+
+model SyncLog {
+  id            String    @id @default(cuid())
+  source        String
+  type          String
+  items_synced  Int       @default(0)
+  items_new     Int       @default(0)
+  items_updated Int       @default(0)
+  errors        Int       @default(0)
+  duration_ms   Int?
+  started_at    DateTime  @default(now())
+  completed_at  DateTime?
+  error_log     String?   @db.Text
+}
