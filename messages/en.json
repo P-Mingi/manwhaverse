@@ -69,6 +69,12 @@
     "dropped": "Dropped",
     "planToRead": "Plan to Read",
     "rereading": "Rereading",
+    "all": "All",
+    "sortBy": "Sort by",
+    "sortUpdated": "Last updated",
+    "sortScore": "Score",
+    "sortTitle": "Title",
+    "sortAdded": "Date added",
     "empty": "No titles in this category yet",
     "addFirst": "Add your first manhwa!"
   },

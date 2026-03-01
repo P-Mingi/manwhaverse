@@ -28,9 +28,19 @@ export type LibraryEntryWithManhwa = Prisma.UserLibraryGetPayload<{
   include: typeof libraryWithManhwa
 }>
 
+export type LibrarySort = 'updated' | 'score' | 'title' | 'added'
+
+const sortMap: Record<LibrarySort, Prisma.UserLibraryOrderByWithRelationInput> = {
+  updated: { updated_at: 'desc' },
+  score: { score: { sort: 'desc', nulls: 'last' } },
+  title: { manhwa: { title_en: 'asc' } },
+  added: { created_at: 'desc' },
+}
+
 export async function getUserLibrary(
   userId: string,
-  status?: ReadingStatus
+  status?: ReadingStatus,
+  sort: LibrarySort = 'updated'
 ): Promise<LibraryEntryWithManhwa[]> {
   return prisma.userLibrary.findMany({
     where: {
@@ -38,8 +48,24 @@ export async function getUserLibrary(
       ...(status ? { status } : {}),
     },
     include: libraryWithManhwa,
-    orderBy: { updated_at: 'desc' },
+    orderBy: sortMap[sort],
   })
+}
+
+export async function getLibraryCounts(userId: string) {
+  const counts = await prisma.userLibrary.groupBy({
+    by: ['status'],
+    where: { user_id: userId },
+    _count: true,
+  })
+
+  const result: Partial<Record<ReadingStatus, number>> = {}
+  let total = 0
+  for (const c of counts) {
+    result[c.status] = c._count
+    total += c._count
+  }
+  return { ...result, total }
 }
 
 export async function getLibraryEntry(userId: string, manhwaId: string) {
