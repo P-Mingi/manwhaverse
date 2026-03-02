@@ -70,7 +70,7 @@ export default async function TopPage({ params, searchParams }: TopPageProps) {
 
       {/* Ranking table */}
       {manhwas.length === 0 ? (
-        <p className="py-12 text-center text-text-muted">No ranked titles found.</p>
+        <p className="py-12 text-center text-text-muted">{t('noRanked')}</p>
       ) : (
         <div className="space-y-1">
           {manhwas.map((manhwa) => (

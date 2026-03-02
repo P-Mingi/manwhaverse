@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { prisma } from '@/lib/db/client'
 
-const BASE_URL = 'https://manhwaverse.com'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://manhwaverse.com'
 const LOCALES = ['en', 'fr']
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -30,10 +30,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 1.0,
       },
       {
-        url: `${BASE_URL}/${locale}/search`,
+        url: `${BASE_URL}/${locale}/explore`,
         lastModified: new Date(),
         changeFrequency: 'daily',
         priority: 0.9,
+      },
+      {
+        url: `${BASE_URL}/${locale}/top`,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 0.9,
+      },
+      {
+        url: `${BASE_URL}/${locale}/search`,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 0.8,
       },
       {
         url: `${BASE_URL}/${locale}/genre`,

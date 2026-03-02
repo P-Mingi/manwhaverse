@@ -399,7 +399,8 @@
     "allGenres": "Tous les genres",
     "rank": "Rang",
     "score": "Score",
-    "readers": "lecteurs"
+    "readers": "lecteurs",
+    "noRanked": "Aucun titre classé trouvé."
   },
   "seo": {
     "siteName": "ManhwaVerse",
