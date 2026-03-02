@@ -11,6 +11,11 @@ const manhwaWithRelations = {
   },
   read_links: true,
   arcs: { orderBy: { position: 'asc' as const } },
+  characters: {
+    include: { character: true },
+    orderBy: { role: 'asc' as const },
+    take: 6,
+  },
 } satisfies Prisma.ManhwaInclude
 
 export type ManhwaWithRelations = Prisma.ManhwaGetPayload<{
@@ -27,17 +32,23 @@ export async function getManhwaBySlug(
 }
 
 // Lightweight type for cards/grids
-const manhwaCardSelect = {
+export const manhwaCardSelect = {
   id: true,
   slug: true,
   title_en: true,
   title_fr: true,
   cover_url: true,
+  cover_is_nsfw: true,
+  content_rating: true,
   type: true,
   status: true,
   score_avg: true,
   score_count: true,
   ext_score_composite: true,
+  display_score: true,
+  display_score_source: true,
+  display_score_phase: true,
+  display_score_confidence: true,
   chapter_count: true,
   reader_count: true,
   genre_links: {
@@ -48,6 +59,27 @@ const manhwaCardSelect = {
 
 export type ManhwaCardData = Prisma.ManhwaGetPayload<{
   select: typeof manhwaCardSelect
+}>
+
+// Extended card data with popup fields (synopsis, tropes, year)
+export const manhwaCardWithPopupSelect = {
+  ...manhwaCardSelect,
+  synopsis_en: true,
+  synopsis_fr: true,
+  release_year: true,
+  end_year: true,
+  genre_links: {
+    include: { genre: { select: { slug: true, name_en: true, name_fr: true } } },
+    take: 5,
+  },
+  trope_links: {
+    include: { trope: { select: { slug: true, name: true } } },
+    take: 5,
+  },
+} satisfies Prisma.ManhwaSelect
+
+export type ManhwaCardPopupData = Prisma.ManhwaGetPayload<{
+  select: typeof manhwaCardWithPopupSelect
 }>
 
 export async function getManhwaForCard(

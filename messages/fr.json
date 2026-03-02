@@ -22,7 +22,27 @@
     "signIn": "Connexion",
     "signUp": "Inscription",
     "signOut": "Déconnexion",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "genres": "Genres",
+    "tropes": "Tropes",
+    "discover": "Découvrir",
+    "notifications": "Notifications",
+    "blog": "Blog"
+  },
+  "footer": {
+    "discover": "Découvrir",
+    "genres": "Genres",
+    "tropes": "Tropes",
+    "topManhwa": "Top manhwa",
+    "community": "Communauté",
+    "legal": "Légal",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "about": "À propos",
+    "contact": "Contact",
+    "feed": "Fil d'activité",
+    "search": "Recherche",
+    "blog": "Blog"
   },
   "home": {
     "hero": {
@@ -30,10 +50,30 @@
       "cta": "Commencer le suivi",
       "ctaSecondary": "Parcourir les manhwa"
     },
+    "trending": "Tendances",
+    "popularThisYear": "Populaires cette année",
+    "bestRatedAnilist": "Les mieux notés",
+    "recentlyAdded": "Ajoutés récemment",
+    "allTimePopular": "Populaires de tous les temps",
+    "topRated": "Les mieux notés",
+    "hiddenGems": "Pépites cachées",
     "topThisWeek": "Top de la semaine",
     "discoverByTrope": "Découvrir par trope",
     "communityActivity": "Activité communautaire",
-    "hiddenGems": "Pépites cachées"
+    "readers": "lecteurs",
+    "ranking": {
+      "title": "Le Classement ManhwaVerse",
+      "viewAll": "Voir le classement complet"
+    }
+  },
+  "filter": {
+    "searchPlaceholder": "Rechercher un manhwa...",
+    "genre": "Genre",
+    "trope": "Trope",
+    "year": "Année",
+    "allGenres": "Tous les genres",
+    "allTropes": "Tous les tropes",
+    "allYears": "Toutes les années"
   },
   "manhwa": {
     "chapters": "{count, plural, one {# chapitre} other {# chapitres}}",
@@ -46,6 +86,17 @@
     "community": "Communauté",
     "addToLibrary": "Ajouter à la bibliothèque",
     "readLegally": "Lire légalement",
+    "whereToRead": "Lire ce manhwa",
+    "free": "Gratuit",
+    "physicalEdition": "Édition physique",
+    "morePlatforms": "{count, plural, one {# autre langue} other {# autres langues}}",
+    "showLessLangs": "Voir moins",
+    "noReviewsYet": "Aucune critique pour l'instant. Soyez le premier !",
+    "characterVote": {
+      "title": "Meilleur personnage",
+      "votes": "votes",
+      "yourVote": "Votre vote a été enregistré"
+    },
     "status": {
       "ONGOING": "En cours",
       "COMPLETED": "Terminé",
@@ -58,7 +109,104 @@
       "communityScore": "Score communautaire",
       "beFirstToRate": "Soyez parmi les premiers à noter",
       "basedOnVotes": "Basé sur {count} votes",
-      "source": "Source : {platform}"
+      "source": "Source : {platform}",
+      "blended": "Basé sur {count} votes ManhwaVerse + AniList",
+      "bootstrap": "Score de référence"
+    },
+    "tabs": {
+      "overview": "Aperçu",
+      "characters": "Personnages",
+      "staff": "Staff",
+      "reviews": "Critiques",
+      "stats": "Stats"
+    },
+    "characters": "Personnages",
+    "staff": "Staff & Créateurs",
+    "stats": "Stats & Classements",
+    "seeAllCharacters": "Voir tous les personnages",
+    "noCharacters": "Aucune donnée de personnage",
+    "noStaff": "Aucune donnée de staff",
+    "noStats": "Aucune donnée de stats",
+    "characterRole": {
+      "MAIN": "Principal",
+      "SUPPORTING": "Secondaire",
+      "BACKGROUND": "Figurant"
+    },
+    "relationType": {
+      "ADAPTATION": "Adaptation",
+      "SOURCE": "Source",
+      "SEQUEL": "Suite",
+      "PREQUEL": "Préquelle",
+      "SIDE_STORY": "Histoire parallèle",
+      "ALTERNATIVE": "Alternatif",
+      "LIGHT_NOVEL": "Light Novel"
+    },
+    "relations": "Relations",
+    "sidebar": {
+      "type": "Type",
+      "status": "Statut",
+      "chapters": "Chapitres",
+      "volumes": "Volumes",
+      "year": "Année",
+      "origin": "Origine",
+      "source": "Source",
+      "popularity": "Popularité",
+      "favorites": "Favoris",
+      "readers": "Lecteurs",
+      "altTitles": "Aussi connu sous"
+    },
+    "languages": {
+      "english": "Anglais",
+      "french": "Français",
+      "korean": "Coréen",
+      "thai": "Thaï",
+      "german": "Allemand",
+      "chinese": "Chinois",
+      "spanish": "Espagnol",
+      "portuguese": "Portugais",
+      "italian": "Italien",
+      "japanese": "Japonais"
+    },
+    "countries": {
+      "KR": "Corée",
+      "CN": "Chine",
+      "JP": "Japon",
+      "TW": "Taïwan"
+    },
+    "statsLabels": {
+      "scoreDistribution": "Répartition des scores",
+      "statusDistribution": "Répartition des statuts",
+      "rankings": "Classements",
+      "recentActivity": "Activité récente",
+      "votes": "votes",
+      "users": "utilisateurs",
+      "source": "Source : {name}",
+      "rankingsAnilist": "Classements (AniList)"
+    },
+    "reactions": {
+      "title": "Réactions",
+      "HEOL": "Choqué",
+      "DAEBAK": "Incroyable",
+      "GAMDONG": "Émouvant",
+      "KINGBAT": "En rage",
+      "MICHYEO": "Fou",
+      "JUKGET": "Je meurs"
+    },
+    "controversy": {
+      "title": "Controverse",
+      "consensus": "Consensus",
+      "mixed": "Mitigé",
+      "controversial": "Controversé",
+      "very_controversial": "Très controversé",
+      "basedOn": "Basé sur {count} notes"
+    },
+    "contentRating": {
+      "G": "Tout public",
+      "PG": "Accompagnement parental",
+      "PG13": "Ados 13+",
+      "M": "Mature",
+      "R18": "Adultes 18+",
+      "X": "Explicite"
     }
   },
   "library": {
@@ -75,18 +223,57 @@
     "sortScore": "Score",
     "sortTitle": "Titre",
     "sortAdded": "Date d'ajout",
+    "remove": "Retirer de la bibliothèque",
+    "score": "Note",
+    "scoreNone": "Non noté",
+    "rate": "Noter",
+    "clearScore": "Effacer",
+    "progress": "Progression",
+    "favorite": "Favori",
     "empty": "Aucun titre dans cette catégorie",
-    "addFirst": "Ajoutez votre premier manhwa !"
+    "addFirst": "Ajoutez votre premier manhwa !",
+    "addToLibrary": "Ajouter à la bibliothèque",
+    "openEditor": "Ouvrir l'éditeur",
+    "save": "Enregistrer",
+    "confirmRemove": "Êtes-vous sûr ? Ce titre sera retiré de votre bibliothèque.",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "editor": {
+      "status": "Statut",
+      "score": "Note",
+      "progress": "Progression",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "rereads": "Relectures",
+      "privateTags": "Tags privés",
+      "addTag": "Ajouter un tag…",
+      "notes": "Notes",
+      "notesPlaceholder": "Écrivez vos notes privées…",
+      "notesPrivate": "Visible uniquement par vous"
+    }
   },
   "review": {
     "writeReview": "Écrire une critique",
     "writeMicroReview": "Écrire un avis rapide",
     "placeholder": "Partagez vos impressions...",
+    "titlePlaceholder": "Titre de la critique (optionnel)",
     "spoilerWarning": "Contient des spoilers",
     "popular": "Populaire",
     "recent": "Récent",
     "helpful": "Utile",
-    "report": "Signaler"
+    "report": "Signaler",
+    "cancel": "Annuler",
+    "publish": "Publier",
+    "readFull": "Lire la critique complète →",
+    "allReviews": "Toutes les critiques",
+    "longReviews": "Critiques",
+    "quickReviews": "Avis rapides",
+    "helpfulCount": "{likes} sur {total} ont trouvé cela utile",
+    "reviewBy": "une critique par {username}",
+    "scoreStory": "Scénario",
+    "scoreArt": "Dessin",
+    "scoreCharacters": "Personnages",
+    "scoreWorld": "Univers"
   },
   "profile": {
     "myProfile": "Mon Profil",
@@ -97,12 +284,19 @@
     "following": "Abonnements",
     "follow": "Suivre",
     "unfollow": "Ne plus suivre",
+    "following": "Suivi(e)",
+    "followersList": "Abonnés",
+    "followingList": "Abonnements",
+    "noFollowers": "Aucun abonné",
+    "noFollowing": "Ne suit personne",
     "editProfile": "Modifier le profil",
     "readingStreak": "Jours consécutifs",
     "chaptersRead": "Chapitres lus",
     "completed": "Complétés",
     "myLibrary": "Ma Bibliothèque",
-    "viewAll": "Voir tout"
+    "viewAll": "Voir tout",
+    "recentActivity": "Activité récente",
+    "noActivity": "Aucune activité"
   },
   "settings": {
     "title": "Paramètres",
@@ -111,8 +305,18 @@
     "bioPlaceholder": "Parlez-nous de vous...",
     "bioMax": "300 caractères max",
     "language": "Langue",
+    "contentFilter": "Contenu mature",
+    "showMatureContent": "Afficher le contenu mature sans avertissement",
+    "matureEnabled": "Le contenu 18+ sera affiché sans avertissement",
+    "matureDisabled": "Un avertissement apparaîtra avant de voir le contenu 18+",
     "save": "Enregistrer",
-    "saved": "Enregistré !"
+    "saved": "Enregistré !",
+    "notifTitle": "Notifications",
+    "notifNewFollower": "Nouvel abonné",
+    "notifReviewLiked": "Critique aimée",
+    "notifNewChapter": "Nouveau chapitre",
+    "notifWeeklyDigest": "Résumé hebdomadaire",
+    "notifEmail": "Notifications par e-mail"
   },
   "auth": {
     "signIn": "Connexion",
@@ -125,6 +329,77 @@
     "forgotPassword": "Mot de passe oublié ?",
     "noAccount": "Pas encore de compte ?",
     "hasAccount": "Vous avez déjà un compte ?"
+  },
+  "feed": {
+    "title": "Fil d'activité",
+    "empty": "Suivez des utilisateurs pour voir leur activité ici",
+    "emptyPublic": "Aucune activité",
+    "addedToLibrary": "a ajouté",
+    "completed": "a terminé",
+    "rated": "a noté",
+    "reviewed": "a critiqué",
+    "startedReading": "a commencé",
+    "favorited": "a mis en favori"
+  },
+  "mature": {
+    "title": "Contenu mature",
+    "description": "Ce manhwa contient du contenu mature (18+). Voulez-vous continuer ?",
+    "continue": "Oui, continuer",
+    "goBack": "Retour",
+    "remember": "Se souvenir de mon choix et toujours afficher le contenu mature"
+  },
+  "search": {
+    "placeholder": "Rechercher un manhwa...",
+    "all": "Tous",
+    "sortRelevance": "Pertinence",
+    "sortScore": "Mieux notés",
+    "sortPopularity": "Populaires",
+    "sortRecent": "Récents",
+    "typeManhwa": "Manhwa",
+    "typeManhua": "Manhua",
+    "resultsFor": "{count} résultat(s) pour « {query} »",
+    "noResults": "Aucun résultat"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Aucune notification",
+    "loading": "Chargement...",
+    "markAllRead": "Tout marquer comme lu",
+    "viewAll": "Voir toutes les notifications",
+    "newFollower": "{name} a commencé à vous suivre",
+    "reviewLiked": "{name} a aimé votre critique sur {title}",
+    "newChapter": "Le chapitre {chapter} de {title} est disponible"
+  },
+  "poll": {
+    "totalVotes": "{count, plural, one {# vote} other {# votes}}"
+  },
+  "explore": {
+    "title": "Explorer — ManhwaVerse",
+    "genres": "Genres",
+    "tropes": "Parcourir par Trope",
+    "allGenres": "Tous"
+  },
+  "blog": {
+    "title": "Blog",
+    "description": "Actualités, guides et analyses sur les manhwa et manhua",
+    "all": "Tous",
+    "noArticles": "Aucun article pour le moment",
+    "relatedManhwa": "Manhwa associés",
+    "category": {
+      "NEWS": "Actualités",
+      "GUIDE": "Guides",
+      "LIST": "Listes",
+      "OPINION": "Opinion",
+      "ANALYSIS": "Analyse"
+    }
+  },
+  "top": {
+    "title": "Classement des meilleurs Manhwa",
+    "description": "Les meilleurs manhwa classés par la communauté ManhwaVerse",
+    "allGenres": "Tous les genres",
+    "rank": "Rang",
+    "score": "Score",
+    "readers": "lecteurs"
   },
   "seo": {
     "siteName": "ManhwaVerse",

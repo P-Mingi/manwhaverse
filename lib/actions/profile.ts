@@ -36,3 +36,30 @@ export async function updateProfileAction(formData: FormData) {
 
   return { success: true }
 }
+
+const notifPrefsSchema = z.object({
+  notif_new_chapter: z.boolean(),
+  notif_review_liked: z.boolean(),
+  notif_new_follower: z.boolean(),
+  notif_weekly_digest: z.boolean(),
+  notif_email: z.boolean(),
+})
+
+export async function updateNotificationPrefsAction(data: {
+  notif_new_chapter: boolean
+  notif_review_liked: boolean
+  notif_new_follower: boolean
+  notif_weekly_digest: boolean
+  notif_email: boolean
+}) {
+  const user = await getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const parsed = notifPrefsSchema.safeParse(data)
+  if (!parsed.success) return { error: 'Invalid input' }
+
+  await updateUserProfile(user.id, parsed.data)
+
+  revalidatePath('/[locale]/settings', 'page')
+  return { success: true }
+}

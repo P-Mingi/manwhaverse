@@ -1,0 +1,74 @@
+import Image from 'next/image'
+import Link from 'next/link'
+
+interface ArticleCardProps {
+  article: {
+    slug: string
+    title_en: string
+    title_fr: string | null
+    excerpt_en: string | null
+    excerpt_fr: string | null
+    cover_image_url: string | null
+    category: string
+    reading_time: number | null
+    published_at: Date | null
+  }
+  locale: string
+}
+
+const CATEGORY_COLORS: Record<string, string> = {
+  NEWS: 'bg-crystal-blue/10 text-crystal-blue',
+  GUIDE: 'bg-emerald-500/10 text-emerald-400',
+  LIST: 'bg-crystal-gold/10 text-crystal-gold',
+  OPINION: 'bg-purple-500/10 text-purple-400',
+  ANALYSIS: 'bg-orange-500/10 text-orange-400',
+}
+
+export function ArticleCard({ article, locale }: ArticleCardProps) {
+  const title = locale === 'fr' && article.title_fr ? article.title_fr : article.title_en
+  const excerpt = locale === 'fr' && article.excerpt_fr ? article.excerpt_fr : article.excerpt_en
+
+  return (
+    <Link
+      href={`/${locale}/blog/${article.slug}`}
+      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-surface transition-colors hover:border-text-muted"
+    >
+      {article.cover_image_url && (
+        <div className="relative aspect-video w-full overflow-hidden">
+          <Image
+            src={article.cover_image_url}
+            alt={title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col p-4">
+        <div className="mb-2 flex items-center gap-2">
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${CATEGORY_COLORS[article.category] ?? 'bg-elevated text-text-muted'}`}>
+            {article.category}
+          </span>
+          {article.reading_time && (
+            <span className="text-xs text-text-muted">{article.reading_time} min</span>
+          )}
+        </div>
+        <h3 className="mb-1 text-base font-semibold text-text-primary transition-colors group-hover:text-crystal-blue">
+          {title}
+        </h3>
+        {excerpt && (
+          <p className="line-clamp-2 text-sm text-text-secondary">{excerpt}</p>
+        )}
+        {article.published_at && (
+          <time className="mt-auto pt-3 text-xs text-text-muted">
+            {new Date(article.published_at).toLocaleDateString(locale, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </time>
+        )}
+      </div>
+    </Link>
+  )
+}

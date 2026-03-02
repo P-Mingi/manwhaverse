@@ -37,6 +37,12 @@ export async function getUserById(id: string) {
       avatar_url: true,
       bio: true,
       locale: true,
+      content_filter: true,
+      notif_new_chapter: true,
+      notif_review_liked: true,
+      notif_new_follower: true,
+      notif_weekly_digest: true,
+      notif_email: true,
       reader_class: true,
       reading_streak: true,
       longest_streak: true,
@@ -62,6 +68,11 @@ export async function updateUserProfile(
     bio?: string
     avatar_url?: string
     locale?: string
+    notif_new_chapter?: boolean
+    notif_review_liked?: boolean
+    notif_new_follower?: boolean
+    notif_weekly_digest?: boolean
+    notif_email?: boolean
   }
 ) {
   return prisma.user.update({

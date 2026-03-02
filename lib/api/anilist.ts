@@ -47,6 +47,7 @@ query ($page: Int, $perPage: Int, $country: CountryCode, $sort: [MediaSort]) {
       sort: $sort
     ) {
       id
+      isAdult
       title {
         english
         romaji
@@ -129,6 +130,7 @@ export interface AniListPageInfo {
 
 export interface AniListMedia {
   id: number
+  isAdult: boolean
   title: {
     english: string | null
     romaji: string | null

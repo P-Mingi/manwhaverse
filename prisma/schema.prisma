@@ -41,9 +41,20 @@ model Manhwa {
   origin_country String           @default("KR")
   demographic   String?
 
+  // Contenu & modération
+  content_rating    ContentRating  @default(PG13)
+  has_nudity        Boolean        @default(false)
+  has_gore          Boolean        @default(false)
+  has_strong_language Boolean      @default(false)
+  cover_is_nsfw     Boolean        @default(false)
+
+  // Stats AniList (JSON: scoreDistribution, statusDistribution, rankings)
+  anilist_stats Json?
+
   // Scores ManhwaVerse (dénormalisés)
   score_avg     Float?
   score_stddev  Float?
+  score_positive_rate  Float?       // % votes >= 7/10
   score_count   Int               @default(0)
   review_count  Int               @default(0)
   list_count    Int               @default(0)
@@ -66,6 +77,14 @@ model Manhwa {
   trending_fr    Float            @default(0)
   trending_en    Float            @default(0)
 
+  // Display scores (computed by scoring engine cron + realtime)
+  display_score             Float?
+  display_score_source      String?   // "AniList" | "ManhwaVerse + AniList" | "ManhwaVerse"
+  display_score_phase       String?   // "BOOTSTRAP" | "GROWING" | "MATURE"
+  display_score_confidence  Float?    // 0.0 - 1.0
+  display_popularity        Int       @default(0)
+  display_popularity_source String?
+
   // Sources externes
   anilist_id    Int?              @unique
   mal_id        Int?              @unique
@@ -79,6 +98,14 @@ model Manhwa {
   created_at    DateTime          @default(now())
   updated_at    DateTime          @updatedAt
   deleted_at    DateTime?
+
+  // Reaction counters (dénormalisés)
+  reaction_heol     Int               @default(0)
+  reaction_daebak   Int               @default(0)
+  reaction_gamdong  Int               @default(0)
+  reaction_kingbat  Int               @default(0)
+  reaction_michyeo  Int               @default(0)
+  reaction_jukget   Int               @default(0)
 
   // Relations
   creator_links       ManhwaCreator[]
@@ -96,14 +123,21 @@ model Manhwa {
   similar_from        SimilarManhwa[]          @relation("target")
   relations_as_source ManhwaRelation[]         @relation("rel_source")
   relations_as_target ManhwaRelation[]         @relation("rel_target")
+  characters          ManhwaCharacter[]
   score_history       ScoreHistory[]
   external_snapshots  ExternalScoreSnapshot[]
+  manhwa_reactions    ManhwaReaction[]
+  character_votes     CharacterVote[]
+  polls               Poll[]
+  article_links       ArticleManhwa[]
 
   @@index([slug])
   @@index([type, status])
   @@index([score_avg(sort: Desc)])
   @@index([trending_score(sort: Desc)])
   @@index([release_year])
+  @@index([display_score(sort: Desc)])
+  @@index([display_popularity(sort: Desc)])
 }
 
 enum ContentType {
@@ -111,11 +145,27 @@ enum ContentType {
   MANHUA
 }
 
+enum ContentRating {
+  G        // Tout public
+  PG       // Quelques thèmes matures
+  PG13     // Violence, thèmes sombres — défaut
+  M        // Mature — ecchi, violence forte
+  R18      // Adulte — contenu sexuel non-explicite
+  X        // Explicite — fiche uniquement, redirection externe
+}
+
+enum ContentFilter {
+  SAFE     // défaut — G, PG, PG13
+  MATURE   // + M — après confirmation 18+
+  ALL      // + R18 — après vérification date de naissance
+}
+
 enum PublicationStatus {
   ONGOING
   COMPLETED
   HIATUS
   CANCELLED
+  NOT_YET_RELEASED
 }
 
 // ── Arcs narratifs
@@ -282,11 +332,12 @@ model Creator {
 }
 
 model ManhwaCreator {
-  manhwa_id  String
-  manhwa     Manhwa      @relation(fields: [manhwa_id], references: [id])
-  creator_id String
-  creator    Creator     @relation(fields: [creator_id], references: [id])
-  role       CreatorRole
+  manhwa_id   String
+  manhwa      Manhwa      @relation(fields: [manhwa_id], references: [id])
+  creator_id  String
+  creator     Creator     @relation(fields: [creator_id], references: [id])
+  role        CreatorRole
+  role_detail String?
 
   @@id([manhwa_id, creator_id, role])
 }
@@ -295,6 +346,43 @@ enum CreatorRole {
   AUTHOR
   ILLUSTRATOR
   BOTH
+}
+
+// ── Personnages
+model Character {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name_en     String
+  name_native String?
+  name_alt    String[]
+  description String?           @db.Text
+  age         String?
+  gender      String?
+  image_url   String?
+  anilist_id  Int?              @unique
+
+  manhwa_links ManhwaCharacter[]
+  votes        CharacterVote[]
+
+  created_at  DateTime          @default(now())
+  updated_at  DateTime          @updatedAt
+}
+
+model ManhwaCharacter {
+  manhwa_id    String
+  manhwa       Manhwa        @relation(fields: [manhwa_id], references: [id])
+  character_id String
+  character    Character     @relation(fields: [character_id], references: [id])
+  role         CharacterRole
+
+  @@id([manhwa_id, character_id])
+  @@index([character_id])
+}
+
+enum CharacterRole {
+  MAIN
+  SUPPORTING
+  BACKGROUND
 }
 
 model CreatorFollow {
@@ -382,6 +470,7 @@ model User {
   avatar_url              String?
   bio                     String?           @db.VarChar(300)
   locale                  String            @default("en")
+  content_filter          ContentFilter     @default(SAFE)
 
   // Paramètres de lecture
   reading_pace            Float?
@@ -410,6 +499,7 @@ model User {
 
   // Contrôle
   is_banned               Boolean           @default(false)
+  is_seed                 Boolean           @default(false)
   created_at              DateTime          @default(now())
   updated_at              DateTime          @updatedAt
 
@@ -421,6 +511,8 @@ model User {
   library                 UserLibrary[]
   reviews                 Review[]
   review_likes            ReviewLike[]
+  review_dislikes         ReviewDislike[]
+  review_reactions        ReviewReaction[]
   lists                   ManhwaList[]
   list_votes              ListVote[]
   follows                 Follow[]          @relation("follower")
@@ -436,6 +528,9 @@ model User {
   reading_rooms           RoomMember[]
   journal_entries         JournalEntry[]
   achievements            UserAchievement[]
+  manhwa_reactions        ManhwaReaction[]
+  character_votes         CharacterVote[]
+  poll_votes              PollVote[]
 }
 
 // ── Auth.js (OAuth accounts, sessions, verification tokens)
@@ -494,6 +589,7 @@ model UserLibrary {
   completed_at  DateTime?
 
   private_tags  String[]
+  notes         String?       @db.Text
 
   reread_count  Int           @default(0)
   reread_score  Float?
@@ -551,6 +647,7 @@ model Review {
   manhwa_id        String
   manhwa           Manhwa     @relation(fields: [manhwa_id], references: [id])
 
+  title            String?
   content          String     @db.Text
   score            Float?
   is_micro         Boolean    @default(false)
@@ -564,6 +661,7 @@ model Review {
   audience_tag     String?
 
   likes_count      Int        @default(0)
+  dislikes_count   Int        @default(0)
 
   imported_from    String?
   import_url       String?
@@ -573,6 +671,8 @@ model Review {
   deleted_at       DateTime?
 
   likes            ReviewLike[]
+  dislikes         ReviewDislike[]
+  reactions        ReviewReaction[]
 
   @@index([manhwa_id, likes_count(sort: Desc)])
   @@index([manhwa_id, created_at(sort: Desc)])
@@ -587,6 +687,36 @@ model ReviewLike {
   created_at DateTime @default(now())
 
   @@id([user_id, review_id])
+}
+
+model ReviewDislike {
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  review_id  String
+  review     Review   @relation(fields: [review_id], references: [id])
+  created_at DateTime @default(now())
+
+  @@id([user_id, review_id])
+}
+
+model ReviewReaction {
+  user_id    String
+  user       User           @relation(fields: [user_id], references: [id])
+  review_id  String
+  review     Review         @relation(fields: [review_id], references: [id])
+  reaction   KoreanReaction
+  created_at DateTime       @default(now())
+
+  @@id([user_id, review_id, reaction])
+}
+
+enum KoreanReaction {
+  HEOL      // 헐 — Choqué / Incrédule
+  DAEBAK    // 대박 — Incroyable
+  GAMDONG   // 감동 — Émouvant
+  KINGBAT   // 킹받 — En rage
+  MICHYEO   // 미쳤 — Fou/Insensé
+  JUKGET    // 죽겠 — Je meurs (overwhelmed)
 }
 
 model Quote {
@@ -866,4 +996,123 @@ model SyncLog {
   started_at    DateTime  @default(now())
   completed_at  DateTime?
   error_log     String?   @db.Text
+}
+
+// ═══════════════════════════════════════════════════
+// PRE-LAUNCH FEATURES
+// ═══════════════════════════════════════════════════
+
+// ── Réactions coréennes sur les manhwas
+model ManhwaReaction {
+  user_id    String
+  user       User           @relation(fields: [user_id], references: [id])
+  manhwa_id  String
+  manhwa     Manhwa         @relation(fields: [manhwa_id], references: [id])
+  reaction   KoreanReaction
+  created_at DateTime       @default(now())
+
+  @@id([user_id, manhwa_id, reaction])
+  @@index([manhwa_id])
+}
+
+// ── Vote personnage préféré
+model CharacterVote {
+  id           String    @id @default(cuid())
+  user_id      String
+  user         User      @relation(fields: [user_id], references: [id])
+  manhwa_id    String
+  manhwa       Manhwa    @relation(fields: [manhwa_id], references: [id])
+  character_id String
+  character    Character @relation(fields: [character_id], references: [id])
+  created_at   DateTime  @default(now())
+
+  @@unique([user_id, manhwa_id])
+  @@index([manhwa_id, character_id])
+}
+
+// ── Sondages communautaires
+model Poll {
+  id          String       @id @default(cuid())
+  question_en String
+  question_fr String?
+  manhwa_id   String?
+  manhwa      Manhwa?      @relation(fields: [manhwa_id], references: [id])
+  is_active   Boolean      @default(true)
+  ends_at     DateTime?
+  created_at  DateTime     @default(now())
+
+  options     PollOption[]
+
+  @@index([manhwa_id, is_active])
+}
+
+model PollOption {
+  id         String     @id @default(cuid())
+  poll_id    String
+  poll       Poll       @relation(fields: [poll_id], references: [id], onDelete: Cascade)
+  label_en   String
+  label_fr   String?
+  vote_count Int        @default(0)
+  position   Int        @default(0)
+
+  votes      PollVote[]
+}
+
+model PollVote {
+  user_id    String
+  user       User       @relation(fields: [user_id], references: [id])
+  option_id  String
+  option     PollOption @relation(fields: [option_id], references: [id], onDelete: Cascade)
+  created_at DateTime   @default(now())
+
+  @@id([user_id, option_id])
+}
+
+// ── Blog / Articles
+model Article {
+  id              String          @id @default(cuid())
+  slug            String          @unique
+  title_en        String
+  title_fr        String?
+  content_en      String          @db.Text
+  content_fr      String?         @db.Text
+  excerpt_en      String?         @db.VarChar(500)
+  excerpt_fr      String?         @db.VarChar(500)
+  cover_image_url String?
+  category        ArticleCategory
+  status          ArticleStatus   @default(DRAFT)
+  author_name     String
+  reading_time    Int?
+  view_count      Int             @default(0)
+  published_at    DateTime?
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  manhwa_links    ArticleManhwa[]
+
+  @@index([status, published_at(sort: Desc)])
+  @@index([category, status])
+}
+
+model ArticleManhwa {
+  article_id String
+  article    Article @relation(fields: [article_id], references: [id], onDelete: Cascade)
+  manhwa_id  String
+  manhwa     Manhwa  @relation(fields: [manhwa_id], references: [id])
+
+  @@id([article_id, manhwa_id])
+}
+
+enum ArticleCategory {
+  NEWS
+  GUIDE
+  LIST
+  OPINION
+  ANALYSIS
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
 }

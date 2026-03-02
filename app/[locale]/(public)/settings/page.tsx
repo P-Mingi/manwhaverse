@@ -31,6 +31,12 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
             display_name: user.display_name ?? '',
             bio: user.bio ?? '',
             locale: user.locale,
+            content_filter: user.content_filter,
+            notif_new_chapter: user.notif_new_chapter,
+            notif_review_liked: user.notif_review_liked,
+            notif_new_follower: user.notif_new_follower,
+            notif_weekly_digest: user.notif_weekly_digest,
+            notif_email: user.notif_email,
           }}
         />
       </div>

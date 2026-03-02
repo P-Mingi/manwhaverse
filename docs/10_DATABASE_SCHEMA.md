@@ -61,15 +61,23 @@ model Manhwa {
   origin_country  String    @default("KR") // KR = manhwa, CN = manhua
   demographic     String?   // seinen, shounen, josei...
   
+  // Contenu & modération
+  content_rating    ContentRating  @default(PG13)
+  has_nudity        Boolean        @default(false)
+  has_gore          Boolean        @default(false)
+  has_strong_language Boolean      @default(false)
+  cover_is_nsfw     Boolean        @default(false)
+  
   // Scores (dénormalisés pour performance)
-  score_avg       Float?    // score ManhwaVerse /10 — notre communauté uniquement
-  score_stddev    Float?    // écart-type → Controversy Score
-  score_count     Int       @default(0)  // nb de votes ManhwaVerse
-  review_count    Int       @default(0)
-  list_count      Int       @default(0)
-  reader_count    Int       @default(0)
-  favorite_count  Int       @default(0)
-  waitlist_count  Int       @default(0)
+  score_avg            Float?    // score ManhwaVerse /10
+  score_stddev         Float?    // écart-type → Controversy Score
+  score_positive_rate  Float?    // % de votes ≥ 7/10 → "Taux d'Encrage"
+  score_count          Int       @default(0)
+  review_count         Int       @default(0)
+  list_count           Int       @default(0)
+  reader_count         Int       @default(0)
+  favorite_count       Int       @default(0)
+  waitlist_count       Int       @default(0)
 
   // Scores externes agrégés (dénormalisés pour affichage rapide)
   ext_score_mal       Float?    // MyAnimeList /10
@@ -130,6 +138,21 @@ model Manhwa {
 enum ContentType {
   MANHWA
   MANHUA
+}
+
+enum ContentRating {
+  G        // Tout public
+  PG       // Quelques thèmes matures
+  PG13     // Violence, thèmes sombres — défaut
+  M        // Mature — ecchi, violence forte
+  R18      // Adulte — contenu sexuel non-explicite
+  X        // Explicite — fiche uniquement, redirection externe
+}
+
+enum ContentFilter {
+  SAFE     // défaut — G, PG, PG13
+  MATURE   // + M — après confirmation 18+
+  ALL      // + R18 — après vérification date de naissance
 }
 
 enum PublicationStatus {
@@ -576,6 +599,27 @@ model ReviewLike {
   created_at  DateTime  @default(now())
 
   @@id([user_id, review_id])
+}
+
+// ── Réactions coréennes sur les reviews (헐/대박/감동/킹받/미쳤/죽겠)
+model ReviewReaction {
+  user_id     String
+  user        User      @relation(fields: [user_id], references: [id])
+  review_id   String
+  review      Review    @relation(fields: [review_id], references: [id])
+  reaction    KoreanReaction
+  created_at  DateTime  @default(now())
+
+  @@id([user_id, review_id, reaction])
+}
+
+enum KoreanReaction {
+  HEOL       // 헐 — Choqué / Incrédule
+  DAEBAK     // 대박 — Incroyable
+  GAMDONG    // 감동 — Émouvant
+  KINGBAT    // 킹받 — En rage
+  MICHYEO    // 미쳤 — Fou/Insensé
+  JUKGET     // 죽겠 — Je meurs (overwhelmed)
 }
 
 // ── Chapter Quotes

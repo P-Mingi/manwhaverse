@@ -1,10 +1,27 @@
 import { Suspense } from 'react'
-import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { getTopManhwas, getHighRatedManhwas, getPopularTropes, getStats } from '@/lib/db/home'
+import {
+  getTrendingManhwas,
+  getTopRated,
+  getRecentManhwas,
+  getPopularManhwas,
+  getHiddenGems,
+  getStats,
+} from '@/lib/db/home'
+import { getAllGenres } from '@/lib/db/genre'
+import { getAllTropes } from '@/lib/db/trope'
+import { getCurrentContentFilter } from '@/lib/nsfw'
+import { getUser } from '@/lib/auth/session'
+import { getUserLibraryMap, type LibraryMapEntry } from '@/lib/db/library-map'
+import type { ContentFilter } from '@prisma/client'
 import { ManhwaCard } from '@/components/features/ManhwaCard'
 import { ManhwaCardSkeleton } from '@/components/features/ManhwaCardSkeleton'
+import { HomeSection } from '@/components/features/HomeSection'
+import { HomeFilterBar } from '@/components/features/HomeFilterBar'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { HomeRanking } from '@/components/features/home/HomeRanking'
+import { ScrollableRow } from '@/components/features/ScrollableRow'
+import type { ManhwaCardPopupData } from '@/lib/db/manhwa'
 
 export const revalidate = 300
 
@@ -18,142 +35,216 @@ export default async function HomePage({ params }: HomeProps) {
 
   return (
     <>
-      {/* Hero */}
-      <section className="flex flex-col items-center gap-6 px-4 pb-12 pt-16 text-center md:pt-24">
-        <h1 className="font-display text-4xl font-bold tracking-tight md:text-6xl">
+      {/* Compact Hero */}
+      <section className="flex flex-col items-center gap-3 px-4 py-8 text-center md:py-12">
+        <h1 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
           ManhwaVerse
         </h1>
-        <p className="max-w-md text-lg text-text-secondary">
+        <p className="max-w-md text-text-secondary">
           {t('hero.tagline')}
         </p>
-        <div className="flex gap-4">
-          <Link
-            href={`/${locale}/sign-up`}
-            className="rounded-lg bg-crystal-gold px-6 py-3 font-semibold text-base transition-colors hover:bg-crystal-gold/90"
-          >
-            {t('hero.cta')}
-          </Link>
-          <Link
-            href={`/${locale}/search`}
-            className="rounded-lg border border-border px-6 py-3 font-semibold text-text-primary transition-colors hover:bg-elevated"
-          >
-            {t('hero.ctaSecondary')}
-          </Link>
-        </div>
+        <Suspense fallback={null}>
+          <StatsInline />
+        </Suspense>
       </section>
 
       <PageContainer>
-        {/* Stats */}
+        {/* Filter Bar */}
         <Suspense fallback={null}>
-          <StatsSection locale={locale} />
+          <FilterBarSection locale={locale} />
         </Suspense>
 
-        {/* Top This Week */}
-        <section className="mt-10">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-xl font-bold">{t('topThisWeek')}</h2>
-            <Link href={`/${locale}/search?sort=popularity`} className="text-sm text-crystal-blue hover:underline">
-              {await getTranslation(locale, 'common', 'seeAll')}
-            </Link>
-          </div>
-          <Suspense fallback={<CardGridSkeleton />}>
-            <TopManhwasSection locale={locale} />
-          </Suspense>
-        </section>
+        {/* Trending */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <TrendingSection locale={locale} />
+        </Suspense>
 
-        {/* High Rated */}
-        <section className="mt-10">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-xl font-bold">{t('hiddenGems')}</h2>
-          </div>
-          <Suspense fallback={<CardGridSkeleton />}>
-            <HighRatedSection locale={locale} />
-          </Suspense>
-        </section>
+        {/* Best Rated AniList */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <BestRatedAnilistSection locale={locale} />
+        </Suspense>
 
-        {/* Discover by Trope */}
-        <section className="mt-10 mb-10">
-          <h2 className="mb-4 font-display text-xl font-bold">{t('discoverByTrope')}</h2>
-          <Suspense fallback={<div className="h-20 animate-pulse rounded-lg bg-elevated" />}>
-            <TropeDiscoverySection locale={locale} />
-          </Suspense>
-        </section>
+        {/* Recently Added */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <RecentSection locale={locale} />
+        </Suspense>
+
+        {/* Ranking */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <HomeRanking locale={locale} />
+        </Suspense>
+
+        {/* All-Time Popular */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <AllTimePopularSection locale={locale} />
+        </Suspense>
+
+        {/* Hidden Gems */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <HiddenGemsSection locale={locale} />
+        </Suspense>
       </PageContainer>
     </>
   )
 }
 
-async function getTranslation(locale: string, ns: string, key: string) {
-  const t = await getTranslations({ locale, namespace: ns })
-  return t(key)
-}
-
-async function StatsSection({ locale }: { locale: string }) {
+async function StatsInline() {
   const stats = await getStats()
   return (
-    <div className="flex justify-center gap-8 text-center">
+    <div className="flex gap-6 text-center">
       <div>
-        <div className="font-mono text-2xl font-bold text-crystal-gold">{stats.manhwaCount.toLocaleString()}</div>
-        <div className="text-xs text-text-muted">Titles</div>
+        <span className="font-mono text-lg font-bold text-crystal-gold">{stats.manhwaCount.toLocaleString()}</span>
+        <span className="ml-1 text-xs text-text-muted">Titles</span>
       </div>
       <div>
-        <div className="font-mono text-2xl font-bold text-crystal-blue">{stats.genreCount}</div>
-        <div className="text-xs text-text-muted">Genres</div>
+        <span className="font-mono text-lg font-bold text-crystal-blue">{stats.genreCount}</span>
+        <span className="ml-1 text-xs text-text-muted">Genres</span>
       </div>
       <div>
-        <div className="font-mono text-2xl font-bold text-crystal-red">{stats.tropeCount}</div>
-        <div className="text-xs text-text-muted">Tropes</div>
+        <span className="font-mono text-lg font-bold text-crystal-red">{stats.tropeCount}</span>
+        <span className="ml-1 text-xs text-text-muted">Tropes</span>
       </div>
     </div>
   )
 }
 
-async function TopManhwasSection({ locale }: { locale: string }) {
-  const manhwas = await getTopManhwas(10)
+async function FilterBarSection({ locale }: { locale: string }) {
+  const [genres, tropes] = await Promise.all([getAllGenres(), getAllTropes()])
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-      {manhwas.map((m) => (
-        <ManhwaCard key={m.id} manhwa={m} locale={locale} />
-      ))}
-    </div>
+    <HomeFilterBar
+      locale={locale}
+      genres={genres.map((g) => ({
+        slug: g.slug,
+        name: locale === 'fr' ? g.name_fr : g.name_en,
+      }))}
+      tropes={tropes.map((tr) => ({
+        slug: tr.slug,
+        name: tr.name,
+      }))}
+    />
   )
 }
 
-async function HighRatedSection({ locale }: { locale: string }) {
-  const manhwas = await getHighRatedManhwas(10)
+async function TrendingSection({ locale }: { locale: string }) {
+  const [contentFilter, user] = await Promise.all([getCurrentContentFilter(), getUser()])
+  const [manhwas, libraryMap] = await Promise.all([
+    getTrendingManhwas(locale, 10),
+    user ? getUserLibraryMap(user.id) : new Map<string, LibraryMapEntry>(),
+  ])
+  const t = await getTranslations({ locale, namespace: 'home' })
+  if (manhwas.length === 0) return null
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-      {manhwas.map((m) => (
-        <ManhwaCard key={m.id} manhwa={m} locale={locale} />
-      ))}
-    </div>
+    <HomeSection title={t('trending')} viewAllHref={`/${locale}/search?sort=popularity`} locale={locale}>
+      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} libraryMap={libraryMap} isLoggedIn={!!user} />
+    </HomeSection>
   )
 }
 
-async function TropeDiscoverySection({ locale }: { locale: string }) {
-  const tropes = await getPopularTropes(8)
+async function BestRatedAnilistSection({ locale }: { locale: string }) {
+  const [contentFilter, user] = await Promise.all([getCurrentContentFilter(), getUser()])
+  const [manhwas, libraryMap] = await Promise.all([
+    getTopRated(10),
+    user ? getUserLibraryMap(user.id) : new Map<string, LibraryMapEntry>(),
+  ])
+  const t = await getTranslations({ locale, namespace: 'home' })
+  if (manhwas.length === 0) return null
   return (
-    <div className="flex flex-wrap gap-2">
-      {tropes.map((trope) => (
-        <Link
-          key={trope.id}
-          href={`/${locale}/trope/${trope.slug}`}
-          className="rounded-full bg-elevated px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-border"
-        >
-          {trope.name}
-          <span className="ml-2 text-text-muted">{trope._count.manhwa_links}</span>
-        </Link>
-      ))}
-    </div>
+    <HomeSection title={t('bestRatedAnilist')} viewAllHref={`/${locale}/search?sort=score`} locale={locale}>
+      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} libraryMap={libraryMap} isLoggedIn={!!user} />
+    </HomeSection>
   )
 }
 
-function CardGridSkeleton() {
+async function RecentSection({ locale }: { locale: string }) {
+  const [contentFilter, user] = await Promise.all([getCurrentContentFilter(), getUser()])
+  const [manhwas, libraryMap] = await Promise.all([
+    getRecentManhwas(10),
+    user ? getUserLibraryMap(user.id) : new Map<string, LibraryMapEntry>(),
+  ])
+  const t = await getTranslations({ locale, namespace: 'home' })
+  if (manhwas.length === 0) return null
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <ManhwaCardSkeleton key={i} />
-      ))}
-    </div>
+    <HomeSection title={t('recentlyAdded')} viewAllHref={`/${locale}/search?sort=recent`} locale={locale}>
+      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} libraryMap={libraryMap} isLoggedIn={!!user} />
+    </HomeSection>
+  )
+}
+
+async function AllTimePopularSection({ locale }: { locale: string }) {
+  const [contentFilter, user] = await Promise.all([getCurrentContentFilter(), getUser()])
+  const [manhwas, libraryMap] = await Promise.all([
+    getPopularManhwas(10),
+    user ? getUserLibraryMap(user.id) : new Map<string, LibraryMapEntry>(),
+  ])
+  const t = await getTranslations({ locale, namespace: 'home' })
+  if (manhwas.length === 0) return null
+  return (
+    <HomeSection title={t('allTimePopular')} viewAllHref={`/${locale}/search?sort=popularity`} locale={locale}>
+      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} libraryMap={libraryMap} isLoggedIn={!!user} />
+    </HomeSection>
+  )
+}
+
+async function HiddenGemsSection({ locale }: { locale: string }) {
+  const [contentFilter, user] = await Promise.all([getCurrentContentFilter(), getUser()])
+  const [manhwas, libraryMap] = await Promise.all([
+    getHiddenGems(10),
+    user ? getUserLibraryMap(user.id) : new Map<string, LibraryMapEntry>(),
+  ])
+  const t = await getTranslations({ locale, namespace: 'home' })
+  if (manhwas.length === 0) return null
+  return (
+    <HomeSection title={t('hiddenGems')} viewAllHref={`/${locale}/search?sort=score`} locale={locale}>
+      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} libraryMap={libraryMap} isLoggedIn={!!user} />
+    </HomeSection>
+  )
+}
+
+function CardGrid({
+  manhwas,
+  locale,
+  contentFilter,
+  libraryMap,
+  isLoggedIn,
+}: {
+  manhwas: ManhwaCardPopupData[]
+  locale: string
+  contentFilter: ContentFilter
+  libraryMap: Map<string, LibraryMapEntry>
+  isLoggedIn: boolean
+}) {
+  return (
+    <ScrollableRow>
+      {manhwas.map((m) => {
+        const entry = libraryMap.get(m.id)
+        return (
+          <div key={m.id} className="w-36 flex-none sm:w-40 md:w-44">
+            <ManhwaCard
+              manhwa={m}
+              locale={locale}
+              userContentFilter={contentFilter}
+              libraryStatus={entry?.status ?? null}
+              isFavorite={entry?.is_favorite ?? false}
+              isLoggedIn={isLoggedIn}
+            />
+          </div>
+        )
+      })}
+    </ScrollableRow>
+  )
+}
+
+function SectionSkeleton() {
+  return (
+    <section className="mt-10">
+      <div className="mb-4 h-7 w-40 animate-pulse rounded bg-elevated" />
+      <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scroll-pl-4">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className="w-36 flex-none snap-start sm:w-40 md:w-44">
+            <ManhwaCardSkeleton />
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }

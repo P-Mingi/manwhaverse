@@ -3,7 +3,10 @@ import { getTranslations } from 'next-intl/server'
 import { requireSession } from '@/lib/auth/session'
 import { getUserById } from '@/lib/db/user'
 import { getUserLibrary } from '@/lib/db/library'
+import { getUserActivity } from '@/lib/db/activity'
+import { getFollowerPreview } from '@/lib/db/follow'
 import { ManhwaCard } from '@/components/features/ManhwaCard'
+import { ActivityCard } from '@/components/features/ActivityCard'
 import { PageContainer } from '@/components/layouts/PageContainer'
 
 interface MyProfilePageProps {
@@ -24,7 +27,11 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
   const user = await getUserById(sessionUser.id)
   if (!user) return null
 
-  const library = await getUserLibrary(user.id)
+  const [library, { activities: recentActivity }, followerPreview] = await Promise.all([
+    getUserLibrary(user.id),
+    getUserActivity(user.id, 1, 5),
+    getFollowerPreview(user.id, 5),
+  ])
 
   return (
     <PageContainer>
@@ -79,15 +86,47 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
           <div className="font-mono text-lg font-bold">{user._count.reviews}</div>
           <div className="text-xs text-text-muted">{t('reviewsWritten')}</div>
         </div>
-        <div>
+        <Link href={`/${locale}/profile/${user.username}/followers`} className="transition-colors hover:text-crystal-blue">
           <div className="font-mono text-lg font-bold">{user._count.followers}</div>
           <div className="text-xs text-text-muted">{t('followers')}</div>
-        </div>
-        <div>
+        </Link>
+        <Link href={`/${locale}/profile/${user.username}/following`} className="transition-colors hover:text-crystal-blue">
           <div className="font-mono text-lg font-bold">{user._count.follows}</div>
           <div className="text-xs text-text-muted">{t('following')}</div>
-        </div>
+        </Link>
       </div>
+
+      {/* Follower avatar row */}
+      {followerPreview.length > 0 && (
+        <Link
+          href={`/${locale}/profile/${user.username}/followers`}
+          className="mt-4 flex items-center gap-2"
+        >
+          <div className="flex -space-x-2">
+            {followerPreview.map((f) => (
+              <div
+                key={f.id}
+                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-base bg-elevated text-[10px] text-text-muted"
+              >
+                {f.avatar_url ? (
+                  <img
+                    src={f.avatar_url}
+                    alt={f.username ?? ''}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  (f.username ?? '?').charAt(0).toUpperCase()
+                )}
+              </div>
+            ))}
+          </div>
+          {user._count.followers > followerPreview.length && (
+            <span className="text-xs text-text-muted">
+              +{user._count.followers - followerPreview.length}
+            </span>
+          )}
+        </Link>
+      )}
 
       {/* Reading stats */}
       <div className="mt-6 grid grid-cols-3 gap-4">
@@ -126,6 +165,18 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {library.slice(0, 12).map((entry) => (
               <ManhwaCard key={entry.id} manhwa={entry.manhwa} locale={locale} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Recent Activity */}
+      {recentActivity.length > 0 && (
+        <section className="mt-8">
+          <h2 className="mb-4 font-display text-lg font-bold">{t('recentActivity')}</h2>
+          <div className="space-y-2">
+            {recentActivity.map((activity) => (
+              <ActivityCard key={activity.id} activity={activity} locale={locale} />
             ))}
           </div>
         </section>

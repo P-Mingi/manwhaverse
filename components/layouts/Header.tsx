@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/hooks/useAuth'
+import { NotificationBell } from '@/components/features/NotificationBell'
 
 export function Header() {
   const t = useTranslations('nav')
@@ -29,24 +30,32 @@ export function Header() {
         {/* Desktop nav */}
         <nav className="hidden items-center gap-6 md:flex">
           <Link
-            href={`/${locale}`}
+            href={`/${locale}/explore`}
             className="text-sm text-text-secondary transition-colors hover:text-text-primary"
           >
-            {t('home')}
+            {t('discover')}
           </Link>
           <Link
-            href={`/${locale}/search`}
+            href={`/${locale}/blog`}
             className="text-sm text-text-secondary transition-colors hover:text-text-primary"
           >
-            {t('search')}
+            {t('blog')}
           </Link>
           {user && (
-            <Link
-              href={`/${locale}/library`}
-              className="text-sm text-text-secondary transition-colors hover:text-text-primary"
-            >
-              {t('library')}
-            </Link>
+            <>
+              <Link
+                href={`/${locale}/library`}
+                className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+              >
+                {t('library')}
+              </Link>
+              <Link
+                href={`/${locale}/feed`}
+                className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+              >
+                {t('feed')}
+              </Link>
+            </>
           )}
         </nav>
 
@@ -59,6 +68,9 @@ export function Header() {
           >
             {otherLocale}
           </Link>
+
+          {/* Notifications */}
+          <NotificationBell />
 
           {/* Auth */}
           {loading ? (

@@ -15,8 +15,10 @@ export function SynopsisSection({ synopsis }: SynopsisSectionProps) {
 
   if (!synopsis) return null
 
-  const isLong = synopsis.length > MAX_LENGTH
-  const displayText = isLong && !expanded ? synopsis.slice(0, MAX_LENGTH) + '...' : synopsis
+  // Collapse 3+ newlines into double, trim leading/trailing whitespace
+  const cleaned = synopsis.replace(/\n{3,}/g, '\n\n').trim()
+  const isLong = cleaned.length > MAX_LENGTH
+  const displayText = isLong && !expanded ? cleaned.slice(0, MAX_LENGTH) + '...' : cleaned
 
   return (
     <div>
