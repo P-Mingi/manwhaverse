@@ -8,7 +8,7 @@ import {
 import type { AniListMedia, AniListPageResult } from '@/lib/api/anilist'
 import { slugify } from '@/lib/utils/slugify'
 import { detectTropes, getAllTropeRules, getTropeRule } from './trope-detection'
-import type { ContentType, PublicationStatus, CreatorRole } from '@prisma/client'
+import type { ContentType, PublicationStatus, CreatorRole, ContentRating } from '@prisma/client'
 
 // ── Normalization helpers ──
 
@@ -51,6 +51,42 @@ function mapCreatorRole(role: string): CreatorRole | null {
   if (r.includes('story') || r.includes('original') || r.includes('author')) return 'AUTHOR'
   if (r.includes('art') || r.includes('illust')) return 'ILLUSTRATOR'
   return null
+}
+
+// ── Content rating classification ──
+
+const NSFW_GENRES = new Set(['Hentai'])
+const MATURE_GENRES = new Set(['Ecchi'])
+const NSFW_TAGS = new Set(['Nudity', 'Sexual Content', 'Female Harem', 'Male Harem'])
+
+function classifyContentRating(media: AniListMedia): {
+  contentRating: ContentRating
+  coverIsNsfw: boolean
+} {
+  // AniList isAdult flag is the most reliable signal
+  if (media.isAdult) {
+    const hasHentai = media.genres.some((g) => NSFW_GENRES.has(g))
+    return {
+      contentRating: hasHentai ? 'R18' : 'R18',
+      coverIsNsfw: true,
+    }
+  }
+
+  // Check genres for mature content
+  if (media.genres.some((g) => MATURE_GENRES.has(g))) {
+    return { contentRating: 'M', coverIsNsfw: false }
+  }
+
+  // Check tags for mature signals (high-ranked NSFW tags)
+  const hasMatureTags = media.tags.some(
+    (t) => NSFW_TAGS.has(t.name) && t.rank >= 60
+  )
+  if (hasMatureTags) {
+    return { contentRating: 'M', coverIsNsfw: false }
+  }
+
+  // Default: PG13 for most manhwa (violence, dark themes are common)
+  return { contentRating: 'PG13', coverIsNsfw: false }
 }
 
 // ── Seed tropes ──
@@ -118,6 +154,7 @@ async function importManhwa(
 ): Promise<{ created: boolean; slug: string }> {
   const slug = buildSlug(media)
   const synopsis = stripHtml(media.description)
+  const { contentRating, coverIsNsfw } = classifyContentRating(media)
 
   // Check if already exists
   const existing = await prisma.manhwa.findFirst({
@@ -135,6 +172,8 @@ async function importManhwa(
         ext_score_anilist_count: media.popularity,
         cover_url: media.coverImage.extraLarge ?? media.coverImage.large ?? existing.cover_url,
         banner_url: media.bannerImage ?? existing.banner_url,
+        content_rating: contentRating,
+        cover_is_nsfw: coverIsNsfw,
       },
     })
     return { created: false, slug: existing.slug }
@@ -170,6 +209,8 @@ async function importManhwa(
       ext_score_anilist: media.meanScore ? media.meanScore / 10 : null,
       ext_score_anilist_count: media.popularity,
       favorite_count: media.favourites ?? 0,
+      content_rating: contentRating,
+      cover_is_nsfw: coverIsNsfw,
       data_source: ['anilist'],
       is_published: true,
     },

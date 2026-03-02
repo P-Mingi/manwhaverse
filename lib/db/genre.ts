@@ -1,24 +1,5 @@
 import { prisma } from './client'
-import type { ManhwaCardData } from './manhwa'
-
-const cardSelect = {
-  id: true,
-  slug: true,
-  title_en: true,
-  title_fr: true,
-  cover_url: true,
-  type: true,
-  status: true,
-  score_avg: true,
-  score_count: true,
-  ext_score_composite: true,
-  chapter_count: true,
-  reader_count: true,
-  genre_links: {
-    include: { genre: { select: { slug: true, name_en: true, name_fr: true } } },
-    take: 3,
-  },
-} as const
+import { manhwaCardSelect, type ManhwaCardData } from './manhwa'
 
 export async function getAllGenres() {
   return prisma.genre.findMany({
@@ -50,7 +31,7 @@ export async function getManhwasByGenre(
   genreSlug: string,
   page = 1,
   limit = 24,
-  sortBy: 'score' | 'popularity' | 'recent' = 'popularity'
+  sortBy: 'score' | 'popularity' | 'recent' = 'popularity',
 ): Promise<{ results: ManhwaCardData[]; total: number }> {
   const where = {
     is_published: true,
@@ -72,7 +53,7 @@ export async function getManhwasByGenre(
   const [results, total] = await Promise.all([
     prisma.manhwa.findMany({
       where,
-      select: cardSelect,
+      select: manhwaCardSelect,
       orderBy,
       skip: (page - 1) * limit,
       take: limit,

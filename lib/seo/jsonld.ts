@@ -1,5 +1,5 @@
 import type { ManhwaWithRelations } from '@/lib/db/manhwa'
-import { getDisplayScore } from '@/lib/scores/display'
+import { getDisplayScore } from '@/lib/scoring/engine'
 
 const BASE_URL = 'https://manhwaverse.com'
 
@@ -8,7 +8,7 @@ export function generateManhwaJsonLd(
   locale: string
 ) {
   const title = locale === 'fr' ? (manhwa.title_fr ?? manhwa.title_en) : manhwa.title_en
-  const { primaryScore } = getDisplayScore(manhwa)
+  const { value: displayScoreValue } = getDisplayScore(manhwa)
 
   const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
@@ -29,10 +29,10 @@ export function generateManhwaJsonLd(
     inLanguage: manhwa.origin_country === 'KR' ? 'ko' : 'zh',
   }
 
-  if (primaryScore && manhwa.score_count > 0) {
+  if (displayScoreValue && manhwa.score_count > 0) {
     jsonLd.aggregateRating = {
       '@type': 'AggregateRating',
-      ratingValue: primaryScore,
+      ratingValue: displayScoreValue,
       bestRating: 10,
       worstRating: 0,
       ratingCount: manhwa.score_count,

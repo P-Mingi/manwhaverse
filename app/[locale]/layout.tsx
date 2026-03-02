@@ -6,7 +6,9 @@ import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import type { Locale } from '@/i18n/routing'
 import { playfairDisplay, dmSans, jetbrainsMono } from '@/app/fonts'
+import { Suspense } from 'react'
 import { SessionProvider } from '@/components/providers/SessionProvider'
+import { PostHogTracker } from '@/components/providers/PostHogProvider'
 import { Header } from '@/components/layouts/Header'
 import { MobileNav } from '@/components/layouts/MobileNav'
 import { Footer } from '@/components/layouts/Footer'
@@ -79,6 +81,9 @@ export default async function LocaleLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <SessionProvider>
+            <Suspense fallback={null}>
+              <PostHogTracker />
+            </Suspense>
             <Header />
             <div className="min-h-screen pb-16 md:pb-0">
               {children}

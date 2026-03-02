@@ -1,31 +1,15 @@
 import { prisma } from './client'
-import type { ManhwaCardData } from './manhwa'
-
-const cardSelect = {
-  id: true,
-  slug: true,
-  title_en: true,
-  title_fr: true,
-  cover_url: true,
-  type: true,
-  status: true,
-  score_avg: true,
-  score_count: true,
-  ext_score_composite: true,
-  chapter_count: true,
-  reader_count: true,
-  genre_links: {
-    include: { genre: { select: { slug: true, name_en: true, name_fr: true } } },
-    take: 3,
-  },
-} as const
+import { manhwaCardSelect, type ManhwaCardData } from './manhwa'
 
 interface SearchOptions {
-  query: string
+  query?: string
   page?: number
   limit?: number
   status?: string
   type?: string
+  genre?: string
+  trope?: string
+  year?: number
   sortBy?: 'relevance' | 'score' | 'popularity' | 'recent'
 }
 
@@ -35,19 +19,29 @@ export async function searchManhwas({
   limit = 24,
   status,
   type,
+  genre,
+  trope,
+  year,
   sortBy = 'relevance',
 }: SearchOptions): Promise<{ results: ManhwaCardData[]; total: number }> {
   const where = {
     is_published: true,
     deleted_at: null,
-    OR: [
-      { title_en: { contains: query, mode: 'insensitive' as const } },
-      { title_fr: { contains: query, mode: 'insensitive' as const } },
-      { title_kr: { contains: query, mode: 'insensitive' as const } },
-      { title_alt: { has: query } },
-    ],
+    ...(query
+      ? {
+          OR: [
+            { title_en: { contains: query, mode: 'insensitive' as const } },
+            { title_fr: { contains: query, mode: 'insensitive' as const } },
+            { title_kr: { contains: query, mode: 'insensitive' as const } },
+            { title_alt: { has: query } },
+          ],
+        }
+      : {}),
     ...(status ? { status: status as 'ONGOING' | 'COMPLETED' | 'HIATUS' | 'CANCELLED' } : {}),
     ...(type ? { type: type as 'MANHWA' | 'MANHUA' } : {}),
+    ...(genre ? { genre_links: { some: { genre: { slug: genre } } } } : {}),
+    ...(trope ? { trope_links: { some: { trope: { slug: trope } } } } : {}),
+    ...(year ? { release_year: year } : {}),
   }
 
   const orderBy = (() => {
@@ -66,7 +60,7 @@ export async function searchManhwas({
   const [results, total] = await Promise.all([
     prisma.manhwa.findMany({
       where,
-      select: cardSelect,
+      select: manhwaCardSelect,
       orderBy,
       skip: (page - 1) * limit,
       take: limit,

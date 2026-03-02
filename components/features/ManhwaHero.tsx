@@ -1,26 +1,28 @@
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import type { ManhwaWithRelations } from '@/lib/db/manhwa'
-import { getDisplayScore } from '@/lib/scores/display'
-import { formatScore, getCrystalColor, getCrystalLabel } from '@/lib/utils/formatScore'
+import { getDisplayScore } from '@/lib/scoring/engine'
+import { getRankFromScore } from '@/lib/scores/ranks'
+import { ScoreCard } from '@/components/features/manhwa/ScoreCard'
 import { formatCount } from '@/lib/utils/formatCount'
 
 interface ManhwaHeroProps {
   manhwa: ManhwaWithRelations
   locale: string
+  hasBanner?: boolean
+  children?: React.ReactNode
 }
 
-export function ManhwaHero({ manhwa, locale }: ManhwaHeroProps) {
+export function ManhwaHero({ manhwa, locale, hasBanner = false, children }: ManhwaHeroProps) {
   const t = useTranslations('manhwa')
   const title = locale === 'fr' ? (manhwa.title_fr ?? manhwa.title_en) : manhwa.title_en
-  const { primaryScore, primaryLabel, mode } = getDisplayScore(manhwa)
-  const crystalColor = getCrystalColor(primaryScore)
-  const crystalLabel = getCrystalLabel(primaryScore)
+  const scoreInfo = getDisplayScore(manhwa)
+  const rank = getRankFromScore(scoreInfo.value, manhwa.score_count)
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Blurred background */}
-      {manhwa.cover_url && (
+    <section className="relative overflow-visible">
+      {/* Blurred background (only when no banner) */}
+      {!hasBanner && manhwa.cover_url && (
         <div className="absolute inset-0 -z-10">
           <Image
             src={manhwa.cover_url}
@@ -33,10 +35,10 @@ export function ManhwaHero({ manhwa, locale }: ManhwaHeroProps) {
         </div>
       )}
 
-      <div className="mx-auto max-w-5xl px-4 pb-8 pt-8 md:pt-12">
-        <div className="flex flex-col gap-6 md:flex-row md:gap-8">
-          {/* Cover */}
-          <div className="flex-shrink-0 self-center md:self-start">
+      <div className={`relative mx-auto max-w-5xl px-4 ${hasBanner ? 'pb-8' : 'pt-10 pb-6'}`}>
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:gap-8">
+          {/* Cover — only the cover pulls up into the banner */}
+          <div className={`flex-shrink-0 self-center ${hasBanner ? '-mt-[140px]' : 'md:self-start'}`}>
             {manhwa.cover_url ? (
               <Image
                 src={manhwa.cover_url}
@@ -53,8 +55,8 @@ export function ManhwaHero({ manhwa, locale }: ManhwaHeroProps) {
             )}
           </div>
 
-          {/* Info */}
-          <div className="flex flex-1 flex-col gap-4">
+          {/* Info — stays below the banner, never overlaps it */}
+          <div className="flex flex-1 flex-col gap-4 pt-2">
             <div>
               <h1 className="font-display text-2xl font-bold tracking-tight md:text-4xl">
                 {title}
@@ -64,44 +66,58 @@ export function ManhwaHero({ manhwa, locale }: ManhwaHeroProps) {
               )}
             </div>
 
-            {/* Score */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className={`font-mono text-3xl font-bold ${crystalColor}`}>
-                  {formatScore(primaryScore)}
-                </span>
-                <span className={`font-mono text-lg ${crystalColor}`}>
-                  {crystalLabel}
-                </span>
-              </div>
-              <span className="text-sm text-text-muted">
-                {t(`score.${primaryLabel}`)}
-                {manhwa.score_count > 0 && (
-                  <> · {t('score.basedOnVotes', { count: manhwa.score_count })}</>
-                )}
-              </span>
-            </div>
+            {/* Score zone — aggregator style */}
+            <div className="flex flex-wrap items-stretch gap-3">
+              {/* Primary score — click to reveal detail */}
+              {scoreInfo.value && (
+                <ScoreCard
+                  score={scoreInfo.value}
+                  source={scoreInfo.source}
+                  rank={rank}
+                  detail={
+                    scoreInfo.phase === 'GROWING'
+                      ? t('score.blended', { count: manhwa.score_count })
+                      : scoreInfo.phase === 'BOOTSTRAP'
+                        ? t('score.bootstrap')
+                        : manhwa.score_count > 0
+                          ? t('score.basedOnVotes', { count: manhwa.score_count })
+                          : null
+                  }
+                />
+              )}
 
-            {/* Metadata row */}
-            <div className="flex flex-wrap gap-3 text-sm text-text-secondary">
-              <span className="rounded-md bg-elevated px-2 py-1">
-                {t(`status.${manhwa.status}`)}
-              </span>
-              {manhwa.chapter_count && (
-                <span className="rounded-md bg-elevated px-2 py-1">
-                  {t('chapters', { count: manhwa.chapter_count })}
-                </span>
+              {/* AniList score — informational only, no outbound link */}
+              {manhwa.ext_score_anilist && (
+                <div className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-2.5">
+                  <span className="font-mono text-2xl font-bold text-[#02A9FF] leading-none">
+                    {manhwa.ext_score_anilist.toFixed(1)}
+                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase tracking-wider text-text-muted">AniList</span>
+                    {manhwa.ext_score_anilist_count != null && manhwa.ext_score_anilist_count > 0 && (
+                      <span className="text-[10px] text-text-muted">
+                        {formatCount(manhwa.ext_score_anilist_count)} votes
+                      </span>
+                    )}
+                  </div>
+                </div>
               )}
-              {manhwa.release_year && (
-                <span className="rounded-md bg-elevated px-2 py-1">
-                  {manhwa.release_year}
-                  {manhwa.end_year ? `–${manhwa.end_year}` : ''}
-                </span>
-              )}
-              {manhwa.reader_count > 0 && (
-                <span className="rounded-md bg-elevated px-2 py-1">
-                  {formatCount(manhwa.reader_count)} readers
-                </span>
+
+              {/* MAL score — informational only, no outbound link */}
+              {manhwa.ext_score_mal && (
+                <div className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-2.5">
+                  <span className="font-mono text-2xl font-bold text-[#2E51A2] leading-none">
+                    {manhwa.ext_score_mal.toFixed(1)}
+                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase tracking-wider text-text-muted">MAL</span>
+                    {manhwa.ext_score_mal_count != null && manhwa.ext_score_mal_count > 0 && (
+                      <span className="text-[10px] text-text-muted">
+                        {formatCount(manhwa.ext_score_mal_count)} votes
+                      </span>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -118,20 +134,15 @@ export function ManhwaHero({ manhwa, locale }: ManhwaHeroProps) {
               ))}
             </div>
 
-            {/* Creators */}
-            {manhwa.creator_links.length > 0 && (
-              <div className="text-sm text-text-secondary">
-                {manhwa.creator_links.map((cl, i) => (
-                  <span key={`${cl.creator_id}-${cl.role}`}>
-                    {i > 0 && ' · '}
-                    <span className="text-text-primary">{cl.creator.name}</span>
-                    <span className="text-text-muted"> ({cl.role.toLowerCase()})</span>
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
         </div>
+
+        {/* Library actions slot — rendered inside the section so they share the blurred bg */}
+        {children && (
+          <div className="mt-5">
+            {children}
+          </div>
+        )}
       </div>
     </section>
   )

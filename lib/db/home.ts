@@ -1,61 +1,80 @@
 import { prisma } from './client'
-import type { ManhwaCardData } from './manhwa'
+import { manhwaCardWithPopupSelect, type ManhwaCardPopupData } from './manhwa'
 
-const cardSelect = {
-  id: true,
-  slug: true,
-  title_en: true,
-  title_fr: true,
-  cover_url: true,
-  type: true,
-  status: true,
-  score_avg: true,
-  score_count: true,
-  ext_score_composite: true,
-  chapter_count: true,
-  reader_count: true,
-  genre_links: {
-    include: { genre: { select: { slug: true, name_en: true, name_fr: true } } },
-    take: 3,
-  },
-} as const
+const published = { is_published: true, deleted_at: null } as const
 
-export async function getTopManhwas(limit = 10): Promise<ManhwaCardData[]> {
+export async function getTrendingManhwas(locale: string, limit = 10): Promise<ManhwaCardPopupData[]> {
+  const trendingField = locale === 'fr' ? 'trending_fr' : 'trending_en'
   return prisma.manhwa.findMany({
-    where: { is_published: true, deleted_at: null },
-    select: cardSelect,
-    orderBy: [{ trending_score: 'desc' }, { reader_count: 'desc' }],
+    where: published,
+    select: manhwaCardWithPopupSelect,
+    orderBy: [{ [trendingField]: 'desc' }, { reader_count: 'desc' }],
     take: limit,
   })
 }
 
-export async function getPopularManhwas(limit = 12): Promise<ManhwaCardData[]> {
+export async function getPopularThisYear(limit = 10): Promise<ManhwaCardPopupData[]> {
+  const currentYear = new Date().getFullYear()
   return prisma.manhwa.findMany({
-    where: { is_published: true, deleted_at: null },
-    select: cardSelect,
+    where: { ...published, release_year: currentYear },
+    select: manhwaCardWithPopupSelect,
     orderBy: { reader_count: 'desc' },
     take: limit,
   })
 }
 
-export async function getRecentManhwas(limit = 12): Promise<ManhwaCardData[]> {
+export async function getTopRated(limit = 10): Promise<ManhwaCardPopupData[]> {
   return prisma.manhwa.findMany({
-    where: { is_published: true, deleted_at: null },
-    select: cardSelect,
+    where: {
+      ...published,
+      display_score: { not: null },
+      display_score_confidence: { gte: 0.3 },
+    },
+    select: manhwaCardWithPopupSelect,
+    orderBy: { display_score: 'desc' },
+    take: limit,
+  })
+}
+
+export async function getRecentManhwas(limit = 10): Promise<ManhwaCardPopupData[]> {
+  return prisma.manhwa.findMany({
+    where: published,
+    select: manhwaCardWithPopupSelect,
     orderBy: { created_at: 'desc' },
     take: limit,
   })
 }
 
-export async function getHighRatedManhwas(limit = 12): Promise<ManhwaCardData[]> {
+export async function getPopularManhwas(limit = 10): Promise<ManhwaCardPopupData[]> {
+  return prisma.manhwa.findMany({
+    where: { ...published, display_popularity: { gt: 0 } },
+    select: manhwaCardWithPopupSelect,
+    orderBy: { display_popularity: 'desc' },
+    take: limit,
+  })
+}
+
+export async function getTopRatedManhwas(limit = 10): Promise<ManhwaCardPopupData[]> {
   return prisma.manhwa.findMany({
     where: {
-      is_published: true,
-      deleted_at: null,
-      ext_score_composite: { not: null },
+      ...published,
+      display_score: { not: null },
     },
-    select: cardSelect,
-    orderBy: { ext_score_composite: 'desc' },
+    select: manhwaCardWithPopupSelect,
+    orderBy: [{ display_score: 'desc' }, { display_popularity: 'desc' }],
+    take: limit,
+  })
+}
+
+export async function getHiddenGems(limit = 10): Promise<ManhwaCardPopupData[]> {
+  return prisma.manhwa.findMany({
+    where: {
+      ...published,
+      display_score: { gte: 7.5 },
+      display_popularity: { lt: 1000 },
+    },
+    select: manhwaCardWithPopupSelect,
+    orderBy: { display_score: 'desc' },
     take: limit,
   })
 }
