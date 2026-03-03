@@ -47,8 +47,8 @@ export default async function TopPage({ params, searchParams }: TopPageProps) {
           href={`/${locale}/top`}
           className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
             !genre
-              ? 'bg-crystal-blue text-white'
-              : 'bg-elevated text-text-secondary hover:text-text-primary'
+              ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
+              : 'border border-white/10 bg-white/[0.03] text-[#9999b8] hover:bg-[rgba(0,255,255,0.08)] hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]'
           }`}
         >
           {t('allGenres')}
@@ -59,8 +59,8 @@ export default async function TopPage({ params, searchParams }: TopPageProps) {
             href={`/${locale}/top?genre=${g.slug}`}
             className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
               genre === g.slug
-                ? 'bg-crystal-blue text-white'
-                : 'bg-elevated text-text-secondary hover:text-text-primary'
+                ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
+                : 'border border-white/10 bg-white/[0.03] text-[#9999b8] hover:bg-[rgba(0,255,255,0.08)] hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]'
             }`}
           >
             {locale === 'fr' ? g.name_fr : g.name_en}
@@ -70,24 +70,32 @@ export default async function TopPage({ params, searchParams }: TopPageProps) {
 
       {/* Ranking table */}
       {manhwas.length === 0 ? (
-        <p className="py-12 text-center text-text-muted">{t('noRanked')}</p>
+        <p className="py-12 text-center text-[#6b6b88]">{t('noRanked')}</p>
       ) : (
         <div className="space-y-1">
           {manhwas.map((manhwa) => (
             <Link
               key={manhwa.slug}
               href={`/${locale}/manhwa/${manhwa.slug}`}
-              className="group flex items-center gap-4 rounded-lg p-3 transition-colors hover:bg-white/5"
+              className="group flex items-center gap-4 rounded-lg p-3 transition-all hover:bg-[rgba(0,255,255,0.03)] hover:border-l-2 hover:border-[#00ffff] hover:pl-2"
             >
               {/* Rank */}
-              <span className={`w-10 shrink-0 text-right text-2xl font-bold ${
-                manhwa.rank <= 3 ? 'text-crystal-gold' : 'text-text-muted'
+              <span className={`w-10 shrink-0 text-right font-display text-2xl ${
+                manhwa.rank === 1
+                  ? 'text-[#ffd700] drop-shadow-[0_0_12px_rgba(255,215,0,0.4)]'
+                  : manhwa.rank === 2
+                  ? 'text-[#c0c0c0]'
+                  : manhwa.rank === 3
+                  ? 'text-[#cd7f32]'
+                  : manhwa.rank <= 10
+                  ? 'text-[#00ffff]'
+                  : 'text-[#6b6b88]'
               }`}>
                 #{manhwa.rank}
               </span>
 
               {/* Cover */}
-              <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-md bg-elevated">
+              <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-md bg-[#111120]">
                 {manhwa.cover_url ? (
                   <Image
                     src={manhwa.cover_url}
@@ -97,7 +105,7 @@ export default async function TopPage({ params, searchParams }: TopPageProps) {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-[8px] text-text-muted">
+                  <div className="flex h-full items-center justify-center text-[8px] text-[#6b6b88]">
                     N/A
                   </div>
                 )}
@@ -105,23 +113,23 @@ export default async function TopPage({ params, searchParams }: TopPageProps) {
 
               {/* Info */}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-text-primary transition-colors group-hover:text-crystal-blue">
+                <p className="truncate text-sm font-medium text-[#e8e8f0] transition-colors group-hover:text-[#00ffff]">
                   {manhwa.title}
                 </p>
-                <p className="truncate text-xs text-text-muted">
+                <p className="truncate text-xs text-[#6b6b88]">
                   {manhwa.genres.slice(0, 3).join(', ')}
                 </p>
               </div>
 
               {/* Score */}
               {manhwa.score != null && (
-                <span className="shrink-0 text-sm font-bold text-yellow-400">
+                <span className="shrink-0 font-mono text-sm font-bold text-[#00ffff]">
                   ★ {manhwa.score.toFixed(1)}
                 </span>
               )}
 
               {/* Readers */}
-              <span className="hidden shrink-0 text-xs text-text-muted md:block">
+              <span className="hidden shrink-0 text-xs text-[#6b6b88] md:block">
                 {formatCount(manhwa.reader_count)} {t('readers')}
               </span>
             </Link>

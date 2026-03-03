@@ -1,12 +1,9 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { searchManhwas } from '@/lib/db/search'
-import { getPopularManhwas } from '@/lib/db/home'
 import { getAllGenres } from '@/lib/db/genre'
 import { getAllTropes } from '@/lib/db/trope'
 import { getCurrentContentFilter } from '@/lib/nsfw'
-import { getUser } from '@/lib/auth/session'
-import { getUserLibraryMap, type LibraryMapEntry } from '@/lib/db/library-map'
 import { ManhwaCard } from '@/components/features/ManhwaCard'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { SearchBar } from '@/components/features/SearchBar'
@@ -42,34 +39,24 @@ export default async function ExplorePage({ params, searchParams }: ExplorePageP
   const hasQuery = q && q.trim().length > 0
   const hasFilters = status || type || genre || trope || year
 
-  const [contentFilter, user, genres, tropes] = await Promise.all([
+  const [contentFilter, genres, tropes] = await Promise.all([
     getCurrentContentFilter(),
-    getUser(),
     getAllGenres(),
     getAllTropes(),
   ])
-  const libraryMap = user
-    ? await getUserLibraryMap(user.id)
-    : new Map<string, LibraryMapEntry>()
 
-  let results, total
-  if (hasQuery || hasFilters || sort) {
-    const data = await searchManhwas({
-      query: hasQuery ? q.trim() : undefined,
-      page: currentPage,
-      sortBy: (sort as 'relevance' | 'score' | 'popularity' | 'recent') ?? 'popularity',
-      status,
-      type,
-      genre,
-      trope,
-      year: year ? parseInt(year, 10) : undefined,
-    })
-    results = data.results
-    total = data.total
-  } else {
-    results = await getPopularManhwas(48)
-    total = results.length
-  }
+  const data = await searchManhwas({
+    query: hasQuery ? q.trim() : undefined,
+    page: currentPage,
+    sortBy: (sort as 'relevance' | 'score' | 'popularity' | 'recent') ?? 'popularity',
+    status,
+    type,
+    genre,
+    trope,
+    year: year ? parseInt(year, 10) : undefined,
+  })
+  const results = data.results
+  const total = data.total
 
   const totalPages = Math.ceil(total / 24)
 
@@ -134,8 +121,8 @@ export default async function ExplorePage({ params, searchParams }: ExplorePageP
             href={exploreHref({ genre: undefined })}
             className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
               !genre
-                ? 'bg-crystal-blue text-white'
-                : 'bg-elevated text-text-secondary hover:bg-border'
+                ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
+                : 'border border-white/10 bg-white/[0.03] text-[#9999b8] hover:bg-[rgba(0,255,255,0.08)] hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]'
             }`}
           >
             {t('allGenres') ?? 'All'}
@@ -149,12 +136,12 @@ export default async function ExplorePage({ params, searchParams }: ExplorePageP
                 href={exploreHref({ genre: active ? undefined : g.slug, page: undefined })}
                 className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   active
-                    ? 'bg-crystal-blue text-white'
-                    : 'bg-elevated text-text-secondary hover:bg-border'
+                    ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
+                    : 'border border-white/10 bg-white/[0.03] text-[#9999b8] hover:bg-[rgba(0,255,255,0.08)] hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]'
                 }`}
               >
                 {name}
-                <span className={`ml-1.5 text-xs ${active ? 'text-white/70' : 'text-text-muted'}`}>
+                <span className={`ml-1.5 text-xs ${active ? 'text-[#00ffff]/70' : 'text-[#6b6b88]'}`}>
                   {g._count.manhwa_links}
                 </span>
               </Link>
@@ -173,20 +160,14 @@ export default async function ExplorePage({ params, searchParams }: ExplorePageP
 
       {/* Manhwa grid */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        {results.map((m) => {
-          const entry = libraryMap.get(m.id)
-          return (
-            <ManhwaCard
-              key={m.id}
-              manhwa={m}
-              locale={locale}
-              userContentFilter={contentFilter}
-              libraryStatus={entry?.status ?? null}
-              isFavorite={entry?.is_favorite ?? false}
-              isLoggedIn={!!user}
-            />
-          )
-        })}
+        {results.map((m) => (
+          <ManhwaCard
+            key={m.id}
+            manhwa={m}
+            locale={locale}
+            userContentFilter={contentFilter}
+          />
+        ))}
       </div>
 
       {results.length === 0 && (
@@ -194,33 +175,39 @@ export default async function ExplorePage({ params, searchParams }: ExplorePageP
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-8 flex justify-center gap-2">
-          {Array.from({ length: Math.min(totalPages, 10) }).map((_, i) => {
-            const p = i + 1
-            return (
+      {totalPages > 1 && (() => {
+        const windowSize = 10
+        let start = Math.max(1, currentPage - Math.floor(windowSize / 2))
+        let end = start + windowSize - 1
+        if (end > totalPages) { end = totalPages; start = Math.max(1, end - windowSize + 1) }
+        const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i)
+        return (
+          <div className="mt-8 flex justify-center gap-2">
+            {currentPage > 1 && (
+              <Link href={exploreHref({ page: String(currentPage - 1) })} className="rounded-md px-3 py-1.5 text-sm border border-white/10 bg-[#0d0d16] text-[#9999b8] hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]">‹</Link>
+            )}
+            {pages.map((p) => (
               <Link
                 key={p}
                 href={exploreHref({ page: String(p) })}
-                className={`rounded-md px-3 py-1.5 text-sm ${
-                  p === currentPage
-                    ? 'bg-crystal-blue text-white'
-                    : 'bg-elevated text-text-secondary hover:bg-border'
-                }`}
+                className={`rounded-md px-3 py-1.5 text-sm ${p === currentPage ? 'bg-[#00ffff] text-black font-bold' : 'border border-white/10 bg-[#0d0d16] text-[#9999b8] hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]'}`}
               >
                 {p}
               </Link>
-            )
-          })}
-        </div>
-      )}
+            ))}
+            {currentPage < totalPages && (
+              <Link href={exploreHref({ page: String(currentPage + 1) })} className="rounded-md px-3 py-1.5 text-sm border border-white/10 bg-[#0d0d16] text-[#9999b8] hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]">›</Link>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Browse by Trope */}
-      <section className="mt-16 border-t border-border pt-12">
-        <h2 className="mb-6 font-display text-xl font-bold">{t('tropes') ?? 'Browse by Trope'}</h2>
+      <section className="mt-16 border-t border-white/5 pt-12">
+        <h2 className="section-title-bar mb-6 font-display text-xl">{t('tropes') ?? 'Browse by Trope'}</h2>
         {Object.entries(groupedTropes).map(([category, tropesInCat]) => (
           <div key={category} className="mb-8">
-            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
+            <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-[#6b6b88]">
               {category.replace(/_/g, ' ')}
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -232,12 +219,12 @@ export default async function ExplorePage({ params, searchParams }: ExplorePageP
                     href={exploreHref({ trope: active ? undefined : tr.slug, page: undefined })}
                     className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
                       active
-                        ? 'bg-crystal-blue/20 text-crystal-blue ring-1 ring-crystal-blue/40'
-                        : 'bg-elevated text-text-secondary hover:bg-border'
+                        ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
+                        : 'border border-white/10 bg-white/[0.03] text-[#9999b8] hover:bg-[rgba(0,255,255,0.08)] hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]'
                     }`}
                   >
                     {tr.name}
-                    <span className={`ml-1.5 text-xs ${active ? 'text-crystal-blue/70' : 'text-text-muted'}`}>
+                    <span className={`ml-1.5 text-xs ${active ? 'text-[#00ffff]/70' : 'text-[#6b6b88]'}`}>
                       {tr._count.manhwa_links}
                     </span>
                   </Link>

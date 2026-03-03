@@ -1,109 +1,144 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme inline {
-  /* ─── Colors: Base ─── */
-  --color-base: #0D0D0F;
-  --color-surface: #13141A;
-  --color-elevated: #1C1E27;
-  --color-border: #252836;
+  /* Backgrounds */
+  --color-void: #060609;
+  --color-deep: #08080e;
+  --color-card: #0d0d16;
+  --color-section: #0a0a13;
+  --color-elevated: #111120;
 
-  /* ─── Colors: Crystal System ─── */
-  --color-crystal-gold: #C9A84C;
-  --color-crystal-blue: #4A9EFF;
-  --color-crystal-red: #E05252;
-  --color-crystal-void: #555970;
+  /* Electric brand */
+  --color-electric: #00ffff;
+  --color-electric-dim: #00bfff;
+  --color-electric-glow: rgba(0, 255, 255, 0.15);
+  --color-electric-border: rgba(0, 255, 255, 0.12);
+  --color-electric-border-hover: rgba(0, 255, 255, 0.3);
 
-  /* ─── Colors: Text ─── */
-  --color-text-primary: #E8E4D9;
-  --color-text-secondary: #8B8FA8;
-  --color-text-muted: #4A4E63;
+  /* Text */
+  --color-text-primary: #e8e8f0;
+  --color-text-secondary: #9999b8;
+  --color-text-muted: #6b6b88;
 
-  /* ─── Colors: Semantic ─── */
-  --color-success: #4ADE80;
-  --color-warning: #FBBF24;
-  --color-error: #EF4444;
-  --color-info: #3B82F6;
+  /* Accents */
+  --color-gold: #ffd700;
+  --color-red: #ff2d55;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-error: #ef4444;
 
-  /* ─── Colors: Background/Foreground ─── */
-  --color-background: var(--color-base);
-  --color-foreground: var(--color-text-primary);
+  /* Legacy aliases (keep for components that haven't migrated yet) */
+  --color-base: #060609;
+  --color-surface: #0d0d16;
+  --color-border: rgba(0, 255, 255, 0.12);
+  --color-crystal-blue: #00ffff;
+  --color-crystal-gold: #ffd700;
+  --color-crystal-red: #ff2d55;
 
-  /* ─── Typography ─── */
-  --font-display: var(--font-playfair-display);
-  --font-sans: var(--font-dm-sans);
-  --font-mono: var(--font-jetbrains-mono);
+  /* Fonts */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-sans: 'Sora', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
-  /* ─── Border Radius ─── */
+  /* Radii */
   --radius-sm: 2px;
   --radius-md: 6px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
   --radius-full: 9999px;
 }
 
 /* ─── Base Styles ─── */
 body {
-  background: var(--color-base);
+  background: var(--color-void);
   color: var(--color-text-primary);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Crystal Animation Keyframes ─── */
+/* Section alternation */
+.section-alt {
+  background: var(--color-section);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Electric glow utility */
+.electric-glow {
+  text-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+/* Card hover standard */
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(0, 255, 255, 0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 255, 255, 0.12), 0 4px 20px rgba(0, 255, 255, 0.08);
+}
+
+/* Section title bar — 3px electric left bar */
+.section-title-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-title-bar::before {
+  content: '';
+  width: 3px;
+  height: 1.25rem;
+  background: #00ffff;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ─── Crystal / rank animations (preserved) ─── */
 @keyframes crystal-fill {
-  from {
-    clip-path: inset(100% 0 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
+  from { clip-path: inset(100% 0 0 0); }
+  to { clip-path: inset(0 0 0 0); }
 }
 
 @keyframes crystal-shimmer {
-  0%, 100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
 @keyframes count-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes stagger-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ─── Rank Glow Animation (S-Rank and above) ─── */
 @keyframes rank-glow {
-  from {
-    box-shadow: 0 0 8px var(--rank-glow);
-  }
-  to {
-    box-shadow: 0 0 20px var(--rank-glow), 0 0 40px var(--rank-glow);
-  }
+  from { box-shadow: 0 0 8px var(--rank-glow); }
+  to { box-shadow: 0 0 20px var(--rank-glow), 0 0 40px var(--rank-glow); }
 }
 
 @utility animate-rank-glow {
   animation: rank-glow 2s ease-in-out infinite alternate;
+}
+
+/* ─── Ticker animation ─── */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ─── Hero blob animations ─── */
+@keyframes blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
 }
 
 /* ─── Hide scrollbar utility ─── */
@@ -115,21 +150,8 @@ body {
   }
 }
 
-/* ─── Scrollbar (minimal, dark) ─── */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-base);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
-}
+/* ─── Scrollbar (minimal, electric) ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--color-void); }
+::-webkit-scrollbar-thumb { background: rgba(0, 255, 255, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 255, 255, 0.35); }

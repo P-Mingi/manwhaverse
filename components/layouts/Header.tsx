@@ -17,12 +17,12 @@ export function Header() {
   const switchedPath = pathname.replace(/^\/[a-z]{2}/, `/${otherLocale}`)
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-base/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-[rgba(0,255,255,0.07)] bg-[rgba(6,6,9,0.85)] backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo */}
         <Link
           href={`/${locale}`}
-          className="font-display text-lg font-bold tracking-tight text-text-primary"
+          className="font-display text-2xl tracking-widest text-[#00ffff] drop-shadow-[0_0_20px_rgba(0,255,255,0.5)]"
         >
           ManhwaVerse
         </Link>
@@ -31,29 +31,90 @@ export function Header() {
         <nav className="hidden items-center gap-6 md:flex">
           <Link
             href={`/${locale}/explore`}
-            className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+            className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]"
           >
             {t('discover')}
           </Link>
+
+          {/* Browse dropdown */}
+          <div className="group relative">
+            <button className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]">
+              {t('browse')}
+            </button>
+            <div className="absolute left-0 top-full z-50 hidden min-w-[160px] rounded-lg border border-[rgba(0,255,255,0.12)] bg-[#0d0d16] p-1 shadow-lg group-hover:block">
+              <Link
+                href={`/${locale}/people`}
+                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
+              >
+                {t('people')}
+              </Link>
+              <Link
+                href={`/${locale}/character`}
+                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
+              >
+                {t('characters')}
+              </Link>
+              <Link
+                href={`/${locale}/publisher`}
+                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
+              >
+                {t('publishers')}
+              </Link>
+            </div>
+          </div>
+
           <Link
-            href={`/${locale}/blog`}
-            className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+            href={`/${locale}/news`}
+            className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]"
           >
-            {t('blog')}
+            {t('news')}
           </Link>
+
+          {/* Community dropdown */}
+          <div className="group relative">
+            <button className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]">
+              {t('community')}
+            </button>
+            <div className="absolute left-0 top-full z-50 hidden min-w-[160px] rounded-lg border border-[rgba(0,255,255,0.12)] bg-[#0d0d16] p-1 shadow-lg group-hover:block">
+              <Link
+                href={`/${locale}/blog`}
+                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
+              >
+                {t('blog')}
+              </Link>
+              <Link
+                href={`/${locale}/members`}
+                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
+              >
+                {t('members')}
+              </Link>
+              <Link
+                href={`/${locale}/lists`}
+                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
+              >
+                {t('lists')}
+              </Link>
+              <Link
+                href={`/${locale}/artwork`}
+                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
+              >
+                {t('artwork')}
+              </Link>
+              <Link
+                href={`/${locale}/challenge/${new Date().getFullYear()}`}
+                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
+              >
+                {t('challenge')}
+              </Link>
+            </div>
+          </div>
           {user && (
             <>
               <Link
                 href={`/${locale}/library`}
-                className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+                className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]"
               >
                 {t('library')}
-              </Link>
-              <Link
-                href={`/${locale}/feed`}
-                className="text-sm text-text-secondary transition-colors hover:text-text-primary"
-              >
-                {t('feed')}
               </Link>
             </>
           )}
@@ -64,7 +125,7 @@ export function Header() {
           {/* Locale switcher */}
           <Link
             href={switchedPath}
-            className="rounded-md px-2 py-1 text-xs font-medium uppercase text-text-muted transition-colors hover:text-text-primary"
+            className="rounded-md px-2 py-1 text-xs font-medium uppercase tracking-widest text-[#6b6b88] transition-colors hover:text-[#00ffff]"
           >
             {otherLocale}
           </Link>
@@ -74,18 +135,18 @@ export function Header() {
 
           {/* Auth */}
           {loading ? (
-            <div className="h-8 w-16 animate-pulse rounded-lg bg-elevated" />
+            <div className="h-8 w-16 animate-pulse rounded-lg bg-[#111120]" />
           ) : user ? (
             <div className="flex items-center gap-2">
               <Link
                 href={`/${locale}/profile`}
-                className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+                className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]"
               >
                 {t('profile')}
               </Link>
               <button
                 onClick={signOut}
-                className="rounded-lg bg-elevated px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-border hover:text-text-primary"
+                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-[#9999b8] transition-colors hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]"
               >
                 {t('signOut')}
               </button>
@@ -93,7 +154,7 @@ export function Header() {
           ) : (
             <Link
               href={`/${locale}/sign-in`}
-              className="rounded-lg bg-crystal-blue px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-crystal-blue/90"
+              className="rounded-md bg-[#00ffff] px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-black transition-all duration-150 hover:shadow-[0_8px_24px_rgba(0,255,255,0.35)] hover:-translate-y-px"
             >
               {t('signIn')}
             </Link>

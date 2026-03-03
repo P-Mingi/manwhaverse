@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { getManhwaBySlug } from '@/lib/db/manhwa'
@@ -97,7 +98,7 @@ export default async function ManhwaLayout({
 
           {/* Sidebar */}
           <aside className="w-full space-y-6 md:w-64 flex-shrink-0">
-            <div className="rounded-lg bg-surface p-4">
+            <div className="rounded-lg border border-white/5 bg-[#0d0d16] p-4">
               <h3 className="mb-3 text-sm font-semibold text-text-muted uppercase tracking-wide">
                 {t('info')}
               </h3>
@@ -137,15 +138,36 @@ export default async function ManhwaLayout({
                     {t(`countries.${manhwa.origin_country}`)}
                   </dd>
                 </div>
+                {manhwa.publisher_links.length > 0 && (
+                  <div className="flex justify-between">
+                    <dt className="text-text-muted">{t('sidebar.publisher')}</dt>
+                    <dd className="flex flex-wrap justify-end gap-1">
+                      {manhwa.publisher_links.map(({ publisher }) => (
+                        <Link
+                          key={publisher.id}
+                          href={`/${locale}/publisher/${publisher.slug}`}
+                          className="text-[#00ffff] hover:underline"
+                        >
+                          {publisher.name}
+                        </Link>
+                      ))}
+                    </dd>
+                  </div>
+                )}
               </dl>
             </div>
+
+            {/* Where to Read — sidebar for affiliate revenue */}
+            {manhwa.read_links.length > 0 && (
+              <WhereToRead readLinks={manhwa.read_links} locale={locale} />
+            )}
 
             {/* Controversy Badge */}
             <ControversyBadge stddev={manhwa.score_stddev} scoreCount={manhwa.score_count} />
 
             {/* Popularity */}
             {(manhwa.reader_count > 0 || manhwa.favorite_count > 0) && (
-              <div className="rounded-lg bg-surface p-4">
+              <div className="rounded-lg border border-white/5 bg-[#0d0d16] p-4">
                 <h3 className="mb-3 text-sm font-semibold text-text-muted uppercase tracking-wide">
                   {t('sidebar.popularity')}
                 </h3>
@@ -166,14 +188,9 @@ export default async function ManhwaLayout({
               </div>
             )}
 
-            {/* Where to Read — sidebar for affiliate revenue */}
-            {manhwa.read_links.length > 0 && (
-              <WhereToRead readLinks={manhwa.read_links} locale={locale} />
-            )}
-
             {/* Alt titles */}
             {manhwa.title_alt.length > 0 && (
-              <div className="rounded-lg bg-surface p-4">
+              <div className="rounded-lg border border-white/5 bg-[#0d0d16] p-4">
                 <h3 className="mb-2 text-sm font-semibold text-text-muted uppercase tracking-wide">
                   {t('sidebar.altTitles')}
                 </h3>
