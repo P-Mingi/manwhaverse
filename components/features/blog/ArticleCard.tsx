@@ -16,14 +16,6 @@ interface ArticleCardProps {
   locale: string
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  NEWS: 'bg-crystal-blue/10 text-crystal-blue',
-  GUIDE: 'bg-emerald-500/10 text-emerald-400',
-  LIST: 'bg-crystal-gold/10 text-crystal-gold',
-  OPINION: 'bg-purple-500/10 text-purple-400',
-  ANALYSIS: 'bg-orange-500/10 text-orange-400',
-}
-
 export function ArticleCard({ article, locale }: ArticleCardProps) {
   const title = locale === 'fr' && article.title_fr ? article.title_fr : article.title_en
   const excerpt = locale === 'fr' && article.excerpt_fr ? article.excerpt_fr : article.excerpt_en
@@ -31,7 +23,7 @@ export function ArticleCard({ article, locale }: ArticleCardProps) {
   return (
     <Link
       href={`/${locale}/blog/${article.slug}`}
-      className="group flex flex-col overflow-hidden rounded-lg border border-border bg-surface transition-colors hover:border-text-muted"
+      className="group flex flex-col overflow-hidden rounded-lg border border-white/5 bg-[#0d0d16] card-hover"
     >
       {article.cover_image_url && (
         <div className="relative aspect-video w-full overflow-hidden">
@@ -46,21 +38,21 @@ export function ArticleCard({ article, locale }: ArticleCardProps) {
       )}
       <div className="flex flex-1 flex-col p-4">
         <div className="mb-2 flex items-center gap-2">
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${CATEGORY_COLORS[article.category] ?? 'bg-elevated text-text-muted'}`}>
+          <span className="rounded-full border border-[rgba(0,255,255,0.2)] bg-[rgba(0,255,255,0.06)] px-2 py-0.5 text-xs uppercase tracking-widest text-[#00bfff]">
             {article.category}
           </span>
           {article.reading_time && (
-            <span className="text-xs text-text-muted">{article.reading_time} min</span>
+            <span className="text-xs text-[#6b6b88]">{article.reading_time} min</span>
           )}
         </div>
-        <h3 className="mb-1 text-base font-semibold text-text-primary transition-colors group-hover:text-crystal-blue">
+        <h3 className="mb-1 font-display text-xl tracking-wide text-[#e8e8f0] transition-colors group-hover:text-[#00ffff]">
           {title}
         </h3>
         {excerpt && (
-          <p className="line-clamp-2 text-sm text-text-secondary">{excerpt}</p>
+          <p className="line-clamp-2 text-sm text-[#9999b8]">{excerpt}</p>
         )}
         {article.published_at && (
-          <time className="mt-auto pt-3 text-xs text-text-muted">
+          <time className="mt-auto pt-3 text-xs text-[#6b6b88]">
             {new Date(article.published_at).toLocaleDateString(locale, {
               year: 'numeric',
               month: 'short',

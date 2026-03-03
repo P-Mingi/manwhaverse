@@ -1,22 +1,22 @@
-import { Playfair_Display, DM_Sans, JetBrains_Mono } from 'next/font/google'
+import { Bebas_Neue, Sora, JetBrains_Mono } from 'next/font/google'
 
-export const playfairDisplay = Playfair_Display({
+export const bebasNeue = Bebas_Neue({
+  weight: '400',
   subsets: ['latin'],
-  variable: '--font-playfair-display',
+  variable: '--font-display',
   display: 'swap',
-  weight: ['400', '500', '600', '700', '800'],
 })
 
-export const dmSans = DM_Sans({
+export const sora = Sora({
   subsets: ['latin'],
-  variable: '--font-dm-sans',
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-sans',
   display: 'swap',
-  weight: ['400', '500', '600', '700'],
 })
 
 export const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
-  variable: '--font-jetbrains-mono',
+  weight: ['400', '500', '700'],
+  variable: '--font-mono',
   display: 'swap',
-  weight: ['400', '500', '600', '700'],
 })

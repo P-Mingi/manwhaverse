@@ -33,7 +33,7 @@ export function MobileNav() {
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-base/95 backdrop-blur-md md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-[rgba(0,255,255,0.07)] bg-[#08080e]/90 backdrop-blur-md md:hidden">
       <div className="flex items-center justify-around py-2">
         {items.map((item) => {
           const isActive = pathname === item.href
@@ -42,13 +42,13 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={`relative flex flex-col items-center gap-0.5 px-3 py-1 text-xs transition-colors ${
-                isActive ? 'text-crystal-blue' : 'text-text-muted'
+                isActive ? 'text-[#00ffff]' : 'text-[#6b6b88]'
               }`}
             >
               <div className="relative">
                 <item.icon active={isActive} />
                 {item.badge != null && item.badge > 0 && (
-                  <span className="absolute -right-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-error px-0.5 text-[8px] font-bold text-white">
+                  <span className="absolute -right-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-[#ff2d55] px-0.5 text-[8px] font-bold text-white">
                     {item.badge > 99 ? '99+' : item.badge}
                   </span>
                 )}

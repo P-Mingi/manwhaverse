@@ -45,7 +45,7 @@ export function ManhwaHero({ manhwa, locale, hasBanner = false, children }: Manh
                 alt={title}
                 width={200}
                 height={280}
-                className="rounded-lg shadow-2xl"
+                className="rounded-lg shadow-2xl ring-1 ring-[rgba(0,255,255,0.15)] shadow-[0_0_60px_rgba(0,0,0,0.7)]"
                 priority
               />
             ) : (
@@ -58,7 +58,7 @@ export function ManhwaHero({ manhwa, locale, hasBanner = false, children }: Manh
           {/* Info — stays below the banner, never overlaps it */}
           <div className="flex flex-1 flex-col gap-4 pt-2">
             <div>
-              <h1 className="font-display text-2xl font-bold tracking-tight md:text-4xl">
+              <h1 className="font-display text-4xl tracking-wide text-white md:text-5xl">
                 {title}
               </h1>
               {manhwa.title_kr && (
@@ -127,7 +127,7 @@ export function ManhwaHero({ manhwa, locale, hasBanner = false, children }: Manh
                 <a
                   key={gl.genre.id}
                   href={`/${locale}/genre/${gl.genre.slug}`}
-                  className="rounded-full bg-elevated px-3 py-1 text-xs font-medium text-text-primary transition-colors hover:bg-border"
+                  className="rounded border border-[rgba(0,255,255,0.2)] bg-[rgba(0,255,255,0.06)] px-2 py-1 text-xs uppercase tracking-widest text-[#00bfff] transition-colors hover:border-[rgba(0,255,255,0.4)] hover:bg-[rgba(0,255,255,0.12)]"
                 >
                   {locale === 'fr' ? gl.genre.name_fr : gl.genre.name_en}
                 </a>

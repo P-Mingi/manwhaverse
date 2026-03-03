@@ -24,7 +24,13 @@ export function HomePodium({ top3, locale, readersLabel }: HomePodiumProps) {
           href={`/${locale}/manhwa/${manhwa.slug}`}
           className={`group relative ${i === 1 ? 'w-[160px] md:w-[200px]' : 'w-[130px] md:w-[170px]'}`}
         >
-          <div className={`relative ${HEIGHTS[i]} overflow-hidden rounded-xl shadow-lg`}>
+          <div className={`relative ${HEIGHTS[i]} overflow-hidden rounded-xl shadow-lg ${
+            i === 1
+              ? 'ring-2 ring-[#ffd700] shadow-[0_0_24px_rgba(255,215,0,0.3)]'
+              : i === 0
+              ? 'ring-2 ring-[#c0c0c0] shadow-[0_0_16px_rgba(192,192,192,0.2)]'
+              : 'ring-2 ring-[#cd7f32] shadow-[0_0_16px_rgba(205,127,50,0.2)]'
+          }`}>
             {manhwa.cover_url ? (
               <Image
                 src={manhwa.cover_url}
@@ -45,12 +51,12 @@ export function HomePodium({ top3, locale, readersLabel }: HomePodiumProps) {
 
             {/* Info overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-3">
-              <p className="line-clamp-2 text-sm font-bold leading-tight text-white">
+              <p className="line-clamp-2 font-display text-sm leading-tight text-white">
                 {manhwa.title}
               </p>
               <div className="mt-1 flex items-center gap-2">
                 {manhwa.score != null && (
-                  <span className="text-xs font-bold text-yellow-400">
+                  <span className="font-mono text-xs font-bold text-yellow-400">
                     ★ {manhwa.score.toFixed(1)}
                   </span>
                 )}

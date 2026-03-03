@@ -5,15 +5,12 @@ import { getMessages, getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import type { Locale } from '@/i18n/routing'
-import { playfairDisplay, dmSans, jetbrainsMono } from '@/app/fonts'
 import { Suspense } from 'react'
 import { SessionProvider } from '@/components/providers/SessionProvider'
 import { PostHogTracker } from '@/components/providers/PostHogProvider'
 import { Header } from '@/components/layouts/Header'
 import { MobileNav } from '@/components/layouts/MobileNav'
 import { Footer } from '@/components/layouts/Footer'
-import '@/app/globals.css'
-
 interface LocaleLayoutProps {
   children: ReactNode
   params: Promise<{ locale: string }>
@@ -75,24 +72,18 @@ export default async function LocaleLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} className="dark">
-      <body
-        className={`${playfairDisplay.variable} ${dmSans.variable} ${jetbrainsMono.variable} bg-base text-text-primary antialiased`}
-      >
-        <NextIntlClientProvider messages={messages}>
-          <SessionProvider>
-            <Suspense fallback={null}>
-              <PostHogTracker />
-            </Suspense>
-            <Header />
-            <div className="min-h-screen pb-16 md:pb-0">
-              {children}
-            </div>
-            <Footer locale={locale} />
-            <MobileNav />
-          </SessionProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider messages={messages}>
+      <SessionProvider>
+        <Suspense fallback={null}>
+          <PostHogTracker />
+        </Suspense>
+        <Header />
+        <div className="min-h-screen pb-16 md:pb-0">
+          {children}
+        </div>
+        <Footer locale={locale} />
+        <MobileNav />
+      </SessionProvider>
+    </NextIntlClientProvider>
   )
 }
