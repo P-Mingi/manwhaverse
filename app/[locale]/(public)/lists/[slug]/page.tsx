@@ -18,19 +18,31 @@ interface ListDetailProps {
 }
 
 export async function generateMetadata({ params }: ListDetailProps) {
-  const { slug } = await params
+  const { locale, slug } = await params
   const list = await getListBySlug(slug)
   if (!list || !list.is_public) return {}
   const title = list.og_title ?? list.title
   const author = list.user.display_name ?? list.user.username ?? 'ManhwaVerse'
+  const description =
+    list.description?.slice(0, 155) ??
+    `A thematic manhwa list by ${author} with ${list.item_count} titles`
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://manhwaverse.com'
+  const canonical = `${baseUrl}/${locale}/lists/${slug}`
   return {
     title: `${title} — ManhwaVerse`,
-    description:
-      list.description?.slice(0, 155) ??
-      `A thematic manhwa list by ${author} with ${list.item_count} titles`,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        'en': `${baseUrl}/en/lists/${slug}`,
+        'fr': `${baseUrl}/fr/lists/${slug}`,
+      },
+    },
     openGraph: {
       title,
-      description: list.description ?? undefined,
+      description: list.description ?? description,
+      type: 'website',
+      url: canonical,
     },
   }
 }
@@ -56,8 +68,28 @@ export default async function ListDetailPage({ params }: ListDetailProps) {
     day: 'numeric',
   })
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://manhwaverse.com'
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: list.og_title ?? list.title,
+    description: list.description ?? undefined,
+    url: `${baseUrl}/${locale}/lists/${slug}`,
+    numberOfItems: list.item_count,
+    itemListElement: list.items.map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: locale === 'fr' ? (item.manhwa.title_fr ?? item.manhwa.title_en) : item.manhwa.title_en,
+      url: `${baseUrl}/${locale}/manhwa/${item.manhwa.slug}`,
+    })),
+  }
+
   return (
     <PageContainer>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
       {/* Back */}
       <Link
         href={`/${locale}/lists`}

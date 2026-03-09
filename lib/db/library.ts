@@ -93,6 +93,7 @@ export async function upsertLibraryEntry(
     reread_count?: number
     private_tags?: string[]
     notes?: string | null
+    read_at?: Date | null
   }
 ) {
   const now = new Date()
@@ -107,6 +108,7 @@ export async function upsertLibraryEntry(
       is_favorite: data.is_favorite ?? false,
       started_at: data.started_at !== undefined ? data.started_at : (data.status === 'READING' ? now : undefined),
       completed_at: data.completed_at !== undefined ? data.completed_at : (data.status === 'COMPLETED' ? now : undefined),
+      read_at: data.read_at !== undefined ? data.read_at : (['COMPLETED', 'REREADING'].includes(data.status) ? now : undefined),
       reread_count: data.reread_count ?? 0,
       private_tags: data.private_tags ?? [],
       notes: data.notes,
@@ -122,6 +124,9 @@ export async function upsertLibraryEntry(
       ...(data.completed_at !== undefined
         ? { completed_at: data.completed_at }
         : data.status === 'COMPLETED' ? { completed_at: now } : {}),
+      ...(data.read_at !== undefined
+        ? { read_at: data.read_at }
+        : ['COMPLETED', 'REREADING'].includes(data.status) ? { read_at: now } : {}),
       ...(data.reread_count !== undefined ? { reread_count: data.reread_count } : {}),
       ...(data.private_tags !== undefined ? { private_tags: data.private_tags } : {}),
       ...(data.notes !== undefined ? { notes: data.notes } : {}),

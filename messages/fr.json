@@ -266,6 +266,8 @@
       "startDate": "Date de début",
       "endDate": "Date de fin",
       "rereads": "Relectures",
+      "readAt": "Date du journal",
+      "readAtHint": "Date à laquelle vous avez enregistré cette lecture (apparaît dans votre journal)",
       "privateTags": "Tags privés",
       "addTag": "Ajouter un tag…",
       "notes": "Notes",

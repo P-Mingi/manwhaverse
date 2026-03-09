@@ -110,10 +110,10 @@ export function SearchBar({
             }, 300)
           }}
           placeholder={t('placeholder')}
-          className="w-full rounded-lg border border-[rgba(0,255,255,0.12)] bg-[#0d0d16] px-4 py-3 pl-10 text-sm text-[#e8e8f0] placeholder:text-[#6b6b88] focus:border-[rgba(0,255,255,0.4)] focus:outline-none focus:ring-1 focus:ring-[rgba(0,255,255,0.2)]"
+          className="w-full rounded-lg border border-electric-border bg-card px-4 py-3 pl-10 text-sm text-text-primary placeholder:text-text-muted focus:border-electric-border-hover focus:outline-none focus:ring-1 focus:ring-electric-border"
         />
         <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00ffff]"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-electric"
           width="16"
           height="16"
           viewBox="0 0 24 24"
@@ -198,7 +198,7 @@ export function SearchBar({
             <select
               value={currentGenre ?? ''}
               onChange={(e) => handleFilter('genre', e.target.value || undefined)}
-              className="rounded-lg border border-[rgba(0,255,255,0.12)] bg-[#0d0d16] px-3 py-1.5 text-xs text-[#e8e8f0] focus:border-[rgba(0,255,255,0.4)] focus:outline-none"
+              className="rounded-lg border border-electric-border bg-card px-3 py-1.5 text-xs text-text-primary focus:border-electric-border-hover focus:outline-none"
             >
               <option value="">{tFilter('allGenres')}</option>
               {genres.map((g) => (
@@ -212,7 +212,7 @@ export function SearchBar({
             <select
               value={currentTrope ?? ''}
               onChange={(e) => handleFilter('trope', e.target.value || undefined)}
-              className="rounded-lg border border-[rgba(0,255,255,0.12)] bg-[#0d0d16] px-3 py-1.5 text-xs text-[#e8e8f0] focus:border-[rgba(0,255,255,0.4)] focus:outline-none"
+              className="rounded-lg border border-electric-border bg-card px-3 py-1.5 text-xs text-text-primary focus:border-electric-border-hover focus:outline-none"
             >
               <option value="">{tFilter('allTropes')}</option>
               {tropes.map((tr) => (
@@ -225,7 +225,7 @@ export function SearchBar({
           <select
             value={currentYear ?? ''}
             onChange={(e) => handleFilter('year', e.target.value || undefined)}
-            className="rounded-lg border border-[rgba(0,255,255,0.12)] bg-[#0d0d16] px-3 py-1.5 text-xs text-[#e8e8f0] focus:border-[rgba(0,255,255,0.4)] focus:outline-none"
+            className="rounded-lg border border-electric-border bg-card px-3 py-1.5 text-xs text-text-primary focus:border-electric-border-hover focus:outline-none"
           >
             <option value="">{tFilter('allYears')}</option>
             {YEARS.map((y) => (
@@ -252,8 +252,8 @@ function Chip({
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
         active
-          ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.2)] text-[#00ffff]'
-          : 'border border-white/10 bg-white/[0.03] text-[#9999b8] hover:bg-[rgba(0,255,255,0.08)] hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]'
+          ? 'bg-electric-glow border border-electric-border text-electric'
+          : 'border border-white/10 bg-white/[0.03] text-text-secondary hover:bg-electric-glow hover:border-electric-border-hover hover:text-electric'
       }`}
     >
       {children}

@@ -46,7 +46,7 @@ export function NewsGeneratorButton({ locale }: NewsGeneratorButtonProps) {
         <button
           onClick={run}
           disabled={status === 'loading'}
-          className="rounded-lg border border-[rgba(0,255,255,0.25)] bg-[rgba(0,255,255,0.08)] px-4 py-2 text-sm font-medium text-[#00bfff] transition-all hover:border-[rgba(0,255,255,0.4)] hover:bg-[rgba(0,255,255,0.12)] disabled:opacity-50"
+          className="rounded-lg border border-electric-border-hover bg-electric-glow px-4 py-2 text-sm font-medium text-electric-dim transition-all hover:border-electric-border-hover hover:bg-electric-glow disabled:opacity-50"
         >
           {status === 'loading' ? 'Running…' : 'Run pipeline'}
         </button>

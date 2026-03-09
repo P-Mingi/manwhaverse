@@ -612,6 +612,8 @@ model UserLibrary {
   reread_count  Int           @default(0)
   reread_score  Float?
 
+  read_at       DateTime?
+
   created_at    DateTime      @default(now())
   updated_at    DateTime      @updatedAt
 

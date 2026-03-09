@@ -33,9 +33,9 @@ export function ProductCard({ product, isInWishlist = false, isLoggedIn = false 
   }
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-lg border border-white/5 bg-[#0d0d16] transition-all duration-250 hover:border-[rgba(0,255,255,0.2)]">
+    <div className="group flex flex-col overflow-hidden rounded-lg border border-white/5 bg-card transition-all duration-250 hover:border-electric-border">
       {/* Cover */}
-      <div className="relative aspect-[3/4] bg-[#111120]">
+      <div className="relative aspect-[3/4] bg-elevated">
         {cover ? (
           <Image
             src={cover}
@@ -45,13 +45,13 @@ export function ProductCard({ product, isInWishlist = false, isLoggedIn = false 
             className="object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-[#6b6b88]">
+          <div className="flex h-full items-center justify-center text-xs text-text-muted">
             No image
           </div>
         )}
 
         {/* Type badge */}
-        <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-medium text-[#e8e8f0] backdrop-blur-sm">
+        <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-medium text-text-primary backdrop-blur-sm">
           {t(`type.${product.type as 'PHYSICAL_MANGA'}`)}
         </span>
 
@@ -68,18 +68,18 @@ export function ProductCard({ product, isInWishlist = false, isLoggedIn = false 
         {/* Manhwa link */}
         <Link
           href={`/${locale}/manhwa/${product.manhwa.slug}`}
-          className="text-[10px] text-[#00ffff] hover:underline"
+          className="text-[10px] text-electric hover:underline"
         >
           {locale === 'fr' && product.manhwa.title_fr ? product.manhwa.title_fr : product.manhwa.title_en}
         </Link>
 
-        <h3 className="mt-0.5 line-clamp-2 text-sm font-medium leading-snug text-[#e8e8f0]">
+        <h3 className="mt-0.5 line-clamp-2 text-sm font-medium leading-snug text-text-primary">
           {title}
         </h3>
 
         {/* Price */}
         {primaryLink?.price_amount != null && primaryLink.price_currency && (
-          <p className="mt-1 text-xs text-[#9999b8]">
+          <p className="mt-1 text-xs text-text-secondary">
             {formatPrice(primaryLink.price_amount, primaryLink.price_currency, isStale)}
           </p>
         )}
@@ -105,7 +105,7 @@ export function ProductCard({ product, isInWishlist = false, isLoggedIn = false 
 
         {/* Footer: wishlist + affiliate hint */}
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-[9px] text-[#6b6b88]">{t('affiliateHint')}</span>
+          <span className="text-[9px] text-text-muted">{t('affiliateHint')}</span>
           <WishlistButton
             productId={product.id}
             isInWishlist={isInWishlist}

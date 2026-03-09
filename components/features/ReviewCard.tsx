@@ -14,6 +14,8 @@ interface ReviewCardProps {
   isAdmin?: boolean
   locale?: string
   manhwaSlug?: string
+  manhwaTitle?: string
+  showManhwa?: boolean
   preview?: boolean  // truncate long reviews with "read more" link
 }
 
@@ -28,7 +30,7 @@ const REACTIONS: { key: KoreanReaction; emoji: string; kr: string }[] = [
 
 const PREVIEW_LENGTH = 180
 
-export function ReviewCard({ review, currentUserId, isAdmin = false, locale, manhwaSlug, preview = false }: ReviewCardProps) {
+export function ReviewCard({ review, currentUserId, isAdmin = false, locale, manhwaSlug, manhwaTitle, showManhwa = false, preview = false }: ReviewCardProps) {
   const t = useTranslations('review')
   const [isPending, startTransition] = useTransition()
   const [deleted, setDeleted] = useState(false)
@@ -113,7 +115,7 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
   if (deleted) return null
 
   return (
-    <div className="rounded-lg border border-white/5 bg-[#0d0d16] p-4 transition-colors hover:border-[rgba(0,255,255,0.15)]">
+    <article className="rounded-lg border border-electric-border bg-card p-5 transition-colors hover:border-electric/40">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
@@ -136,7 +138,7 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
           )}
           <div>
             {locale && review.user.username ? (
-              <Link href={`/${locale}/profile/${review.user.username}`} className="text-sm font-medium text-[#e8e8f0] hover:text-[#00ffff]">
+              <Link href={`/${locale}/profile/${review.user.username}`} className="text-sm font-medium text-text-primary hover:text-electric">
                 {review.user.display_name ?? review.user.username}
               </Link>
             ) : (
@@ -149,11 +151,21 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
         </div>
 
         {review.score && (
-          <span className="font-mono text-sm font-bold text-[#00ffff]">
+          <span className="font-mono text-sm font-bold text-electric">
             {formatScore(review.score)}
           </span>
         )}
       </div>
+
+      {/* Manhwa ref — when showManhwa=true */}
+      {showManhwa && manhwaSlug && manhwaTitle && locale && (
+        <Link
+          href={`/${locale}/manhwa/${manhwaSlug}`}
+          className="mt-2 block text-xs font-medium text-electric-dim hover:text-electric transition-colors"
+        >
+          ↗ {manhwaTitle}
+        </Link>
+      )}
 
       {/* Title — long reviews */}
       {isLong && review.title && (
@@ -176,7 +188,7 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
       {shouldTruncate && reviewHref && (
         <Link
           href={reviewHref}
-          className="mt-1 inline-block text-xs text-[#00ffff] hover:underline"
+          className="mt-1 inline-block text-xs text-electric hover:underline"
         >
           {t('readFull')}
         </Link>
@@ -194,8 +206,8 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
               disabled={isPending || !currentUserId}
               className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] transition-colors disabled:opacity-50 ${
                 isActive
-                  ? 'bg-[rgba(0,255,255,0.15)] text-[#00ffff]'
-                  : 'bg-[#111120] text-[#6b6b88] hover:bg-[rgba(0,255,255,0.06)]'
+                  ? 'bg-electric-glow text-electric'
+                  : 'bg-elevated text-text-muted hover:bg-electric-glow'
               }`}
             >
               <span>{emoji}</span>
@@ -211,7 +223,7 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
         <button
           onClick={handleLike}
           disabled={isPending || !currentUserId}
-          className="flex items-center gap-1 text-xs text-[#6b6b88] transition-colors hover:text-[#00ffff] disabled:opacity-50"
+          className="flex items-center gap-1 text-xs text-text-muted transition-colors hover:text-electric disabled:opacity-50"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z" />
@@ -242,7 +254,7 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
         {isLong && reviewHref && !shouldTruncate && (
           <Link
             href={reviewHref}
-            className="ml-auto text-xs text-[#6b6b88] transition-colors hover:text-[#00ffff]"
+            className="ml-auto text-xs text-text-muted transition-colors hover:text-electric"
           >
             {t('readFull')}
           </Link>
@@ -259,6 +271,6 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
           </button>
         )}
       </div>
-    </div>
+    </article>
   )
 }

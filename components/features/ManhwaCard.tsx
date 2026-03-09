@@ -32,10 +32,10 @@ export function ManhwaCard({ manhwa, locale, userContentFilter = 'SAFE', rankBad
   const card = (
     <Link
       href={`/${locale}/manhwa/${manhwa.slug}`}
-      className="group flex flex-col overflow-hidden rounded-lg border border-white/5 bg-[#0d0d16] card-hover"
+      className="group flex flex-col overflow-hidden rounded-lg border border-electric-border bg-card card-hover"
     >
       {/* Cover */}
-      <div className="relative aspect-[5/7] w-full overflow-hidden bg-[#111120]">
+      <div className="relative aspect-[5/7] w-full overflow-hidden bg-elevated">
         {manhwa.cover_url ? (
           <Image
             src={manhwa.cover_url}
@@ -45,7 +45,7 @@ export function ManhwaCard({ manhwa, locale, userContentFilter = 'SAFE', rankBad
             className={`object-cover transition-transform duration-300 group-hover:scale-105 ${blurCover ? 'blur-xl' : ''}`}
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-[#6b6b88]">
+          <div className="flex h-full items-center justify-center text-xs text-text-muted">
             No Cover
           </div>
         )}
@@ -53,7 +53,7 @@ export function ManhwaCard({ manhwa, locale, userContentFilter = 'SAFE', rankBad
         {/* NSFW badge */}
         {blurCover && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="rounded-md bg-[#ff2d55]/80 px-2 py-1 text-xs font-bold text-white">
+            <span className="rounded-md bg-red/80 px-2 py-1 text-xs font-bold text-white">
               18+
             </span>
           </div>
@@ -68,9 +68,9 @@ export function ManhwaCard({ manhwa, locale, userContentFilter = 'SAFE', rankBad
 
         {/* Score + rank badge — bottom left */}
         {displayScore && (
-          <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-[#060609]/80 px-1.5 py-0.5 backdrop-blur-sm">
+          <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-void/80 px-1.5 py-0.5 backdrop-blur-sm">
             <span className="text-xs text-yellow-400">★</span>
-            <span className={`font-mono text-xs font-bold ${displayScore >= 8 ? 'text-[#00ffff]' : 'text-[#e8e8f0]'}`}>
+            <span className={`font-mono text-xs font-bold ${displayScore >= 8 ? 'text-electric' : 'text-text-primary'}`}>
               {formatScore(displayScore)}
             </span>
             {!rankBadgeTop && rank && <RankBadge rank={rank} compact />}
@@ -82,15 +82,15 @@ export function ManhwaCard({ manhwa, locale, userContentFilter = 'SAFE', rankBad
       {/* Footer */}
       <div className="p-2.5">
         {/* Title */}
-        <h3 className="truncate text-sm font-semibold text-[#e8e8f0] transition-colors group-hover:text-[#00ffff]">
+        <h3 className="truncate text-sm font-semibold text-text-primary transition-colors group-hover:text-electric">
           {title}
         </h3>
 
         {/* User personal score */}
         {userScore != null && (
-          <p className="mt-0.5 text-[11px] text-[#6b6b88]">
+          <p className="mt-0.5 text-[11px] text-text-muted">
             {locale === 'fr' ? 'Noté' : 'Rated'}{' '}
-            <span className="font-mono font-semibold text-[#00ffff]">{formatScore(userScore)}</span>
+            <span className="font-mono font-semibold text-electric">{formatScore(userScore)}</span>
           </p>
         )}
 
@@ -100,7 +100,7 @@ export function ManhwaCard({ manhwa, locale, userContentFilter = 'SAFE', rankBad
             {manhwa.genre_links.slice(0, 2).map((gl) => (
               <span
                 key={gl.genre.name_en}
-                className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-[#6b6b88]"
+                className="rounded bg-elevated px-1.5 py-0.5 text-[10px] text-text-muted"
               >
                 {locale === 'fr' ? gl.genre.name_fr : gl.genre.name_en}
               </span>

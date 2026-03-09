@@ -71,6 +71,7 @@ export default async function ManhwaLayout({
           currentIsFavorite={libraryEntry?.is_favorite ?? false}
           currentStartedAt={libraryEntry?.started_at?.toISOString() ?? null}
           currentCompletedAt={libraryEntry?.completed_at?.toISOString() ?? null}
+          currentReadAt={libraryEntry?.read_at?.toISOString() ?? null}
           currentRereadCount={libraryEntry?.reread_count ?? 0}
           currentPrivateTags={libraryEntry?.private_tags ?? []}
           currentNotes={libraryEntry?.notes ?? null}

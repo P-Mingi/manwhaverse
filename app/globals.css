@@ -1,157 +1,334 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@theme inline {
+/* ============================================================
+   THEME TOKENS — applied via data-theme on <html>
+   ============================================================ */
+
+/* ── NIGHT MODE (Hunter / Ranker — default) ─────────────────── */
+[data-theme="dark"],
+:root {
   /* Backgrounds */
-  --color-void: #060609;
-  --color-deep: #08080e;
-  --color-card: #0d0d16;
-  --color-section: #0a0a13;
-  --color-elevated: #111120;
+  --color-void:     #080A0F;
+  --color-deep:     #0C0E14;
+  --color-card:     #111420;
+  --color-section:  #0C0E14;
+  --color-elevated: #181C2A;
+  --color-border-raw: 30, 34, 53;        /* #1E2235 as RGB for alpha variants */
 
   /* Electric brand */
-  --color-electric: #00ffff;
-  --color-electric-dim: #00bfff;
-  --color-electric-glow: rgba(0, 255, 255, 0.15);
-  --color-electric-border: rgba(0, 255, 255, 0.12);
-  --color-electric-border-hover: rgba(0, 255, 255, 0.3);
+  --color-electric:              #00E5CC;
+  --color-electric-dim:          #00BFAA;
+  --color-electric-glow:         rgba(0, 229, 204, 0.12);
+  --color-electric-border:       rgba(0, 229, 204, 0.12);
+  --color-electric-border-hover: rgba(0, 229, 204, 0.30);
 
   /* Text */
-  --color-text-primary: #e8e8f0;
-  --color-text-secondary: #9999b8;
-  --color-text-muted: #6b6b88;
+  --color-text-primary:   #E8E8F0;
+  --color-text-secondary: #8890AA;
+  --color-text-muted:     #454A60;
 
   /* Accents */
-  --color-gold: #ffd700;
-  --color-red: #ff2d55;
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
-  --color-error: #ef4444;
+  --color-gold:    #F5C842;
+  --color-red:     #FF4455;
+  --color-success: #4ADE80;
+  --color-warning: #FBBF24;
+  --color-error:   #EF4444;
 
-  /* Legacy aliases (keep for components that haven't migrated yet) */
-  --color-base: #060609;
-  --color-surface: #0d0d16;
-  --color-border: rgba(0, 255, 255, 0.12);
-  --color-crystal-blue: #00ffff;
-  --color-crystal-gold: #ffd700;
-  --color-crystal-red: #ff2d55;
+  /* Legacy aliases (keep for backwards compat) */
+  --color-base:         #080A0F;
+  --color-surface:      #111420;
+  --color-border:       rgba(0, 229, 204, 0.12);
+  --color-crystal-blue: #00E5CC;
+  --color-crystal-gold: #F5C842;
+  --color-crystal-red:  #FF4455;
 
-  /* Fonts */
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-sans: 'Sora', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Rank badge base (used in color-mix in RankBadge.tsx) */
+  --rank-badge-base: 8 10 15;
+
+  /* Medal colors */
+  --color-medal-gold:   #F5C842;
+  --color-medal-silver: #C0C0C0;
+  --color-medal-bronze: #CD7F32;
+
+  /* External brand (immutable) */
+  --color-anilist: #02A9FF;
+  --color-mal:     #2E51A2;
+
+  /* Card hover glow */
+  --card-hover-border:  rgba(0, 229, 204, 0.25);
+  --card-hover-shadow:  0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,229,204,0.10), 0 4px 20px rgba(0,229,204,0.08);
+
+  /* Section bar */
+  --section-bar-color:  #00E5CC;
+  --section-bar-glow:   rgba(0, 229, 204, 0.6);
+
+  /* Scrollbar */
+  --scrollbar-thumb:       rgba(0, 229, 204, 0.20);
+  --scrollbar-thumb-hover: rgba(0, 229, 204, 0.35);
+
+  /* Fonts — reference CSS font variables set by next/font */
+  --font-display: var(--font-bebas);
+  --font-sans:    var(--font-sora);
+  --font-mono:    'JetBrains Mono', monospace;
 
   /* Radii */
-  --radius-sm: 2px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
+  --radius-sm:   2px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-xl:   12px;
+  --radius-2xl:  16px;
   --radius-full: 9999px;
 }
 
-/* ─── Base Styles ─── */
+/* ── DAY MODE (Shōjo / Slice of Life — white & pale pink) ───── */
+[data-theme="light"] {
+  /* Backgrounds */
+  --color-void:     #FFFAFB;
+  --color-deep:     #FFF5F7;
+  --color-card:     #FFF0F3;
+  --color-section:  #FFF5F7;
+  --color-elevated: #FFE8ED;
+  --color-border-raw: 245, 214, 222;
+
+  /* Rose brand */
+  --color-electric:              #E8547A;
+  --color-electric-dim:          #D43F66;
+  --color-electric-glow:         rgba(232, 84, 122, 0.10);
+  --color-electric-border:       rgba(232, 84, 122, 0.20);
+  --color-electric-border-hover: rgba(232, 84, 122, 0.45);
+
+  /* Text */
+  --color-text-primary:   #2D1B24;
+  --color-text-secondary: #8C6070;
+  --color-text-muted:     #C4A0AE;
+
+  /* Accents */
+  --color-gold:    #C4883C;
+  --color-red:     #D43F5E;
+  --color-success: #3D9E6A;
+  --color-warning: #C47A20;
+  --color-error:   #C43A3A;
+
+  /* Legacy aliases */
+  --color-base:         #FFFAFB;
+  --color-surface:      #FFF0F3;
+  --color-border:       rgba(232, 84, 122, 0.20);
+  --color-crystal-blue: #E8547A;
+  --color-crystal-gold: #C4883C;
+  --color-crystal-red:  #D43F5E;
+
+  /* Rank badge base */
+  --rank-badge-base: 255 245 247;
+
+  /* Medal colors */
+  --color-medal-gold:   #C4883C;
+  --color-medal-silver: #9090A0;
+  --color-medal-bronze: #A06030;
+
+  /* External brand (immutable) */
+  --color-anilist: #02A9FF;
+  --color-mal:     #2E51A2;
+
+  /* Card hover */
+  --card-hover-border:  rgba(232, 84, 122, 0.30);
+  --card-hover-shadow:  0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(232,84,122,0.12);
+
+  /* Section bar */
+  --section-bar-color: #E8547A;
+  --section-bar-glow:  rgba(232, 84, 122, 0.40);
+
+  /* Scrollbar */
+  --scrollbar-thumb:       rgba(232, 84, 122, 0.20);
+  --scrollbar-thumb-hover: rgba(232, 84, 122, 0.40);
+
+  /* Fonts — Crimson Pro for display in light mode */
+  --font-display: var(--font-crimson);
+  --font-sans:    var(--font-dm);
+  --font-mono:    'JetBrains Mono', monospace;
+
+  /* Radii — slightly rounder in light mode */
+  --radius-sm:   3px;
+  --radius-md:   8px;
+  --radius-lg:   10px;
+  --radius-xl:   14px;
+  --radius-2xl:  18px;
+  --radius-full: 9999px;
+}
+
+/* ============================================================
+   TAILWIND THEME REGISTRATION
+   ============================================================ */
+@theme inline {
+  --color-void:                    var(--color-void);
+  --color-deep:                    var(--color-deep);
+  --color-card:                    var(--color-card);
+  --color-section:                 var(--color-section);
+  --color-elevated:                var(--color-elevated);
+  --color-electric:                var(--color-electric);
+  --color-electric-dim:            var(--color-electric-dim);
+  --color-electric-glow:           var(--color-electric-glow);
+  --color-electric-border:         var(--color-electric-border);
+  --color-electric-border-hover:   var(--color-electric-border-hover);
+  --color-text-primary:            var(--color-text-primary);
+  --color-text-secondary:          var(--color-text-secondary);
+  --color-text-muted:              var(--color-text-muted);
+  --color-gold:                    var(--color-gold);
+  --color-red:                     var(--color-red);
+  --color-success:                 var(--color-success);
+  --color-warning:                 var(--color-warning);
+  --color-error:                   var(--color-error);
+  --color-base:                    var(--color-base);
+  --color-surface:                 var(--color-surface);
+  --color-border:                  var(--color-border);
+  --color-crystal-blue:            var(--color-crystal-blue);
+  --color-crystal-gold:            var(--color-crystal-gold);
+  --color-crystal-red:             var(--color-crystal-red);
+  --color-medal-gold:              var(--color-medal-gold);
+  --color-medal-silver:            var(--color-medal-silver);
+  --color-medal-bronze:            var(--color-medal-bronze);
+  --color-anilist:                 var(--color-anilist);
+  --color-mal:                     var(--color-mal);
+  --font-display:                  var(--font-display);
+  --font-sans:                     var(--font-sans);
+  --font-mono:                     var(--font-mono);
+  --radius-sm:                     var(--radius-sm);
+  --radius-md:                     var(--radius-md);
+  --radius-lg:                     var(--radius-lg);
+  --radius-xl:                     var(--radius-xl);
+  --radius-2xl:                    var(--radius-2xl);
+  --radius-full:                   var(--radius-full);
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
 body {
-  background: var(--color-void);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+  background:              var(--color-void);
+  color:                   var(--color-text-primary);
+  font-family:             var(--font-sans);
+  -webkit-font-smoothing:  antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.4s cubic-bezier(0.4,0,0.2,1),
+              color      0.4s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* Section alternation */
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
 .section-alt {
-  background: var(--color-section);
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  background:    var(--color-section);
+  border-top:    1px solid rgba(var(--color-border-raw), 0.06);
+  border-bottom: 1px solid rgba(var(--color-border-raw), 0.06);
 }
 
-/* Electric glow utility */
 .electric-glow {
-  text-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  text-shadow: 0 0 20px var(--color-electric-glow);
 }
 
-/* Card hover standard */
 .card-hover {
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .card-hover:hover {
-  transform: translateY(-4px) scale(1.01);
-  border-color: rgba(0, 255, 255, 0.25);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 255, 255, 0.12), 0 4px 20px rgba(0, 255, 255, 0.08);
+  transform:    translateY(-4px) scale(1.01);
+  border-color: var(--card-hover-border);
+  box-shadow:   var(--card-hover-shadow);
 }
 
-/* Section title bar — 3px electric left bar */
 .section-title-bar {
-  display: flex;
+  display:     flex;
   align-items: center;
-  gap: 12px;
+  gap:         12px;
 }
 .section-title-bar::before {
-  content: '';
-  width: 3px;
-  height: 1.25rem;
-  background: #00ffff;
-  box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+  content:       '';
+  width:         3px;
+  height:        1.25rem;
+  background:    var(--section-bar-color);
+  box-shadow:    0 0 8px var(--section-bar-glow);
   border-radius: 2px;
-  flex-shrink: 0;
+  flex-shrink:   0;
 }
 
-/* ─── Crystal / rank animations (preserved) ─── */
+/* ============================================================
+   KEYFRAME ANIMATIONS
+   ============================================================ */
 @keyframes crystal-fill {
   from { clip-path: inset(100% 0 0 0); }
-  to { clip-path: inset(0 0 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
 }
-
 @keyframes crystal-shimmer {
   0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  50%       { opacity: 1; }
 }
-
 @keyframes count-up {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes stagger-reveal {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-/* ─── Rank Glow Animation (S-Rank and above) ─── */
 @keyframes rank-glow {
   from { box-shadow: 0 0 8px var(--rank-glow); }
-  to { box-shadow: 0 0 20px var(--rank-glow), 0 0 40px var(--rank-glow); }
+  to   { box-shadow: 0 0 20px var(--rank-glow), 0 0 40px var(--rank-glow); }
 }
-
 @utility animate-rank-glow {
   animation: rank-glow 2s ease-in-out infinite alternate;
 }
-
-/* ─── Ticker animation ─── */
 @keyframes ticker {
   from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  to   { transform: translateX(-50%); }
 }
-
-/* ─── Hero blob animations ─── */
 @keyframes blob-float {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -20px) scale(1.05); }
-  66% { transform: translate(-20px, 15px) scale(0.95); }
+  33%       { transform: translate(30px, -20px) scale(1.05); }
+  66%       { transform: translate(-20px, 15px) scale(0.95); }
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Hide scrollbar utility ─── */
+/* ============================================================
+   UTILITIES
+   ============================================================ */
 @utility scrollbar-none {
   -ms-overflow-style: none;
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  scrollbar-width:    none;
+  &::-webkit-scrollbar { display: none; }
 }
 
-/* ─── Scrollbar (minimal, electric) ─── */
-::-webkit-scrollbar { width: 5px; }
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar       { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--color-void); }
-::-webkit-scrollbar-thumb { background: rgba(0, 255, 255, 0.2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0, 255, 255, 0.35); }
+::-webkit-scrollbar-thumb {
+  background:    var(--scrollbar-thumb);
+  border-radius: 3px;
+  transition:    background 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+/* ============================================================
+   LIGHT MODE — FONT & TYPOGRAPHY OVERRIDES
+   ============================================================ */
+[data-theme="light"] .font-display {
+  font-family: var(--font-display);
+  font-style:  italic;
+}
+
+[data-theme="light"] .prose {
+  --tw-prose-body:       var(--color-text-secondary);
+  --tw-prose-headings:   var(--color-text-primary);
+  --tw-prose-links:      var(--color-electric);
+  --tw-prose-bold:       var(--color-text-primary);
+  --tw-prose-code:       var(--color-electric);
+  --tw-prose-quotes:     var(--color-text-secondary);
+  --tw-prose-hr:         var(--color-electric-border);
+  --tw-prose-th-borders: var(--color-electric-border);
+  --tw-prose-td-borders: var(--color-electric-border);
+  --tw-prose-bullets:    var(--color-electric);
+}

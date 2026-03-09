@@ -16,7 +16,7 @@ export function HomeRankingList({ manhwas, locale, readersLabel }: HomeRankingLi
         <Link
           key={manhwa.slug}
           href={`/${locale}/manhwa/${manhwa.slug}`}
-          className="group flex items-center gap-4 rounded-lg p-3 transition-colors hover:bg-white/5"
+          className="group flex items-center gap-4 rounded-lg p-3 transition-colors hover:bg-elevated"
         >
           {/* Rank */}
           <span className="w-10 text-right text-2xl font-bold text-text-muted shrink-0">
@@ -42,7 +42,7 @@ export function HomeRankingList({ manhwas, locale, readersLabel }: HomeRankingLi
 
           {/* Title + genres */}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-text-primary transition-colors group-hover:text-crystal-blue">
+            <p className="truncate text-sm font-medium text-text-primary transition-colors group-hover:text-electric">
               {manhwa.title}
             </p>
             <p className="truncate text-xs text-text-muted">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { useTheme } from 'next-themes'
 import {
   BarChart,
   Bar,
@@ -11,6 +12,18 @@ import {
   Cell,
 } from 'recharts'
 import type { ManhwaStatsData, AniListStats } from '@/lib/db/stats'
+
+function useChartColors() {
+  const { resolvedTheme } = useTheme()
+  const isLight = resolvedTheme === 'light'
+  return {
+    primary:  isLight ? '#E8547A' : '#00E5CC',
+    gold:     isLight ? '#C4883C' : '#F5C842',
+    muted:    isLight ? '#C4A0AE' : '#454A60',
+    bg:       isLight ? '#FFF0F3' : '#181C2A',
+    border:   isLight ? 'rgba(232,84,122,0.2)' : 'rgba(0,229,204,0.15)',
+  }
+}
 
 interface ManhwaStatsProps {
   stats: ManhwaStatsData
@@ -48,6 +61,7 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 export function ManhwaStats({ stats, anilistStats }: ManhwaStatsProps) {
+  const chartColors = useChartColors()
   const t = useTranslations('manhwa.statsLabels')
 
   const hasUserScores = stats.scoreDistribution.some((b) => b.count > 0)
@@ -112,8 +126,8 @@ export function ManhwaStats({ stats, anilistStats }: ManhwaStatsProps) {
                 <YAxis hide />
                 <Tooltip
                   contentStyle={{
-                    background: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
+                    background: chartColors.bg,
+                    border: `1px solid ${chartColors.border}`,
                     borderRadius: 8,
                     fontSize: 12,
                   }}

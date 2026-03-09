@@ -23,6 +23,7 @@ interface LibraryActionsProps {
   currentIsFavorite: boolean
   currentStartedAt: string | null
   currentCompletedAt: string | null
+  currentReadAt: string | null
   currentRereadCount: number
   currentPrivateTags: string[]
   currentNotes: string | null
@@ -42,6 +43,7 @@ export function LibraryActions({
   currentIsFavorite = false,
   currentStartedAt,
   currentCompletedAt,
+  currentReadAt,
   currentRereadCount = 0,
   currentPrivateTags = [],
   currentNotes,
@@ -64,6 +66,7 @@ export function LibraryActions({
   const [isFavorite, setIsFavorite] = useState(currentIsFavorite)
   const [startedAt, setStartedAt] = useState(currentStartedAt)
   const [completedAt, setCompletedAt] = useState(currentCompletedAt)
+  const [readAt, setReadAt] = useState(currentReadAt)
   const [rereadCount, setRereadCount] = useState(currentRereadCount)
   const [privateTags, setPrivateTags] = useState(currentPrivateTags)
   const [notes, setNotes] = useState(currentNotes)
@@ -171,6 +174,7 @@ export function LibraryActions({
     setIsFavorite(data.is_favorite)
     setStartedAt(data.started_at)
     setCompletedAt(data.completed_at)
+    setReadAt(data.read_at)
     setRereadCount(data.reread_count)
     setPrivateTags(data.private_tags)
     setNotes(data.notes)
@@ -184,6 +188,7 @@ export function LibraryActions({
         progress: data.progress,
         started_at: data.started_at,
         completed_at: data.completed_at,
+        read_at: data.read_at,
         reread_count: data.reread_count,
         is_favorite: data.is_favorite,
         private_tags: data.private_tags,
@@ -283,6 +288,7 @@ export function LibraryActions({
           isFavorite,
           startedAt,
           completedAt,
+          readAt,
           rereadCount,
           privateTags,
           notes,

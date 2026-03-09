@@ -266,6 +266,8 @@
       "startDate": "Start date",
       "endDate": "End date",
       "rereads": "Rereads",
+      "readAt": "Diary date",
+      "readAtHint": "Date you logged this read (appears in your diary)",
       "privateTags": "Private tags",
       "addTag": "Add tag…",
       "notes": "Notes",

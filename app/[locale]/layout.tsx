@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import type { Locale } from '@/i18n/routing'
 import { Suspense } from 'react'
+import { ThemeProvider } from 'next-themes'
 import { SessionProvider } from '@/components/providers/SessionProvider'
 import { PostHogTracker } from '@/components/providers/PostHogProvider'
 import { Header } from '@/components/layouts/Header'
@@ -72,18 +73,25 @@ export default async function LocaleLayout({
   const messages = await getMessages()
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      <SessionProvider>
-        <Suspense fallback={null}>
-          <PostHogTracker />
-        </Suspense>
-        <Header />
-        <div className="min-h-screen pb-16 md:pb-0">
-          {children}
-        </div>
-        <Footer locale={locale} />
-        <MobileNav />
-      </SessionProvider>
-    </NextIntlClientProvider>
+    <ThemeProvider
+      attribute="data-theme"
+      defaultTheme="dark"
+      enableSystem={false}
+      storageKey="manhwaverse-theme"
+    >
+      <NextIntlClientProvider messages={messages}>
+        <SessionProvider>
+          <Suspense fallback={null}>
+            <PostHogTracker />
+          </Suspense>
+          <Header />
+          <div className="min-h-screen pb-16 md:pb-0">
+            {children}
+          </div>
+          <Footer locale={locale} />
+          <MobileNav />
+        </SessionProvider>
+      </NextIntlClientProvider>
+    </ThemeProvider>
   )
 }

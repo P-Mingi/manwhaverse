@@ -20,8 +20,11 @@ import { ManhwaCard } from '@/components/features/ManhwaCard'
 import { ManhwaCardSkeleton } from '@/components/features/ManhwaCardSkeleton'
 import { HomeSection } from '@/components/features/HomeSection'
 import { HomeFilterBar } from '@/components/features/HomeFilterBar'
+import { HomeGenreBar } from '@/components/features/home/HomeGenreBar'
+import { HomeActivityFeed } from '@/components/features/home/HomeActivityFeed'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { HomeRanking } from '@/components/features/home/HomeRanking'
+import { HomeRankingList } from '@/components/features/home/HomeRankingList'
 import { ScrollableRow } from '@/components/features/ScrollableRow'
 import type { ManhwaCardPopupData } from '@/lib/db/manhwa'
 import { formatCount } from '@/lib/utils/formatCount'
@@ -40,7 +43,7 @@ export default async function HomePage({ params }: HomeProps) {
   return (
     <>
       {/* Featured Hero */}
-      <Suspense fallback={<div className="h-[420px] bg-[#060609]" />}>
+      <Suspense fallback={<div className="h-[420px] bg-void" />}>
         <FeaturedHeroSection locale={locale} />
       </Suspense>
 
@@ -48,6 +51,9 @@ export default async function HomePage({ params }: HomeProps) {
       <Suspense fallback={null}>
         <TickerSection locale={locale} />
       </Suspense>
+
+      {/* Genre pill bar */}
+      <HomeGenreBar locale={locale} />
 
       <PageContainer>
         {/* Trending */}
@@ -65,9 +71,9 @@ export default async function HomePage({ params }: HomeProps) {
           <RecentSection locale={locale} />
         </Suspense>
 
-        {/* Ranking */}
+        {/* Two-col: Rankings + Activity Feed */}
         <Suspense fallback={<SectionSkeleton />}>
-          <HomeRanking locale={locale} />
+          <RankingAndFeedSection locale={locale} />
         </Suspense>
 
         {/* Community Lists */}
@@ -104,11 +110,11 @@ async function FeaturedHeroSection({ locale }: { locale: string }) {
   if (!manhwa) {
     // Fallback: simple hero without featured manhwa
     return (
-      <section className="relative overflow-hidden bg-[#060609] px-4 py-16 text-center">
-        <h1 className="font-display text-6xl tracking-widest text-[#00ffff] electric-glow md:text-8xl">
+      <section className="relative overflow-hidden bg-void px-4 py-16 text-center">
+        <h1 className="font-display text-6xl tracking-widest text-electric electric-glow md:text-8xl">
           ManhwaVerse
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-[#9999b8]">
+        <p className="mx-auto mt-4 max-w-md text-text-secondary">
           The ultimate manhwa database
         </p>
       </section>
@@ -116,20 +122,20 @@ async function FeaturedHeroSection({ locale }: { locale: string }) {
   }
 
   return (
-    <section className="relative overflow-hidden bg-[#060609]">
+    <section className="relative overflow-hidden bg-void">
       {/* Animated blob background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
           className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full opacity-10"
           style={{
-            background: 'radial-gradient(circle, #00ffff 0%, transparent 70%)',
+            background: 'radial-gradient(circle, var(--color-electric) 0%, transparent 70%)',
             animation: 'blob-float 12s ease-in-out infinite',
           }}
         />
         <div
           className="absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full opacity-8"
           style={{
-            background: 'radial-gradient(circle, #00bfff 0%, transparent 70%)',
+            background: 'radial-gradient(circle, var(--color-electric-dim) 0%, transparent 70%)',
             animation: 'blob-float 15s ease-in-out infinite reverse',
           }}
         />
@@ -140,8 +146,8 @@ async function FeaturedHeroSection({ locale }: { locale: string }) {
         <div className="flex flex-1 flex-col gap-4">
           {/* Pulsing tag */}
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-[#00ffff]" />
-            <span className="text-xs uppercase tracking-widest text-[#00ffff]">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-electric" />
+            <span className="text-xs uppercase tracking-widest text-electric">
               {locale === 'fr' ? 'Manhwa en vedette' : 'Featured Manhwa'}
             </span>
           </div>
@@ -157,7 +163,7 @@ async function FeaturedHeroSection({ locale }: { locale: string }) {
               {manhwa.genres.slice(0, 3).map((g) => (
                 <span
                   key={g}
-                  className="rounded border border-[rgba(0,255,255,0.2)] bg-[rgba(0,255,255,0.06)] px-2 py-0.5 text-[10px] uppercase tracking-widest text-[#00bfff]"
+                  className="rounded border border-electric-border bg-electric-glow px-2 py-0.5 text-[10px] uppercase tracking-widest text-electric-dim"
                 >
                   {g}
                 </span>
@@ -169,27 +175,27 @@ async function FeaturedHeroSection({ locale }: { locale: string }) {
           <div className="mt-2 flex items-center gap-4">
             <Link
               href={`/${locale}/manhwa/${manhwa.slug}`}
-              className="rounded-md bg-[#00ffff] px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition-all duration-150 hover:shadow-[0_8px_24px_rgba(0,255,255,0.35)] hover:-translate-y-px"
+              className="rounded-md bg-electric px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition-all duration-150  hover:-translate-y-px"
             >
               {locale === 'fr' ? 'Lire maintenant' : 'Read now'}
             </Link>
           </div>
 
           {/* Stats */}
-          <div className="flex gap-6 border-t border-white/5 pt-4">
+          <div className="flex gap-6 border-t border-electric-border pt-4">
             <div>
-              <div className="font-mono text-lg font-bold text-[#00ffff]">{formatCount(manhwa.reader_count)}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[#6b6b88]">{locale === 'fr' ? 'Lecteurs' : 'Readers'}</div>
+              <div className="font-mono text-lg font-bold text-electric">{formatCount(manhwa.reader_count)}</div>
+              <div className="text-[10px] uppercase tracking-widest text-text-muted">{locale === 'fr' ? 'Lecteurs' : 'Readers'}</div>
             </div>
             {manhwa.score != null && (
               <div>
-                <div className="font-mono text-lg font-bold text-[#ffd700]">★ {manhwa.score.toFixed(1)}</div>
-                <div className="text-[10px] uppercase tracking-widest text-[#6b6b88]">Score</div>
+                <div className="font-mono text-lg font-bold text-gold">★ {manhwa.score.toFixed(1)}</div>
+                <div className="text-[10px] uppercase tracking-widest text-text-muted">Score</div>
               </div>
             )}
             <div>
-              <div className="font-mono text-lg font-bold text-[#e8e8f0]">{stats.manhwaCount.toLocaleString()}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[#6b6b88]">Titles</div>
+              <div className="font-mono text-lg font-bold text-text-primary">{stats.manhwaCount.toLocaleString()}</div>
+              <div className="text-[10px] uppercase tracking-widest text-text-muted">Titles</div>
             </div>
           </div>
         </div>
@@ -197,7 +203,7 @@ async function FeaturedHeroSection({ locale }: { locale: string }) {
         {/* Right — Cover */}
         {manhwa.cover_url && (
           <div className="relative flex-shrink-0">
-            <div className="relative h-[280px] w-[200px] overflow-hidden rounded-lg ring-1 ring-[rgba(0,255,255,0.15)] shadow-[0_0_60px_rgba(0,0,0,0.7)]">
+            <div className="relative h-[280px] w-[200px] overflow-hidden rounded-lg ring-1 ring-electric-border shadow-[0_0_60px_rgba(0,0,0,0.7)]">
               <Image
                 src={manhwa.cover_url}
                 alt={manhwa.title}
@@ -208,7 +214,7 @@ async function FeaturedHeroSection({ locale }: { locale: string }) {
               />
             </div>
             {/* #1 badge */}
-            <div className="absolute -left-3 -top-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#ffd700] font-display text-xl text-black shadow-[0_0_12px_rgba(255,215,0,0.4)]">
+            <div className="absolute -left-3 -top-3 flex h-10 w-10 items-center justify-center rounded-full bg-gold font-display text-xl text-black shadow-[0_0_12px_rgba(255,215,0,0.4)]">
               #1
             </div>
           </div>
@@ -229,14 +235,14 @@ async function TickerSection({ locale }: { locale: string }) {
   const doubled = [...items, ...items]
 
   return (
-    <div className="overflow-hidden border-y border-[rgba(0,255,255,0.08)] bg-[rgba(0,255,255,0.04)] py-2.5">
+    <div className="overflow-hidden border-y border-electric-border bg-electric-glow/30 py-2.5">
       <div
         className="flex gap-8 whitespace-nowrap"
         style={{ animation: 'ticker 30s linear infinite' }}
       >
         {doubled.map((title, i) => (
-          <span key={i} className="text-xs text-[#6b6b88]">
-            <span className="mr-3 text-[#00ffff]">→</span>
+          <span key={i} className="text-xs text-text-muted">
+            <span className="mr-3 text-electric">→</span>
             {title}
           </span>
         ))}
@@ -301,6 +307,34 @@ async function RecentSection({ locale }: { locale: string }) {
     <HomeSection title={t('recentlyAdded')} viewAllHref={`/${locale}/search?sort=recent`} locale={locale}>
       <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} />
     </HomeSection>
+  )
+}
+
+async function RankingAndFeedSection({ locale }: { locale: string }) {
+  const [t, ranked] = await Promise.all([
+    getTranslations({ locale, namespace: 'home' }),
+    getTopRankedManhwas(10, locale),
+  ])
+  const readersLabel = locale === 'fr' ? 'lecteurs' : 'readers'
+  return (
+    <section className="mt-12">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        {/* Left: compact ranking list */}
+        <div>
+          <h2 className="section-title-bar mb-4 font-display text-xl uppercase tracking-wider text-text-primary">
+            {t('ranking')}
+          </h2>
+          <HomeRankingList manhwas={ranked} locale={locale} readersLabel={readersLabel} />
+        </div>
+        {/* Right: activity feed */}
+        <div>
+          <h2 className="section-title-bar mb-4 font-display text-xl uppercase tracking-wider text-text-primary">
+            {locale === 'fr' ? 'Activité récente' : 'Recent Activity'}
+          </h2>
+          <HomeActivityFeed locale={locale} />
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -369,7 +403,7 @@ async function TopListsSection({ locale }: { locale: string }) {
           <Link
             key={list.id}
             href={`/${locale}/lists/${list.slug}`}
-            className="group flex gap-3 rounded-xl border border-white/5 bg-[#0d0d16] p-3 transition-colors hover:border-[rgba(0,255,255,0.3)]"
+            className="group flex gap-3 rounded-xl border border-white/5 bg-card p-3 transition-colors hover:border-electric-border-hover"
           >
             {/* Mini cover strip */}
             <div className="flex h-16 w-28 flex-shrink-0 overflow-hidden rounded-lg">
@@ -380,7 +414,7 @@ async function TopListsSection({ locale }: { locale: string }) {
                   </div>
                 ))
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[#111120] text-[#6b6b88] text-xs">
+                <div className="flex h-full w-full items-center justify-center bg-elevated text-text-muted text-xs">
                   —
                 </div>
               )}
@@ -388,10 +422,10 @@ async function TopListsSection({ locale }: { locale: string }) {
 
             {/* Info */}
             <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-              <p className="line-clamp-2 text-sm font-semibold leading-snug text-[#e8e8f0] group-hover:text-[#00ffff]">
+              <p className="line-clamp-2 text-sm font-semibold leading-snug text-text-primary group-hover:text-electric">
                 {list.title}
               </p>
-              <p className="text-xs text-[#6b6b88]">
+              <p className="text-xs text-text-muted">
                 {list.item_count} titles · ♥ {list.likes_count}
               </p>
             </div>
@@ -418,7 +452,7 @@ async function FanArtSection({ locale }: { locale: string }) {
             <Link
               key={post.id}
               href={`/${locale}/artwork/${post.id}`}
-              className="group relative aspect-square overflow-hidden rounded-lg bg-[#0d0d16]"
+              className="group relative aspect-square overflow-hidden rounded-lg bg-card"
               title={post.title}
             >
               <img
