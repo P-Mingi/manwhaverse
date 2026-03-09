@@ -99,7 +99,7 @@ export async function generateAndSaveNewsArticle(
   item: RawNewsItem
 ): Promise<'created' | 'duplicate' | 'failed'> {
   // Dedup check: skip if source_url already exists
-  const existing = await prisma.article.findUnique({
+  const existing = await prisma.article.findFirst({
     where: { source_url: item.guid || item.link },
   })
   if (existing) return 'duplicate'

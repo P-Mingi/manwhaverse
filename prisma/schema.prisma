@@ -548,6 +548,7 @@ model User {
   fan_art_posts           FanArtPost[]
   fan_art_likes           FanArtLike[]
   fan_art_comments        FanArtComment[]
+  articles                Article[]
 }
 
 // ── Auth.js (OAuth accounts, sessions, verification tokens)
@@ -1099,16 +1100,21 @@ model Article {
   category        ArticleCategory
   status          ArticleStatus   @default(DRAFT)
   author_name     String
+  source_url      String?
   reading_time    Int?
   view_count      Int             @default(0)
   published_at    DateTime?
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
 
+  user_id         String?
+  user            User?           @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
   manhwa_links    ArticleManhwa[]
 
   @@index([status, published_at(sort: Desc)])
   @@index([category, status])
+  @@index([user_id])
 }
 
 model ArticleManhwa {

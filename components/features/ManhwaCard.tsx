@@ -13,6 +13,10 @@ interface ManhwaCardProps {
   userContentFilter?: ContentFilter
   rankBadgeTop?: boolean
   userScore?: number | null
+  // passed by some pages for future library-status overlay — not yet rendered
+  libraryStatus?: string | null
+  isFavorite?: boolean
+  isLoggedIn?: boolean
 }
 
 function isPopupData(manhwa: ManhwaCardData | ManhwaCardPopupData): manhwa is ManhwaCardPopupData {

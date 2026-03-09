@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const articles = await prisma.article.findMany({
     where: {
       status: 'DRAFT',
-      user_id: { not: null },
+      NOT: { category: 'NEWS' },
       created_at: { lt: cutoff },
     },
     select: { id: true },

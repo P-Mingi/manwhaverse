@@ -117,10 +117,10 @@ export function sortLinksByLocale(
   links: Array<{ marketplace_id: string; url: string; price_amount: number | null; price_currency: string | null; is_available: boolean }>,
   locale: string
 ): Array<{ marketplace_id: string; url: string; price_amount: number | null; price_currency: string | null; is_available: boolean; marketplace: MarketplaceConfig }> {
-  const priorities = REGION_PRIORITY[locale] ?? REGION_PRIORITY['en']
+  const priorities = REGION_PRIORITY[locale] ?? REGION_PRIORITY['en'] ?? {}
   return links
     .map((link) => ({ ...link, marketplace: MARKETPLACES[link.marketplace_id] }))
-    .filter((link) => link.marketplace && link.is_available)
+    .filter((link): link is typeof link & { marketplace: MarketplaceConfig } => !!link.marketplace && link.is_available)
     .sort((a, b) => {
       const pA = priorities[a.marketplace.region] ?? 99
       const pB = priorities[b.marketplace.region] ?? 99

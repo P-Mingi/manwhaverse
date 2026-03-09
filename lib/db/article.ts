@@ -91,3 +91,76 @@ export async function incrementArticleViews(articleId: string) {
     data: { view_count: { increment: 1 } },
   })
 }
+
+export async function getDraftNewsArticles() {
+  return prisma.article.findMany({
+    where: { category: 'NEWS', status: 'DRAFT' },
+    select: {
+      id: true,
+      title_en: true,
+      title_fr: true,
+      excerpt_en: true,
+      source_url: true,
+      manhwa_links: {
+        include: {
+          manhwa: { select: { slug: true, title_en: true } },
+        },
+      },
+    },
+    orderBy: { created_at: 'desc' },
+  })
+}
+
+export async function getPendingUserArticles() {
+  return prisma.article.findMany({
+    where: { status: 'DRAFT', NOT: { category: 'NEWS' } },
+    select: {
+      id: true,
+      title_en: true,
+      title_fr: true,
+      excerpt_en: true,
+      category: true,
+      created_at: true,
+      user: {
+        select: {
+          avatar_url: true,
+          display_name: true,
+          username: true,
+        },
+      },
+    },
+    orderBy: { created_at: 'desc' },
+  })
+}
+
+export async function createUserArticle(data: {
+  userId: string
+  authorName: string
+  title_en: string
+  title_fr?: string
+  content_en: string
+  content_fr?: string
+  excerpt_en?: string
+  excerpt_fr?: string
+  cover_image_url?: string
+  category: ArticleCategory
+}) {
+  const slug = `${data.title_en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${Date.now()}`
+  return prisma.article.create({
+    data: {
+      slug,
+      title_en: data.title_en,
+      title_fr: data.title_fr ?? null,
+      content_en: data.content_en,
+      content_fr: data.content_fr ?? null,
+      excerpt_en: data.excerpt_en ?? null,
+      excerpt_fr: data.excerpt_fr ?? null,
+      cover_image_url: data.cover_image_url ?? null,
+      category: data.category,
+      status: 'DRAFT',
+      author_name: data.authorName,
+      user_id: data.userId,
+    },
+    select: { id: true, slug: true },
+  })
+}

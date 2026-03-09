@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { prisma } from '@/lib/db/client'
 
+export const dynamic = 'force-dynamic'
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://manhwaverse.com'
 const LOCALES = ['en', 'fr']
 

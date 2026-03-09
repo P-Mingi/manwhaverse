@@ -40,7 +40,7 @@ async function insertArticle(data: {
   published_at: Date
   manhwa_keywords: string[]
 }) {
-  const existing = await prisma.article.findUnique({ where: { source_url: data.source_url } })
+  const existing = await prisma.article.findFirst({ where: { source_url: data.source_url } })
   if (existing) {
     console.log(`  ⚠ Skipped (duplicate): ${data.title_en}`)
     return

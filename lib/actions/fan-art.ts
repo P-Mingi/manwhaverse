@@ -56,6 +56,8 @@ export async function createFanArtAction(data: z.input<typeof createSchema>) {
       image_url: url,
       thumb_url: url,
       alt_text: `${d.title} — image ${i + 1}`,
+      width: 0,
+      height: 0,
     })),
   })
 
