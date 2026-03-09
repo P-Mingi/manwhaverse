@@ -437,10 +437,13 @@ async function TopListsSection({ locale }: { locale: string }) {
 }
 
 async function FanArtSection({ locale }: { locale: string }) {
-  const [posts, t] = await Promise.all([
-    getTopFanArtsThisWeek(6),
-    getTranslations({ locale, namespace: 'home' }),
-  ])
+  let posts: Awaited<ReturnType<typeof getTopFanArtsThisWeek>> = []
+  try {
+    posts = await getTopFanArtsThisWeek(6)
+  } catch {
+    return null
+  }
+  const t = await getTranslations({ locale, namespace: 'home' })
   if (posts.length === 0) return null
   return (
     <HomeSection title={t('featuredFanArt')} viewAllHref={`/${locale}/artwork`} locale={locale}>
