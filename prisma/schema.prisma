@@ -130,6 +130,9 @@ model Manhwa {
   character_votes     CharacterVote[]
   polls               Poll[]
   article_links       ArticleManhwa[]
+  products            ManhwaProduct[]
+  publisher_links     ManhwaPublisher[]
+  fan_art_posts       FanArtPost[]
 
   @@index([slug])
   @@index([type, status])
@@ -497,6 +500,15 @@ model User {
   is_premium              Boolean           @default(false)
   premium_until           DateTime?
 
+  // Artist
+  is_artist               Boolean           @default(false)
+  artist_bio              String?           @db.Text
+  artist_twitter          String?
+  artist_instagram        String?
+  artist_pixiv            String?
+  artist_artstation       String?
+  artist_portfolio_url    String?
+
   // Contrôle
   is_banned               Boolean           @default(false)
   is_seed                 Boolean           @default(false)
@@ -515,6 +527,7 @@ model User {
   review_reactions        ReviewReaction[]
   lists                   ManhwaList[]
   list_votes              ListVote[]
+  product_wishlists       ProductWishlist[]
   follows                 Follow[]          @relation("follower")
   followers               Follow[]          @relation("following")
   creator_follows         CreatorFollow[]
@@ -531,6 +544,10 @@ model User {
   manhwa_reactions        ManhwaReaction[]
   character_votes         CharacterVote[]
   poll_votes              PollVote[]
+  reading_challenges      ReadingChallenge[]
+  fan_art_posts           FanArtPost[]
+  fan_art_likes           FanArtLike[]
+  fan_art_comments        FanArtComment[]
 }
 
 // ── Auth.js (OAuth accounts, sessions, verification tokens)
@@ -1115,4 +1132,200 @@ enum ArticleStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
+}
+
+// ─── Affiliate Store ───────────────────────────────────────────────────────────
+
+model ManhwaProduct {
+  id              String           @id @default(cuid())
+  manhwa_id       String
+  manhwa          Manhwa           @relation(fields: [manhwa_id], references: [id])
+
+  type            ProductType
+
+  title_en        String
+  title_fr        String?
+
+  cover_url       String?
+  language        String?          // "fr", "en", "kr", "jp"
+
+  price_amount    Float?
+  price_currency  String?
+  price_updated_at DateTime?
+
+  asin            String?
+  isbn            String?
+  ean             String?
+
+  is_featured     Boolean          @default(false)
+  position        Int              @default(0)
+
+  links           ProductLink[]
+  wishlists       ProductWishlist[]
+
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+
+  @@index([manhwa_id, type])
+  @@index([type, is_featured])
+  @@index([asin])
+}
+
+model ProductLink {
+  id               String        @id @default(cuid())
+  product_id       String
+  product          ManhwaProduct @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  marketplace_id   String
+  url              String
+
+  price_amount     Float?
+  price_currency   String?
+  price_updated_at DateTime?
+
+  is_available     Boolean       @default(true)
+
+  @@unique([product_id, marketplace_id])
+  @@index([marketplace_id])
+}
+
+model ProductWishlist {
+  user_id    String
+  user       User          @relation(fields: [user_id], references: [id])
+  product_id String
+  product    ManhwaProduct @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  created_at DateTime      @default(now())
+
+  @@id([user_id, product_id])
+  @@index([user_id, created_at(sort: Desc)])
+}
+
+model AffiliateClick {
+  id         String   @id @default(cuid())
+  user_id    String?
+  manhwa_id  String
+  product_id String?
+  platform   String
+  url        String
+  created_at DateTime @default(now())
+
+  @@index([manhwa_id, platform])
+  @@index([created_at(sort: Desc)])
+}
+
+model FanArtPost {
+  id            String         @id @default(cuid())
+  user_id       String
+  manhwa_id     String?
+  title         String
+  description   String?        @db.Text
+  is_nsfw       Boolean        @default(false)
+  is_original   Boolean        @default(false)
+  credit_name   String?
+  credit_url    String?
+  tags          String[]
+  like_count    Int            @default(0)
+  comment_count Int            @default(0)
+  view_count    Int            @default(0)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+
+  user     User            @relation(fields: [user_id],    references: [id], onDelete: Cascade)
+  manhwa   Manhwa?         @relation(fields: [manhwa_id],  references: [id], onDelete: SetNull)
+  images   FanArtImage[]
+  comments FanArtComment[]
+  likes    FanArtLike[]
+
+  @@index([user_id])
+  @@index([manhwa_id])
+  @@index([created_at(sort: Desc)])
+}
+
+model FanArtImage {
+  id         String     @id @default(cuid())
+  post_id    String
+  image_url  String
+  thumb_url  String
+  alt_text   String?
+  width      Int
+  height     Int
+  position   Int        @default(0)
+
+  post FanArtPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@index([post_id])
+}
+
+model FanArtComment {
+  id         String          @id @default(cuid())
+  post_id    String
+  user_id    String
+  parent_id  String?
+  content    String          @db.Text
+  created_at DateTime        @default(now())
+
+  post    FanArtPost    @relation(fields: [post_id],   references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [user_id],   references: [id], onDelete: Cascade)
+  parent  FanArtComment?  @relation("replies", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies FanArtComment[] @relation("replies")
+
+  @@index([post_id])
+}
+
+model FanArtLike {
+  user_id    String
+  post_id    String
+  created_at DateTime @default(now())
+
+  user User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  post FanArtPost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, post_id])
+}
+
+model Publisher {
+  id           String            @id @default(cuid())
+  slug         String            @unique
+  name         String
+  name_native  String?
+  logo_url     String?
+  country      String?
+  description  String?           @db.Text
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+
+  manhwa_links ManhwaPublisher[]
+}
+
+model ManhwaPublisher {
+  manhwa_id    String
+  publisher_id String
+
+  manhwa    Manhwa    @relation(fields: [manhwa_id],    references: [id], onDelete: Cascade)
+  publisher Publisher @relation(fields: [publisher_id], references: [id], onDelete: Cascade)
+
+  @@id([manhwa_id, publisher_id])
+}
+
+model ReadingChallenge {
+  id         String   @id @default(cuid())
+  user_id    String
+  year       Int
+  goal       Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, year])
+}
+
+enum ProductType {
+  PHYSICAL_MANGA
+  BOX_SET
+  LIGHT_NOVEL
+  FIGURINE
+  ARTBOOK
+  POSTER
+  GOODS
 }

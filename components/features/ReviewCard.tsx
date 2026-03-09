@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { ReviewWithUser } from '@/lib/db/review'
 import type { KoreanReaction } from '@prisma/client'
-import { toggleLikeAction, toggleDislikeAction, toggleReactionAction, adminDeleteReviewAction } from '@/lib/actions/review'
+import { toggleLikeAction, toggleDislikeAction, toggleReactionAction, deleteReviewAction } from '@/lib/actions/review'
 import { formatScore, getCrystalColor } from '@/lib/utils/formatScore'
 
 interface ReviewCardProps {
@@ -87,12 +87,12 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
   function handleAdminDelete() {
     if (!confirm('Delete this review?')) return
     startTransition(async () => {
-      await adminDeleteReviewAction(review.id)
+      await deleteReviewAction(review.id)
       setDeleted(true)
     })
   }
 
-  const date = new Date(review.created_at).toLocaleDateString(undefined, {
+  const date = new Date(review.created_at).toLocaleDateString(locale ?? 'en', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

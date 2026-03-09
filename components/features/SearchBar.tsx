@@ -129,9 +129,9 @@ export function SearchBar({
       </form>
 
       {/* Filter rows */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="flex items-center gap-x-3 overflow-x-auto pb-0.5">
         {/* Status */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           <Chip
             active={!currentStatus}
             onClick={() => handleFilter('status', undefined)}
@@ -151,10 +151,10 @@ export function SearchBar({
           ))}
         </div>
 
-        <span className="hidden text-border sm:inline">|</span>
+        <span className="shrink-0 text-border">|</span>
 
         {/* Type */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           <Chip
             active={!currentType}
             onClick={() => handleFilter('type', undefined)}
@@ -177,7 +177,7 @@ export function SearchBar({
         <span className="hidden text-border sm:inline">|</span>
 
         {/* Sort */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           {SORTS.map((s) => (
             <Chip
               key={s}

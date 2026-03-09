@@ -25,6 +25,7 @@ import { HomeRanking } from '@/components/features/home/HomeRanking'
 import { ScrollableRow } from '@/components/features/ScrollableRow'
 import type { ManhwaCardPopupData } from '@/lib/db/manhwa'
 import { formatCount } from '@/lib/utils/formatCount'
+import { getTopFanArtsThisWeek } from '@/lib/db/fan-art'
 
 export const revalidate = 300
 
@@ -49,11 +50,6 @@ export default async function HomePage({ params }: HomeProps) {
       </Suspense>
 
       <PageContainer>
-        {/* Filter Bar */}
-        <Suspense fallback={null}>
-          <FilterBarSection locale={locale} />
-        </Suspense>
-
         {/* Trending */}
         <Suspense fallback={<SectionSkeleton />}>
           <TrendingSection locale={locale} />
@@ -77,6 +73,11 @@ export default async function HomePage({ params }: HomeProps) {
         {/* Community Lists */}
         <Suspense fallback={<SectionSkeleton />}>
           <TopListsSection locale={locale} />
+        </Suspense>
+
+        {/* Fan Art of the Week */}
+        <Suspense fallback={null}>
+          <FanArtSection locale={locale} />
         </Suspense>
 
         {/* All-Time Popular */}
@@ -396,6 +397,44 @@ async function TopListsSection({ locale }: { locale: string }) {
             </div>
           </Link>
         ))}
+      </div>
+    </HomeSection>
+  )
+}
+
+async function FanArtSection({ locale }: { locale: string }) {
+  const [posts, t] = await Promise.all([
+    getTopFanArtsThisWeek(6),
+    getTranslations({ locale, namespace: 'home' }),
+  ])
+  if (posts.length === 0) return null
+  return (
+    <HomeSection title={t('featuredFanArt')} viewAllHref={`/${locale}/artwork`} locale={locale}>
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+        {posts.map((post) => {
+          const img = post.images[0]
+          if (!img) return null
+          return (
+            <Link
+              key={post.id}
+              href={`/${locale}/artwork/${post.id}`}
+              className="group relative aspect-square overflow-hidden rounded-lg bg-[#0d0d16]"
+              title={post.title}
+            >
+              <img
+                src={img.thumb_url || img.image_url}
+                alt={img.alt_text ?? post.title}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/30" />
+              {post.manhwa && (
+                <div className="absolute bottom-0 left-0 right-0 translate-y-full bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5 transition-transform duration-200 group-hover:translate-y-0">
+                  <p className="line-clamp-1 text-[10px] text-white">{post.manhwa.title_en}</p>
+                </div>
+              )}
+            </Link>
+          )
+        })}
       </div>
     </HomeSection>
   )

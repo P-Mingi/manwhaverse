@@ -28,31 +28,32 @@ export function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-3 md:flex">
           <Link
             href={`/${locale}/explore`}
-            className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]"
+            className="text-[10px] font-medium uppercase tracking-wide text-[#9999b8] transition-colors hover:text-[#00ffff]"
           >
             {t('discover')}
           </Link>
 
           {/* Browse dropdown */}
-          <div className="group relative">
-            <button className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]">
+          <div className="group relative flex items-center">
+            <button className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-[#9999b8] transition-colors hover:text-[#00ffff]">
               {t('browse')}
+              <svg className="h-2.5 w-2.5 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
             </button>
             <div className="absolute left-0 top-full z-50 hidden min-w-[160px] rounded-lg border border-[rgba(0,255,255,0.12)] bg-[#0d0d16] p-1 shadow-lg group-hover:block">
-              <Link
-                href={`/${locale}/people`}
-                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
-              >
-                {t('people')}
-              </Link>
               <Link
                 href={`/${locale}/character`}
                 className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
               >
                 {t('characters')}
+              </Link>
+              <Link
+                href={`/${locale}/people`}
+                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
+              >
+                {t('staff')}
               </Link>
               <Link
                 href={`/${locale}/publisher`}
@@ -65,23 +66,19 @@ export function Header() {
 
           <Link
             href={`/${locale}/news`}
-            className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]"
+            className="text-[10px] font-medium uppercase tracking-wide text-[#9999b8] transition-colors hover:text-[#00ffff]"
           >
             {t('news')}
           </Link>
 
+
           {/* Community dropdown */}
-          <div className="group relative">
-            <button className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]">
+          <div className="group relative flex items-center">
+            <button className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-[#9999b8] transition-colors hover:text-[#00ffff]">
               {t('community')}
+              <svg className="h-2.5 w-2.5 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
             </button>
             <div className="absolute left-0 top-full z-50 hidden min-w-[160px] rounded-lg border border-[rgba(0,255,255,0.12)] bg-[#0d0d16] p-1 shadow-lg group-hover:block">
-              <Link
-                href={`/${locale}/blog`}
-                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
-              >
-                {t('blog')}
-              </Link>
               <Link
                 href={`/${locale}/members`}
                 className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
@@ -100,23 +97,15 @@ export function Header() {
               >
                 {t('artwork')}
               </Link>
-              <Link
-                href={`/${locale}/challenge/${new Date().getFullYear()}`}
-                className="block rounded-md px-3 py-2 text-sm text-[#9999b8] transition-colors hover:bg-[rgba(0,255,255,0.06)] hover:text-[#00ffff]"
-              >
-                {t('challenge')}
-              </Link>
             </div>
           </div>
           {user && (
-            <>
-              <Link
-                href={`/${locale}/library`}
-                className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]"
-              >
-                {t('library')}
-              </Link>
-            </>
+            <Link
+              href={`/${locale}/library`}
+              className="text-[10px] font-medium uppercase tracking-wide text-[#9999b8] transition-colors hover:text-[#00ffff]"
+            >
+              {t('library')}
+            </Link>
           )}
         </nav>
 
@@ -140,7 +129,7 @@ export function Header() {
             <div className="flex items-center gap-2">
               <Link
                 href={`/${locale}/profile`}
-                className="text-xs font-medium uppercase tracking-widest text-[#9999b8] transition-colors hover:text-[#00ffff]"
+                className="text-[10px] font-medium uppercase tracking-wide text-[#9999b8] transition-colors hover:text-[#00ffff]"
               >
                 {t('profile')}
               </Link>

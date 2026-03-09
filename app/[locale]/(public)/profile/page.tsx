@@ -128,28 +128,6 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
         </Link>
       )}
 
-      {/* Reading stats */}
-      <div className="mt-6 grid grid-cols-3 gap-4">
-        <div className="rounded-lg bg-surface p-4 text-center">
-          <div className="font-mono text-2xl font-bold text-crystal-blue">
-            {user.reading_streak}
-          </div>
-          <div className="mt-1 text-xs text-text-muted">{t('readingStreak')}</div>
-        </div>
-        <div className="rounded-lg bg-surface p-4 text-center">
-          <div className="font-mono text-2xl font-bold text-crystal-blue">
-            {user.total_chapters_read}
-          </div>
-          <div className="mt-1 text-xs text-text-muted">{t('chaptersRead')}</div>
-        </div>
-        <div className="rounded-lg bg-surface p-4 text-center">
-          <div className="font-mono text-2xl font-bold text-crystal-blue">
-            {user.total_manhwas_completed}
-          </div>
-          <div className="mt-1 text-xs text-text-muted">{t('completed')}</div>
-        </div>
-      </div>
-
       {/* Library */}
       {library.length > 0 && (
         <section className="mt-8">
@@ -169,6 +147,16 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
           </div>
         </section>
       )}
+
+      {/* Journal link */}
+      <div className="mt-5">
+        <Link
+          href={`/${locale}/profile/${user.username}/journal`}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-[rgba(74,158,255,0.3)] hover:text-crystal-blue"
+        >
+          📖 {t('viewJournal')}
+        </Link>
+      </div>
 
       {/* Recent Activity */}
       {recentActivity.length > 0 && (

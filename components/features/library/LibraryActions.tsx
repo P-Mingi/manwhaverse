@@ -220,7 +220,7 @@ export function LibraryActions({
             className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors ${
               status
                 ? 'bg-crystal-blue/20 text-crystal-blue hover:bg-crystal-blue/30'
-                : 'bg-crystal-blue text-white hover:bg-crystal-blue/90'
+                : 'border border-crystal-blue text-crystal-blue hover:bg-crystal-blue/10'
             } disabled:opacity-50`}
           >
             {status && isFavorite && <HeartIcon filled className="h-3.5 w-3.5" />}

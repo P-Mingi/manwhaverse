@@ -31,18 +31,21 @@ export async function getRelationsByManhwaId(
     }),
   ])
 
-  const relations: RelationWithManhwa[] = [
-    ...asSource.map((r) => ({
-      relation_type: r.relation_type,
-      direction: 'source' as const,
-      manhwa: r.target,
-    })),
-    ...asTarget.map((r) => ({
-      relation_type: r.relation_type,
-      direction: 'target' as const,
-      manhwa: r.source,
-    })),
-  ]
+  const seen = new Set<string>()
+  const relations: RelationWithManhwa[] = []
+
+  for (const r of asSource) {
+    if (!seen.has(r.target.id)) {
+      seen.add(r.target.id)
+      relations.push({ relation_type: r.relation_type, direction: 'source', manhwa: r.target })
+    }
+  }
+  for (const r of asTarget) {
+    if (!seen.has(r.source.id)) {
+      seen.add(r.source.id)
+      relations.push({ relation_type: r.relation_type, direction: 'target', manhwa: r.source })
+    }
+  }
 
   return relations
 }

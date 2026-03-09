@@ -169,6 +169,16 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </Link>
       )}
 
+      {/* Journal link */}
+      <div className="mt-4">
+        <Link
+          href={`/${locale}/profile/${profileUser.username}/journal`}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-[rgba(74,158,255,0.3)] hover:text-crystal-blue"
+        >
+          📖 {t('viewJournal')}
+        </Link>
+      </div>
+
       {/* Reading Challenge widget (only if they have an active challenge) */}
       {challengeSummary && (
         <Link

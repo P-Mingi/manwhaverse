@@ -45,9 +45,6 @@ export function Footer({ locale }: FooterProps) {
               <Link href={`/${locale}/search`} className="text-xs text-[#6b6b88] transition-colors hover:text-[#00ffff]">
                 {t('search')}
               </Link>
-              <Link href={`/${locale}/blog`} className="text-xs text-[#6b6b88] transition-colors hover:text-[#00ffff]">
-                {t('blog')}
-              </Link>
               <Link href={`/${locale}/lists`} className="text-xs text-[#6b6b88] transition-colors hover:text-[#00ffff]">
                 {t('lists')}
               </Link>
@@ -65,6 +62,9 @@ export function Footer({ locale }: FooterProps) {
               </Link>
               <Link href={`/${locale}/terms`} className="text-xs text-[#6b6b88] transition-colors hover:text-[#00ffff]">
                 {t('termsOfService')}
+              </Link>
+              <Link href={`/${locale}/legal/affiliate-disclosure`} className="text-xs text-[#6b6b88] transition-colors hover:text-[#00ffff]">
+                {t('affiliateDisclosure')}
               </Link>
             </nav>
           </div>

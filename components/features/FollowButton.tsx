@@ -57,7 +57,7 @@ export function FollowButton({
           ? hover
             ? 'bg-error/10 text-error hover:bg-error/20'
             : 'bg-crystal-blue/20 text-crystal-blue'
-          : 'bg-crystal-blue text-white hover:bg-crystal-blue/90'
+          : 'border border-crystal-blue text-crystal-blue hover:bg-crystal-blue/10'
       }`}
     >
       {label}

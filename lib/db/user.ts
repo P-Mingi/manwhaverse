@@ -61,6 +61,47 @@ export async function getUserById(id: string) {
   })
 }
 
+export async function searchUsers({
+  query,
+  page = 1,
+  limit = 24,
+}: {
+  query?: string
+  page?: number
+  limit?: number
+}) {
+  const where = query
+    ? {
+        is_banned: false,
+        username: { not: null },
+        OR: [
+          { username: { contains: query, mode: 'insensitive' as const } },
+          { display_name: { contains: query, mode: 'insensitive' as const } },
+        ],
+      }
+    : { is_banned: false, username: { not: null } }
+
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        username: true,
+        display_name: true,
+        avatar_url: true,
+        bio: true,
+        _count: { select: { followers: true, library: true } },
+      },
+      orderBy: { followers: { _count: 'desc' } },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.user.count({ where }),
+  ])
+
+  return { users, total }
+}
+
 export async function updateUserProfile(
   userId: string,
   data: {

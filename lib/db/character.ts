@@ -21,6 +21,29 @@ export async function getCharactersByManhwaId(
   })
 }
 
+export async function getAllCharacters(
+  page: number,
+  take: number,
+  role?: 'MAIN' | 'SUPPORTING'
+) {
+  const roleFilter = role
+    ? { manhwa_links: { some: { role } } }
+    : undefined
+
+  const [characters, total] = await Promise.all([
+    prisma.character.findMany({
+      where: roleFilter,
+      include: { _count: { select: { manhwa_links: true } } },
+      orderBy: { name_en: 'asc' },
+      skip: (page - 1) * take,
+      take,
+    }),
+    prisma.character.count({ where: roleFilter }),
+  ])
+
+  return { characters, total }
+}
+
 export async function getCharacterBySlug(slug: string) {
   return prisma.character.findUnique({
     where: { slug },

@@ -101,7 +101,7 @@ export function ReviewForm({ manhwaId, hasExistingReviews = false }: ReviewFormP
           type="button"
           onClick={() => setIsMicro(true)}
           className={`rounded-md px-3 py-1 text-xs font-medium ${
-            isMicro ? 'bg-crystal-blue text-white' : 'bg-elevated text-text-secondary'
+            isMicro ? 'border border-crystal-blue text-crystal-blue' : 'bg-elevated text-text-secondary'
           }`}
         >
           {t('writeMicroReview')}
@@ -110,7 +110,7 @@ export function ReviewForm({ manhwaId, hasExistingReviews = false }: ReviewFormP
           type="button"
           onClick={() => setIsMicro(false)}
           className={`rounded-md px-3 py-1 text-xs font-medium ${
-            !isMicro ? 'bg-crystal-blue text-white' : 'bg-elevated text-text-secondary'
+            !isMicro ? 'border border-crystal-blue text-crystal-blue' : 'bg-elevated text-text-secondary'
           }`}
         >
           {t('writeReview')}
@@ -198,7 +198,7 @@ export function ReviewForm({ manhwaId, hasExistingReviews = false }: ReviewFormP
           <button
             type="submit"
             disabled={isPending || content.length < minLength}
-            className="rounded-lg bg-crystal-blue px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-crystal-blue/90 disabled:opacity-50"
+            className="rounded-lg border border-crystal-blue px-4 py-1.5 text-xs font-medium text-crystal-blue transition-colors hover:bg-crystal-blue/10 disabled:opacity-50"
           >
             {isPending ? '...' : t('publish')}
           </button>

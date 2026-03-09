@@ -35,15 +35,26 @@ const articleSelect = {
 
 export type ArticleData = Awaited<ReturnType<typeof getArticleBySlug>>
 
-export async function getPublishedArticles(category?: ArticleCategory) {
-  return prisma.article.findMany({
-    where: {
-      status: 'PUBLISHED',
-      ...(category ? { category } : {}),
-    },
-    select: articleSelect,
-    orderBy: { published_at: 'desc' },
-  })
+export async function getPublishedArticles(
+  page = 1,
+  limit = 20,
+  category?: ArticleCategory
+) {
+  const where = {
+    status: 'PUBLISHED' as const,
+    ...(category ? { category } : {}),
+  }
+  const [articles, total] = await Promise.all([
+    prisma.article.findMany({
+      where,
+      select: articleSelect,
+      orderBy: { published_at: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.article.count({ where }),
+  ])
+  return { articles, total }
 }
 
 export async function getArticleBySlug(slug: string) {

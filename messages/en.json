@@ -27,7 +27,19 @@
     "tropes": "Tropes",
     "discover": "Discover",
     "notifications": "Notifications",
-    "blog": "Blog"
+    "blog": "Blog",
+    "store": "Store",
+    "browse": "Browse",
+    "people": "People",
+    "staff": "Staff",
+    "characters": "Characters",
+    "publishers": "Publishers",
+    "news": "News",
+    "community": "Community",
+    "members": "Members",
+    "lists": "Lists",
+    "artwork": "Fan Art",
+    "challenge": "Challenge"
   },
   "footer": {
     "discover": "Discover",
@@ -42,7 +54,12 @@
     "contact": "Contact",
     "feed": "Activity Feed",
     "search": "Search",
-    "blog": "Blog"
+    "blog": "Blog",
+    "lists": "Lists",
+    "store": "Store",
+    "news": "News",
+    "affiliateDisclosure": "Affiliate Disclosure",
+    "faq": "FAQ"
   },
   "home": {
     "hero": {
@@ -64,7 +81,9 @@
     "ranking": {
       "title": "ManhwaVerse Rankings",
       "viewAll": "See full ranking"
-    }
+    },
+    "topLists": "Top Lists",
+    "featuredFanArt": "Fan Art of the Week"
   },
   "filter": {
     "searchPlaceholder": "Search manhwa...",
@@ -81,6 +100,8 @@
     "tropes": "Tropes",
     "genres": "Genres",
     "similar": "Similar Titles",
+    "fanArt": "Fan Art",
+    "fanArtSeeAll": "See all fan art",
     "reviews": "Reviews",
     "info": "Info",
     "community": "Community",
@@ -284,7 +305,6 @@
     "following": "Following",
     "follow": "Follow",
     "unfollow": "Unfollow",
-    "following": "Following",
     "followersList": "Followers",
     "followingList": "Following",
     "noFollowers": "No followers yet",
@@ -296,7 +316,20 @@
     "myLibrary": "My Library",
     "viewAll": "View all",
     "recentActivity": "Recent Activity",
-    "noActivity": "No activity yet"
+    "noActivity": "No activity yet",
+    "viewJournal": "Reading Journal",
+    "challengeYear": "{year} Reading Challenge"
+  },
+  "journal": {
+    "title": "Reading Journal",
+    "entries": "entries",
+    "empty": "No journal entries yet",
+    "completed": "Completed",
+    "started": "Started",
+    "paused": "On hold",
+    "dropped": "Dropped",
+    "planned": "Added to list",
+    "rereading": "Rereading"
   },
   "settings": {
     "title": "Settings",
@@ -406,5 +439,225 @@
     "siteName": "ManhwaVerse",
     "defaultTitle": "ManhwaVerse — Track, Discover & Share Manhwa",
     "defaultDescription": "The community-driven platform for manhwa & manhua readers. Track your reading, discover new titles, and share reviews."
+  },
+  "store": {
+    "title": "ManhwaVerse Store",
+    "subtitle": "Support ManhwaVerse by shopping through our affiliate links",
+    "physicalEdition": "Physical Edition",
+    "fansAlsoBuy": "Fans also buy",
+    "buyOn": "Buy on",
+    "seeAllProducts": "See all {count} products →",
+    "featured": "Featured",
+    "recommendedForYou": "Recommended for you",
+    "noProducts": "No products found",
+    "wishlist": "My Wishlist",
+    "addToWishlist": "Add to wishlist",
+    "removeFromWishlist": "Remove from wishlist",
+    "wishlistCount": "{count} people saved this",
+    "affiliateNotice": "Links on this page are affiliate links. ManhwaVerse earns a commission on purchases made through these links, at no extra cost to you.",
+    "affiliateHint": "Affiliate link",
+    "learnMore": "Learn more",
+    "legalNotice": "ManhwaVerse participates in the Amazon Associates Program and other affiliate programs.",
+    "filters": {
+      "all": "All",
+      "search": "Search products..."
+    },
+    "type": {
+      "PHYSICAL_MANGA": "Physical Manga",
+      "BOX_SET": "Box Set",
+      "LIGHT_NOVEL": "Light Novel",
+      "FIGURINE": "Figurine",
+      "ARTBOOK": "Artbook",
+      "POSTER": "Poster",
+      "GOODS": "Goods"
+    },
+    "category": {
+      "PHYSICAL_MANGA": "Physical Manhwa",
+      "BOX_SET": "Box Sets",
+      "LIGHT_NOVEL": "Light Novels",
+      "FIGURINE": "Figurines",
+      "ARTBOOK": "Artbooks",
+      "POSTER": "Posters",
+      "GOODS": "Goods"
+    }
+  },
+  "news": {
+    "title": "Manhwa News",
+    "description": "The latest news, announcements and updates from the manhwa world",
+    "noNews": "No news articles yet",
+    "label": "News"
+  },
+  "publisher": {
+    "title": "Publishers",
+    "description": "Manhwa publishers and their catalogues",
+    "noPublishers": "No publishers found",
+    "titles": "titles"
+  },
+  "people": {
+    "title": "People",
+    "description": "Authors and illustrators behind your favorite manhwa",
+    "filterAll": "All",
+    "filterAuthor": "Authors",
+    "filterIllustrator": "Illustrators",
+    "sortReaders": "Most Read",
+    "sortAlpha": "A–Z",
+    "noCreators": "No creators found",
+    "works": "works"
+  },
+  "artwork": {
+    "title": "Fan Art Gallery",
+    "subtitle": "Community fan art for your favorite manhwa",
+    "submit": "Submit Art",
+    "sortRecent": "Recent",
+    "sortTop": "Top",
+    "noArtwork": "No fan art yet. Be the first to submit!",
+    "backToGallery": "← Back to Gallery",
+    "by": "by",
+    "linkedTo": "Linked to",
+    "comments": "Comments",
+    "writeComment": "Write a comment…",
+    "postComment": "Post",
+    "noComments": "No comments yet. Be the first!",
+    "sameArtist": "More from this artist"
+  },
+  "legal": {
+    "affiliate": {
+      "title": "Affiliate Disclosure",
+      "intro": "ManhwaVerse uses affiliate links to fund the development and maintenance of the site. When you purchase a product through one of our links, we earn a small commission at no additional cost to you.",
+      "amazonTitle": "Amazon Associates Program",
+      "amazonText": "ManhwaVerse is a participant in the Amazon Associates Program (US) and Amazon EU Associates Programme, affiliate advertising programs designed to provide a means for sites to earn advertising fees by advertising and linking to Amazon.com, Amazon.fr, Amazon.co.uk and Amazon.de.",
+      "otherTitle": "Other Affiliate Programs",
+      "otherText": "We also participate in affiliate programs from Fnac (via Awin), CDJapan, and other partners. Links to these platforms may contain affiliate identifiers.",
+      "transparencyTitle": "Our Transparency Commitment",
+      "transparencyText": "All affiliate links are clearly identified on our site. Our recommendations and rankings are never influenced by affiliate commissions. Ratings and reviews are 100% independent.",
+      "lastUpdated": "Last updated: {date}"
+    }
+  },
+  "publisher": {
+    "title": "Publishers",
+    "description": "Discover the platforms and publishers behind your favourite manhwa.",
+    "noPublishers": "No publishers found.",
+    "titles": "titles"
+  },
+  "members": {
+    "title": "Members",
+    "membersCount": "members",
+    "searchPlaceholder": "Search by username or name…",
+    "search": "Search",
+    "clear": "Clear",
+    "result": "result",
+    "results": "results",
+    "for": "for",
+    "noUsers": "No members found.",
+    "followers": "followers",
+    "titles": "titles"
+  },
+  "lists": {
+    "title": "Community Lists",
+    "description": "Browse curated manhwa lists created by the community.",
+    "new": "New list",
+    "noLists": "No lists yet.",
+    "emptyList": "This list is empty.",
+    "by": "by",
+    "sortPopular": "Popular",
+    "sortRecent": "Recent",
+    "sortSize": "Size",
+    "items": "{count, plural, one {# title} other {# titles}}"
+  },
+  "character": {
+    "title": "Characters",
+    "description": "Browse all manhwa characters, their roles, and the series they appear in.",
+    "filterAll": "All",
+    "filterMain": "Main",
+    "filterSupporting": "Supporting",
+    "noCharacters": "No characters found.",
+    "appearsIn": "Appears in",
+    "noDescription": "No description available."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "description": "How ManhwaVerse collects, uses, and protects your personal data.",
+    "lastUpdated": "Last updated: March 2026",
+    "intro": "Your privacy matters to us. This policy explains what data we collect, how we use it, and the choices you have.",
+    "collectTitle": "Data we collect",
+    "collectText": "We collect your email address and username when you register. We also collect usage data such as pages visited, search queries, and reading activity to improve the platform.",
+    "useTitle": "How we use your data",
+    "useText": "Your data is used to provide and improve ManhwaVerse services, personalise your experience, and send optional notifications. We do not sell your personal data to third parties.",
+    "cookiesTitle": "Cookies",
+    "cookiesText": "We use essential cookies for authentication and preference storage. We may use analytics cookies to understand how the platform is used. You can disable non-essential cookies in your browser settings.",
+    "retentionTitle": "Data retention",
+    "retentionText": "Your data is retained as long as your account is active. When you delete your account, your personal data is permanently removed within 30 days.",
+    "rightsTitle": "Your rights",
+    "rightsText": "You have the right to access, correct, or delete your personal data at any time. You can exercise these rights from your account settings or by contacting us.",
+    "contactTitle": "Contact",
+    "contactText": "Privacy-related questions can be sent to"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "description": "The rules and guidelines for using ManhwaVerse.",
+    "lastUpdated": "Last updated: March 2026",
+    "intro": "By using ManhwaVerse, you agree to these terms. Please read them carefully.",
+    "useTitle": "Acceptable use",
+    "useText": "You may use ManhwaVerse for personal, non-commercial purposes. You must not use the platform to post harmful, illegal, or abusive content, or to harass other users.",
+    "contentTitle": "User-generated content",
+    "contentText": "You retain ownership of reviews and lists you create. By posting content, you grant ManhwaVerse a non-exclusive licence to display it on the platform. We reserve the right to remove content that violates these terms.",
+    "ipTitle": "Intellectual property",
+    "ipText": "ManhwaVerse's design, code, and original content are protected by copyright. Manhwa titles, covers, and synopses belong to their respective rights holders.",
+    "disclaimerTitle": "Disclaimer",
+    "disclaimerText": "ManhwaVerse is provided as-is without warranties of any kind. We are not liable for any loss or damage arising from your use of the platform.",
+    "contactTitle": "Contact",
+    "contactText": "Questions about these terms can be sent to"
+  },
+  "about": {
+    "title": "About ManhwaVerse",
+    "description": "ManhwaVerse is a community platform for manhwa fans — track, rate, discover, and discuss your favourite Korean comics.",
+    "mission": "Our mission",
+    "missionText": "We believe manhwa deserves a dedicated space to celebrate its storytelling, art, and community. ManhwaVerse gives readers the tools to build their library, share their opinions, and discover new series through genuine community-driven scores.",
+    "contact": "Contact",
+    "contactText": "Questions, suggestions, or partnerships? Reach us at",
+    "builtBy": "Built with passion by manhwa readers, for manhwa readers."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "description": "Everything you need to know about ManhwaVerse.",
+    "q1": "What is ManhwaVerse?",
+    "a1": "ManhwaVerse is a community platform dedicated to manhwa (Korean webtoons and comics). You can track what you read, rate series, write reviews, follow other readers, and discover new titles.",
+    "q2": "Is ManhwaVerse free to use?",
+    "a2": "Yes, ManhwaVerse is completely free. Create an account and start building your library right away.",
+    "q3": "How does the scoring system work?",
+    "a3": "Scores are calculated from community ratings combined with external data (AniList). The weight of each source adapts based on how many community votes a series has received.",
+    "q4": "Can I read manhwa on ManhwaVerse?",
+    "a4": "ManhwaVerse is a tracking and community platform — we do not host or stream chapters. Links to official reading platforms are provided on each series page.",
+    "q5": "How do I add a manhwa to my library?",
+    "a5": "Navigate to any series page and click the library button. You can set a reading status (Reading, Completed, Plan to read, etc.) and give it a score.",
+    "q6": "What are Korean reactions?",
+    "a6": "Korean reactions (헐, 대박, 감동…) are expressive one-tap reactions inspired by Korean internet culture that you can leave on any series.",
+    "q7": "What is the Reading Challenge?",
+    "a7": "The Reading Challenge lets you set a yearly goal for how many manhwa you want to complete. Your progress is tracked automatically based on titles you mark as completed.",
+    "q8": "How are community lists created?",
+    "a8": "Any registered user can create a curated list of manhwa — thematic recommendations, personal rankings, hidden gems, and more.",
+    "q9": "Can I report incorrect information about a series?",
+    "a9": "Yes. Use the report button on the series page or contact us directly at contact@manhwaverse.com and we will review it promptly.",
+    "q10": "How do I delete my account?",
+    "a10": "You can delete your account from your account settings page. All your data will be permanently removed within 30 days."
+  },
+  "challenge": {
+    "title": "Reading Challenge {year}",
+    "signInPrompt": "Sign in to start your reading challenge.",
+    "signIn": "Sign in",
+    "setGoalTitle": "Start your {year} challenge",
+    "setGoalDesc": "How many manhwa do you want to complete this year?",
+    "startChallenge": "Start challenge",
+    "goalHint": "You can update your goal at any time.",
+    "completed": "Challenge {year} completed! 🎉",
+    "completedSub": "You completed {count} manhwa — amazing!",
+    "manhwasRead": "manhwa completed in {year}",
+    "remaining": "{n} remaining",
+    "goalReached": "Goal reached!",
+    "updateGoal": "Update my goal",
+    "save": "Save",
+    "recentlyCompleted": "Recently completed",
+    "markCompletedHint": "Mark manhwa as completed in your library to track your progress.",
+    "goToLibrary": "Go to my library"
   }
 }

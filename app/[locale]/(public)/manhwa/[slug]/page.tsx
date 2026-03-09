@@ -21,6 +21,7 @@ import { getManhwaReactionCounts, getUserManhwaReactions } from '@/lib/db/manhwa
 import { getCharacterVoteRankings, getUserCharacterVote } from '@/lib/db/character-vote'
 import { getActivePollForManhwa, getUserPollVotes } from '@/lib/db/poll'
 import { PollWidget } from '@/components/features/poll/PollWidget'
+import { getManhwaFanArts } from '@/lib/db/fan-art'
 
 export const revalidate = 3600
 
@@ -55,7 +56,7 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
     ? (manhwa.synopsis_fr ?? manhwa.synopsis_en)
     : manhwa.synopsis_en
 
-  const [{ reviews, total: reviewCount }, related, relations, allCharacters, reactionCounts, userReactions, charVoteRankings, userCharVote, activePoll] = await Promise.all([
+  const [{ reviews, total: reviewCount }, related, relations, allCharacters, reactionCounts, userReactions, charVoteRankings, userCharVote, activePoll, fanArts] = await Promise.all([
     getReviewsForManhwa(manhwa.id),
     getRelatedManhwas(manhwa.id, 6),
     getRelationsByManhwaId(manhwa.id),
@@ -65,6 +66,7 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
     getCharacterVoteRankings(manhwa.id),
     user ? getUserCharacterVote(user.id, manhwa.id) : null,
     getActivePollForManhwa(manhwa.id),
+    getManhwaFanArts(manhwa.id, 6),
   ])
 
   const userPollVotes = activePoll && user
@@ -181,6 +183,42 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
             {related.map((m) => (
               <ManhwaCard key={m.id} manhwa={m} locale={locale} userContentFilter={contentFilter} />
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* 8. Fan Art */}
+      {fanArts.length > 0 && (
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold">{t('fanArt')}</h2>
+            <a
+              href={`/${locale}/artwork?manhwa=${manhwa.slug}`}
+              className="text-xs text-[#00ffff] opacity-70 transition-opacity hover:opacity-100"
+            >
+              {t('fanArtSeeAll')} →
+            </a>
+          </div>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+            {fanArts.map((post) => {
+              const img = post.images[0]
+              if (!img) return null
+              return (
+                <a
+                  key={post.id}
+                  href={`/${locale}/artwork/${post.id}`}
+                  className="group relative aspect-square overflow-hidden rounded-lg bg-[#0d0d16]"
+                  title={post.title}
+                >
+                  <img
+                    src={img.thumb_url || img.image_url}
+                    alt={img.alt_text ?? post.title}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/30" />
+                </a>
+              )
+            })}
           </div>
         </section>
       )}

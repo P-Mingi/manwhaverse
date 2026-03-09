@@ -6,6 +6,7 @@ import { getLibraryEntry } from '@/lib/db/library'
 import { getCharactersByManhwaId } from '@/lib/db/character'
 import { getUser } from '@/lib/auth/session'
 import { getCurrentContentFilter, needsMatureGate } from '@/lib/nsfw'
+import { getProductsForManhwa } from '@/lib/db/store'
 import { MatureGate } from '@/components/features/MatureGate'
 import { generateManhwaJsonLd, generateBreadcrumbJsonLd } from '@/lib/seo/jsonld'
 import { JsonLd } from '@/components/ui/JsonLd'
@@ -15,6 +16,7 @@ import { ManhwaTabNav } from '@/components/features/manhwa/ManhwaTabNav'
 import { LibraryActions } from '@/components/features/library/LibraryActions'
 import { formatCount } from '@/lib/utils/formatCount'
 import { WhereToRead } from '@/components/features/manhwa/WhereToRead'
+import { PhysicalEditions } from '@/components/features/manhwa/PhysicalEditions'
 import { ControversyBadge } from '@/components/features/manhwa/ControversyBadge'
 
 interface ManhwaLayoutProps {
@@ -37,9 +39,10 @@ export default async function ManhwaLayout({
   const t = await getTranslations({ locale, namespace: 'manhwa' })
   const user = await getUser()
 
-  const [libraryEntry, allCharacters] = await Promise.all([
+  const [libraryEntry, allCharacters, products] = await Promise.all([
     user ? getLibraryEntry(user.id, manhwa.id) : null,
     getCharactersByManhwaId(manhwa.id),
+    getProductsForManhwa(manhwa.id),
   ])
 
   const title = locale === 'fr' ? (manhwa.title_fr ?? manhwa.title_en) : manhwa.title_en
@@ -138,28 +141,21 @@ export default async function ManhwaLayout({
                     {t(`countries.${manhwa.origin_country}`)}
                   </dd>
                 </div>
-                {manhwa.publisher_links.length > 0 && (
-                  <div className="flex justify-between">
-                    <dt className="text-text-muted">{t('sidebar.publisher')}</dt>
-                    <dd className="flex flex-wrap justify-end gap-1">
-                      {manhwa.publisher_links.map(({ publisher }) => (
-                        <Link
-                          key={publisher.id}
-                          href={`/${locale}/publisher/${publisher.slug}`}
-                          className="text-[#00ffff] hover:underline"
-                        >
-                          {publisher.name}
-                        </Link>
-                      ))}
-                    </dd>
-                  </div>
-                )}
               </dl>
             </div>
 
             {/* Where to Read — sidebar for affiliate revenue */}
             {manhwa.read_links.length > 0 && (
               <WhereToRead readLinks={manhwa.read_links} locale={locale} />
+            )}
+
+            {/* Physical editions / affiliate store */}
+            {products.length > 0 && (
+              <PhysicalEditions
+                manhwaId={manhwa.id}
+                manhwaSlug={manhwa.slug}
+                products={products}
+              />
             )}
 
             {/* Controversy Badge */}
