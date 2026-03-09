@@ -50,7 +50,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       getUserActivity(profileUser.id, 1, 5),
       getFollowerPreview(profileUser.id, 5),
       isAdmin(),
-      getChallengeSummary(profileUser.id, currentYear),
+      getChallengeSummary(profileUser.id, currentYear).catch(() => null),
     ])
 
   const canAdminEdit =

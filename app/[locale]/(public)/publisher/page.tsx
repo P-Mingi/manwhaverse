@@ -25,7 +25,15 @@ export default async function PublisherPage({ params, searchParams }: PublisherP
   const t = await getTranslations({ locale, namespace: 'publisher' })
 
   const currentPage = parseInt(page ?? '1', 10)
-  const { publishers, total } = await getAllPublishers(currentPage, 24)
+  let publishers: Awaited<ReturnType<typeof getAllPublishers>>['publishers'] = []
+  let total = 0
+  try {
+    const result = await getAllPublishers(currentPage, 24)
+    publishers = result.publishers
+    total = result.total
+  } catch {
+    // Publisher table may not exist yet
+  }
   const totalPages = Math.ceil(total / 24)
 
   return (

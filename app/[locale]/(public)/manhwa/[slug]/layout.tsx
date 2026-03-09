@@ -42,7 +42,7 @@ export default async function ManhwaLayout({
   const [libraryEntry, allCharacters, products] = await Promise.all([
     user ? getLibraryEntry(user.id, manhwa.id) : null,
     getCharactersByManhwaId(manhwa.id),
-    getProductsForManhwa(manhwa.id),
+    getProductsForManhwa(manhwa.id).catch(() => []),
   ])
 
   const title = locale === 'fr' ? (manhwa.title_fr ?? manhwa.title_en) : manhwa.title_en

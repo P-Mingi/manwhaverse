@@ -30,13 +30,21 @@ export default async function ArtworkPage({ params, searchParams }: ArtworkPageP
   const currentSort = (sort as 'recent' | 'top') ?? 'recent'
   const user = await getUser()
 
-  const { posts, total } = await getPublicFanArts({
-    page: currentPage,
-    limit: 24,
-    sort: currentSort,
-    tag: tag ?? undefined,
-    showNsfw: false,
-  })
+  let posts: Awaited<ReturnType<typeof getPublicFanArts>>['posts'] = []
+  let total = 0
+  try {
+    const result = await getPublicFanArts({
+      page: currentPage,
+      limit: 24,
+      sort: currentSort,
+      tag: tag ?? undefined,
+      showNsfw: false,
+    })
+    posts = result.posts
+    total = result.total
+  } catch {
+    // FanArtPost table may not exist yet
+  }
 
   const totalPages = Math.ceil(total / 24)
 
