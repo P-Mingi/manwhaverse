@@ -6,9 +6,17 @@ ALTER TABLE "Article" ADD COLUMN IF NOT EXISTS "user_id" TEXT;
 ALTER TABLE "Article" ADD COLUMN IF NOT EXISTS "source_url" TEXT;
 
 -- Foreign key: Article.user_id → User.id (SET NULL on delete so articles survive user deletion)
-ALTER TABLE "Article"
-  ADD CONSTRAINT "Article_user_id_fkey"
-  FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+-- Wrapped in DO block to avoid error if constraint already exists
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'Article_user_id_fkey'
+  ) THEN
+    ALTER TABLE "Article"
+      ADD CONSTRAINT "Article_user_id_fkey"
+      FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- Index for fetching articles by user
 CREATE INDEX IF NOT EXISTS "Article_user_id_idx" ON "Article"("user_id");
