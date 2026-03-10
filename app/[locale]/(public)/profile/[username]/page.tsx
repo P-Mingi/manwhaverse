@@ -50,7 +50,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       getUserActivity(profileUser.id, 1, 5),
       getFollowerPreview(profileUser.id, 5),
       isAdmin(),
-      getChallengeSummary(profileUser.id, currentYear),
+      getChallengeSummary(profileUser.id, currentYear).catch(() => null),
     ])
 
   const canAdminEdit =
@@ -88,7 +88,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             {isOwnProfile && (
               <Link
                 href={`/${locale}/settings`}
-                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-[#9999b8] transition-colors hover:border-[rgba(0,255,255,0.3)] hover:text-[#00ffff]"
+                className="rounded-lg border border-electric-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-electric/40 hover:text-electric"
               >
                 {t('editProfile')}
               </Link>
@@ -127,11 +127,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <div className="font-mono text-lg font-bold">{profileUser._count.reviews}</div>
           <div className="text-xs text-text-muted">{t('reviewsWritten')}</div>
         </div>
-        <Link href={`/${locale}/profile/${profileUser.username}/followers`} className="transition-colors hover:text-[#00ffff]">
+        <Link href={`/${locale}/profile/${profileUser.username}/followers`} className="transition-colors hover:text-electric">
           <div className="font-mono text-lg font-bold">{profileUser._count.followers}</div>
           <div className="text-xs text-text-muted">{t('followers')}</div>
         </Link>
-        <Link href={`/${locale}/profile/${profileUser.username}/following`} className="transition-colors hover:text-[#00ffff]">
+        <Link href={`/${locale}/profile/${profileUser.username}/following`} className="transition-colors hover:text-electric">
           <div className="font-mono text-lg font-bold">{profileUser._count.follows}</div>
           <div className="text-xs text-text-muted">{t('following')}</div>
         </Link>
@@ -147,7 +147,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             {followerPreview.map((f) => (
               <div
                 key={f.id}
-                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-base bg-elevated text-[10px] text-text-muted"
+                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-void bg-elevated text-[10px] text-text-muted"
               >
                 {f.avatar_url ? (
                   <img
@@ -173,7 +173,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       <div className="mt-4">
         <Link
           href={`/${locale}/profile/${profileUser.username}/journal`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-[rgba(74,158,255,0.3)] hover:text-crystal-blue"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-electric-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-electric/40 hover:text-electric"
         >
           📖 {t('viewJournal')}
         </Link>
@@ -183,7 +183,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       {challengeSummary && (
         <Link
           href={`/${locale}/challenge/${currentYear}`}
-          className="mt-4 flex items-center gap-4 rounded-xl border border-white/10 bg-[#0d0d16] px-4 py-3 transition-colors hover:border-[rgba(0,255,255,0.3)]"
+          className="mt-4 flex items-center gap-4 rounded-xl border border-electric-border bg-card px-4 py-3 transition-colors hover:border-electric/40"
         >
           <span className="text-2xl">{challengeSummary.isCompleted ? '🏆' : '📚'}</span>
           <div className="flex-1 min-w-0">
@@ -197,7 +197,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-elevated">
               <div
-                className={`h-full rounded-full ${challengeSummary.isCompleted ? 'bg-yellow-400' : 'bg-[#00ffff]'}`}
+                className={`h-full rounded-full ${challengeSummary.isCompleted ? 'bg-yellow-400' : 'bg-electric'}`}
                 style={{ width: `${challengeSummary.percent}%` }}
               />
             </div>

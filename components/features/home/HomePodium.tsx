@@ -26,10 +26,10 @@ export function HomePodium({ top3, locale, readersLabel }: HomePodiumProps) {
         >
           <div className={`relative ${HEIGHTS[i]} overflow-hidden rounded-xl shadow-lg ${
             i === 1
-              ? 'ring-2 ring-[#ffd700] shadow-[0_0_24px_rgba(255,215,0,0.3)]'
+              ? 'ring-2 ring-medal-gold shadow-[0_0_24px_rgba(255,215,0,0.3)]'
               : i === 0
-              ? 'ring-2 ring-[#c0c0c0] shadow-[0_0_16px_rgba(192,192,192,0.2)]'
-              : 'ring-2 ring-[#cd7f32] shadow-[0_0_16px_rgba(205,127,50,0.2)]'
+              ? 'ring-2 ring-medal-silver shadow-[0_0_16px_rgba(192,192,192,0.2)]'
+              : 'ring-2 ring-medal-bronze shadow-[0_0_16px_rgba(205,127,50,0.2)]'
           }`}>
             {manhwa.cover_url ? (
               <Image

@@ -15,7 +15,7 @@ export async function HomeSection({ title, viewAllHref, locale, children }: Home
     <section className="mt-10">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="section-title-bar font-display text-xl">{title}</h2>
-        <Link href={viewAllHref} className="text-sm text-[#00ffff] hover:underline">
+        <Link href={viewAllHref} className="text-sm text-electric hover:underline">
           {t('seeAll')}
         </Link>
       </div>

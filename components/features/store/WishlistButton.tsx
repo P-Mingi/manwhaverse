@@ -49,7 +49,7 @@ export function WishlistButton({
       disabled={loading}
       title={optimistic ? t('removeFromWishlist') : t('addToWishlist')}
       className={`flex items-center gap-1 text-xs transition-colors ${
-        optimistic ? 'text-pink-400' : 'text-[#6b6b88] hover:text-pink-400'
+        optimistic ? 'text-pink-400' : 'text-text-muted hover:text-pink-400'
       }`}
     >
       <svg

@@ -16,7 +16,7 @@ export function RankBadge({ rank, compact = false }: RankBadgeProps) {
           color: rank.color,
           borderColor: rank.color,
           borderWidth: '1px',
-          backgroundColor: `color-mix(in srgb, ${rank.color} 22%, rgb(8 8 12 / 0.85))`,
+          backgroundColor: `color-mix(in srgb, ${rank.color} 20%, rgb(var(--rank-badge-base) / 0.90))`,
           ['--rank-glow' as string]: rank.colorGlow,
         }}
       >
@@ -32,7 +32,7 @@ export function RankBadge({ rank, compact = false }: RankBadgeProps) {
         color: rank.color,
         borderColor: rank.color,
         borderWidth: '1px',
-        backgroundColor: `color-mix(in srgb, ${rank.color} 12%, transparent)`,
+        backgroundColor: `color-mix(in srgb, ${rank.color} 10%, rgb(var(--rank-badge-base) / 0.15))`,
         ['--rank-glow' as string]: rank.colorGlow,
       }}
     >

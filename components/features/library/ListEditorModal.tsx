@@ -23,6 +23,7 @@ export interface EditorFormData {
   is_favorite: boolean
   started_at: string | null
   completed_at: string | null
+  read_at: string | null
   reread_count: number
   private_tags: string[]
   notes: string | null
@@ -46,6 +47,7 @@ interface ListEditorModalProps {
     isFavorite: boolean
     startedAt: string | null
     completedAt: string | null
+    readAt: string | null
     rereadCount: number
     privateTags: string[]
     notes: string | null
@@ -78,6 +80,7 @@ export function ListEditorModal({
   const [isFavorite, setIsFavorite] = useState(initialData.isFavorite)
   const [startedAt, setStartedAt] = useState(toDateStr(initialData.startedAt))
   const [completedAt, setCompletedAt] = useState(toDateStr(initialData.completedAt))
+  const [readAt, setReadAt] = useState(toDateStr(initialData.readAt))
   const [rereadCount, setRereadCount] = useState(initialData.rereadCount)
   const [privateTags, setPrivateTags] = useState<string[]>(initialData.privateTags)
   const [notes, setNotes] = useState(initialData.notes ?? '')
@@ -102,6 +105,7 @@ export function ListEditorModal({
       setIsFavorite(initialData.isFavorite)
       setStartedAt(toDateStr(initialData.startedAt))
       setCompletedAt(toDateStr(initialData.completedAt))
+      setReadAt(toDateStr(initialData.readAt))
       setRereadCount(initialData.rereadCount)
       setPrivateTags(initialData.privateTags)
       setNotes(initialData.notes ?? '')
@@ -142,7 +146,11 @@ export function ListEditorModal({
     if (newStatus === 'READING' && !startedAt) setStartedAt(now)
     if (newStatus === 'COMPLETED') {
       if (!completedAt) setCompletedAt(now)
+      if (!readAt) setReadAt(now)
       if (chapterCount != null) setProgress(chapterCount)
+    }
+    if (newStatus === 'REREADING') {
+      if (!readAt) setReadAt(now)
     }
   }
 
@@ -155,6 +163,7 @@ export function ListEditorModal({
       is_favorite: isFavorite,
       started_at: startedAt || null,
       completed_at: completedAt || null,
+      read_at: readAt || null,
       reread_count: rereadCount,
       private_tags: privateTags,
       notes: notes.trim() || null,
@@ -341,6 +350,19 @@ export function ListEditorModal({
                   className="w-full rounded-lg border border-border bg-elevated px-3 py-2 text-sm text-text-primary [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 />
               </div>
+            </div>
+
+            {/* Diary date */}
+            <div>
+              <label className="mb-1.5 block text-xs text-text-muted">{t('editor.readAt')}</label>
+              <input
+                type="date"
+                value={readAt}
+                max={new Date().toISOString().slice(0, 10)}
+                onChange={(e) => setReadAt(e.target.value)}
+                className="w-full rounded-lg border border-border bg-elevated px-3 py-2 text-sm text-text-primary md:w-1/3"
+              />
+              <p className="mt-1 text-[10px] text-text-muted">{t('editor.readAtHint')}</p>
             </div>
 
             {/* Private tags */}

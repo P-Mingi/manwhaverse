@@ -26,8 +26,8 @@ export function PhysicalEditions({ manhwaId, manhwaSlug, products }: PhysicalEdi
   })
 
   return (
-    <div className="rounded-lg border border-[rgba(0,255,255,0.1)] bg-[#0d0d16] p-4">
-      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-[#9999b8]">
+    <div className="rounded-lg border border-electric-border bg-card p-4">
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-text-secondary">
         📦 {t('physicalEdition')}
       </h3>
 
@@ -51,7 +51,7 @@ export function PhysicalEditions({ manhwaId, manhwaSlug, products }: PhysicalEdi
               target="_blank"
               rel="noopener noreferrer nofollow sponsored"
               onClick={() => trackAffiliateClick(manhwaId, product.id, primaryLink.marketplace_id, primaryLink.url).catch(() => {})}
-              className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] p-2.5 transition-all hover:border-[rgba(0,255,255,0.15)] hover:bg-white/[0.04]"
+              className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] p-2.5 transition-all hover:border-electric-border hover:bg-white/[0.04]"
             >
               {cover && (
                 <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded">
@@ -59,14 +59,14 @@ export function PhysicalEditions({ manhwaId, manhwaSlug, products }: PhysicalEdi
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium text-[#e8e8f0]">{title}</p>
+                <p className="truncate text-xs font-medium text-text-primary">{title}</p>
                 <div className="mt-0.5 flex items-center gap-2">
                   {primaryLink.price_amount != null && primaryLink.price_currency && (
-                    <span className="text-[10px] text-[#9999b8]">
+                    <span className="text-[10px] text-text-secondary">
                       {formatPrice(primaryLink.price_amount, primaryLink.price_currency, isStale)}
                     </span>
                   )}
-                  <span className="text-[10px] text-[#00ffff]">
+                  <span className="text-[10px] text-electric">
                     {mp?.flag} {mp?.name ?? primaryLink.marketplace_id} →
                   </span>
                 </div>
@@ -79,13 +79,13 @@ export function PhysicalEditions({ manhwaId, manhwaSlug, products }: PhysicalEdi
       {products.length > 3 && (
         <Link
           href={`/${locale}/store?manhwa=${manhwaSlug}`}
-          className="mt-3 block text-center text-xs text-[#00ffff] hover:underline"
+          className="mt-3 block text-center text-xs text-electric hover:underline"
         >
           {t('seeAllProducts', { count: products.length })}
         </Link>
       )}
 
-      <p className="mt-3 text-[9px] text-[#6b6b88]">{t('affiliateHint')}</p>
+      <p className="mt-3 text-[9px] text-text-muted">{t('affiliateHint')}</p>
     </div>
   )
 }

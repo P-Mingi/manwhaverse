@@ -31,7 +31,7 @@ export function ManhwaHero({ manhwa, locale, hasBanner = false, children }: Manh
             className="object-cover blur-2xl opacity-20 scale-110"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-base/60 to-base" />
+          <div className="absolute inset-0 bg-gradient-to-b from-void/60 to-void" />
         </div>
       )}
 
@@ -45,7 +45,7 @@ export function ManhwaHero({ manhwa, locale, hasBanner = false, children }: Manh
                 alt={title}
                 width={200}
                 height={280}
-                className="rounded-lg shadow-2xl ring-1 ring-[rgba(0,255,255,0.15)] shadow-[0_0_60px_rgba(0,0,0,0.7)]"
+                className="rounded-lg shadow-2xl ring-1 ring-electric-border shadow-[0_0_60px_rgba(0,0,0,0.7)]"
                 priority
               />
             ) : (
@@ -88,7 +88,7 @@ export function ManhwaHero({ manhwa, locale, hasBanner = false, children }: Manh
 
               {/* AniList score — informational only, no outbound link */}
               {manhwa.ext_score_anilist && (
-                <div className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-2.5">
+                <div className="flex items-center gap-2.5 rounded-xl bg-elevated border border-electric-border px-4 py-2.5">
                   <span className="font-mono text-2xl font-bold text-[#02A9FF] leading-none">
                     {manhwa.ext_score_anilist.toFixed(1)}
                   </span>
@@ -105,7 +105,7 @@ export function ManhwaHero({ manhwa, locale, hasBanner = false, children }: Manh
 
               {/* MAL score — informational only, no outbound link */}
               {manhwa.ext_score_mal && (
-                <div className="flex items-center gap-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] px-4 py-2.5">
+                <div className="flex items-center gap-2.5 rounded-xl bg-elevated border border-electric-border px-4 py-2.5">
                   <span className="font-mono text-2xl font-bold text-[#2E51A2] leading-none">
                     {manhwa.ext_score_mal.toFixed(1)}
                   </span>
@@ -127,7 +127,7 @@ export function ManhwaHero({ manhwa, locale, hasBanner = false, children }: Manh
                 <a
                   key={gl.genre.id}
                   href={`/${locale}/genre/${gl.genre.slug}`}
-                  className="rounded border border-[rgba(0,255,255,0.2)] bg-[rgba(0,255,255,0.06)] px-2 py-1 text-xs uppercase tracking-widest text-[#00bfff] transition-colors hover:border-[rgba(0,255,255,0.4)] hover:bg-[rgba(0,255,255,0.12)]"
+                  className="rounded border border-electric-border bg-electric-glow px-2 py-1 text-xs uppercase tracking-widest text-electric-dim transition-colors hover:border-electric-border-hover hover:bg-electric-glow"
                 >
                   {locale === 'fr' ? gl.genre.name_fr : gl.genre.name_en}
                 </a>

@@ -25,7 +25,15 @@ export default async function PublisherPage({ params, searchParams }: PublisherP
   const t = await getTranslations({ locale, namespace: 'publisher' })
 
   const currentPage = parseInt(page ?? '1', 10)
-  const { publishers, total } = await getAllPublishers(currentPage, 24)
+  let publishers: Awaited<ReturnType<typeof getAllPublishers>>['publishers'] = []
+  let total = 0
+  try {
+    const result = await getAllPublishers(currentPage, 24)
+    publishers = result.publishers
+    total = result.total
+  } catch {
+    // Publisher table may not exist yet
+  }
   const totalPages = Math.ceil(total / 24)
 
   return (
@@ -86,11 +94,15 @@ export default async function PublisherPage({ params, searchParams }: PublisherP
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalPages > 1 && (() => {
+          const _ws = 10
+          let _s = Math.max(1, currentPage - Math.floor(_ws / 2))
+          let _e = _s + _ws - 1
+          if (_e > totalPages) { _e = totalPages; _s = Math.max(1, _e - _ws + 1) }
+          const _pages = Array.from({ length: _e - _s + 1 }, (_, i) => _s + i)
+          return (
         <div className="mt-8 flex justify-center gap-2">
-          {Array.from({ length: Math.min(totalPages, 10) }).map((_, i) => {
-            const p = i + 1
-            return (
+          {_pages.map((p) => (
               <Link
                 key={p}
                 href={`/${locale}/publisher?page=${p}`}
@@ -102,10 +114,10 @@ export default async function PublisherPage({ params, searchParams }: PublisherP
               >
                 {p}
               </Link>
-            )
-          })}
+          ))}
         </div>
-      )}
+          )
+      })()}
     </PageContainer>
   )
 }

@@ -113,6 +113,35 @@ export async function getPublicFeed(
   return { activities, total }
 }
 
+export async function getFriendsFeed(
+  userId: string,
+  page = 1,
+  limit = 20,
+): Promise<{ activities: ActivityWithContext[]; total: number }> {
+  const followRows = await prisma.follow.findMany({
+    where: { follower_id: userId },
+    select: { following_id: true },
+  })
+  const followingIds = followRows.map((r) => r.following_id)
+
+  if (followingIds.length === 0) return { activities: [], total: 0 }
+
+  const where = { user_id: { in: followingIds } }
+  const [raw, total] = await Promise.all([
+    prisma.activity.findMany({
+      where,
+      include: activityWithContext,
+      orderBy: { created_at: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.activity.count({ where }),
+  ])
+
+  const activities = await enrichWithManhwa(raw)
+  return { activities, total }
+}
+
 export async function getUserActivity(
   userId: string,
   page = 1,

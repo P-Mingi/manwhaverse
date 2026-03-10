@@ -66,7 +66,7 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
     getCharacterVoteRankings(manhwa.id),
     user ? getUserCharacterVote(user.id, manhwa.id) : null,
     getActivePollForManhwa(manhwa.id),
-    getManhwaFanArts(manhwa.id, 6),
+    getManhwaFanArts(manhwa.id, 6).catch(() => []),
   ])
 
   const userPollVotes = activePoll && user
@@ -207,7 +207,7 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
                 <a
                   key={post.id}
                   href={`/${locale}/artwork/${post.id}`}
-                  className="group relative aspect-square overflow-hidden rounded-lg bg-[#0d0d16]"
+                  className="group relative aspect-square overflow-hidden rounded-lg bg-surface"
                   title={post.title}
                 >
                   <img

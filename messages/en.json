@@ -63,7 +63,16 @@
   },
   "home": {
     "hero": {
-      "tagline": "Your manhwa universe, one scroll at a time",
+      "eyebrow": "Featured Manhwa · #1 This Week",
+      "title_line1": "Track every",
+      "title_accent": "manhwa",
+      "title_line3": "you've ever loved.",
+      "tagline": "Your personal universe for Korean webtoons — rate, review, discover, and connect with readers who get it.",
+      "stat_titles": "Titles",
+      "stat_readers": "Readers",
+      "stat_reviews": "Reviews",
+      "cta_primary": "Start Tracking",
+      "cta_secondary": "See Rankings",
       "cta": "Start Tracking",
       "ctaSecondary": "Browse Manhwa"
     },
@@ -82,8 +91,11 @@
       "title": "ManhwaVerse Rankings",
       "viewAll": "See full ranking"
     },
+    "ranking_title": "Top Rated All Time",
+    "activity_title": "Community Activity",
     "topLists": "Top Lists",
-    "featuredFanArt": "Fan Art of the Week"
+    "featuredFanArt": "Fan Art of the Week",
+    "recentReviews": "Recent Reviews"
   },
   "filter": {
     "searchPlaceholder": "Search manhwa...",
@@ -266,6 +278,8 @@
       "startDate": "Start date",
       "endDate": "End date",
       "rereads": "Rereads",
+      "readAt": "Diary date",
+      "readAtHint": "Date you logged this read (appears in your diary)",
       "privateTags": "Private tags",
       "addTag": "Add tag…",
       "notes": "Notes",

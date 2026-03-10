@@ -1,66 +1,48 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { formatCount } from '@/lib/utils/formatCount'
 import type { RankedManhwa } from '@/lib/db/ranking'
 
 interface HomeRankingListProps {
   manhwas: RankedManhwa[]
   locale: string
-  readersLabel: string
 }
 
-export function HomeRankingList({ manhwas, locale, readersLabel }: HomeRankingListProps) {
+export function HomeRankingList({ manhwas, locale }: HomeRankingListProps) {
   return (
-    <div className="mt-6 space-y-1">
+    <div>
       {manhwas.map((manhwa) => (
         <Link
           key={manhwa.slug}
           href={`/${locale}/manhwa/${manhwa.slug}`}
-          className="group flex items-center gap-4 rounded-lg p-3 transition-colors hover:bg-white/5"
+          className="podium-item"
         >
-          {/* Rank */}
-          <span className="w-10 text-right text-2xl font-bold text-text-muted shrink-0">
-            #{manhwa.rank}
-          </span>
+          <span className="podium-rank">{manhwa.rank}</span>
 
-          {/* Cover mini */}
-          <div className="relative h-16 w-12 shrink-0 overflow-hidden rounded-md bg-elevated">
+          <div className="podium-thumb">
             {manhwa.cover_url ? (
               <Image
                 src={manhwa.cover_url}
                 alt={manhwa.title}
-                width={48}
-                height={64}
-                className="h-full w-full object-cover"
+                width={52}
+                height={70}
+                className="w-full h-full object-cover"
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-[8px] text-text-muted">
-                N/A
-              </div>
+              <div className="flex h-full items-center justify-center text-[8px] text-text-muted">N/A</div>
             )}
           </div>
 
-          {/* Title + genres */}
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-text-primary transition-colors group-hover:text-crystal-blue">
-              {manhwa.title}
-            </p>
-            <p className="truncate text-xs text-text-muted">
-              {manhwa.genres.slice(0, 3).join(', ')}
-            </p>
+          <div className="podium-info">
+            <div className="podium-title">{manhwa.title}</div>
+            <div className="podium-meta">{manhwa.genres.slice(0, 2).join(' · ')}</div>
           </div>
 
-          {/* Score */}
           {manhwa.score != null && (
-            <span className="shrink-0 text-sm font-bold text-yellow-400">
-              ★ {manhwa.score.toFixed(1)}
-            </span>
+            <div className="podium-score">
+              <span>★</span>
+              <span>{manhwa.score.toFixed(1)}</span>
+            </div>
           )}
-
-          {/* Readers */}
-          <span className="hidden shrink-0 text-xs text-text-muted md:block">
-            {formatCount(manhwa.reader_count)} {readersLabel}
-          </span>
         </Link>
       ))}
     </div>

@@ -25,7 +25,7 @@ export function ManhwaTabNav({ slug, locale, hasCharacters, hasStaff }: ManhwaTa
   ]
 
   return (
-    <nav className="sticky top-0 z-20 border-b border-border bg-base/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-20 border-b border-electric-border bg-void/80 backdrop-blur-md">
       <div className="mx-auto max-w-5xl px-4">
         <div className="flex gap-1 overflow-x-auto scrollbar-none">
           {tabs.map((tab) => {
@@ -40,8 +40,8 @@ export function ManhwaTabNav({ slug, locale, hasCharacters, hasStaff }: ManhwaTa
                 href={tab.href}
                 className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
                   isActive
-                    ? 'border-accent text-accent'
-                    : 'border-transparent text-text-muted hover:border-border hover:text-text-primary'
+                    ? 'border-electric text-electric'
+                    : 'border-transparent text-text-muted hover:border-electric-border hover:text-text-primary'
                 }`}
               >
                 {tab.label}

@@ -42,7 +42,7 @@ export default async function ManhwaLayout({
   const [libraryEntry, allCharacters, products] = await Promise.all([
     user ? getLibraryEntry(user.id, manhwa.id) : null,
     getCharactersByManhwaId(manhwa.id),
-    getProductsForManhwa(manhwa.id),
+    getProductsForManhwa(manhwa.id).catch(() => []),
   ])
 
   const title = locale === 'fr' ? (manhwa.title_fr ?? manhwa.title_en) : manhwa.title_en
@@ -71,6 +71,7 @@ export default async function ManhwaLayout({
           currentIsFavorite={libraryEntry?.is_favorite ?? false}
           currentStartedAt={libraryEntry?.started_at?.toISOString() ?? null}
           currentCompletedAt={libraryEntry?.completed_at?.toISOString() ?? null}
+          currentReadAt={libraryEntry?.read_at?.toISOString() ?? null}
           currentRereadCount={libraryEntry?.reread_count ?? 0}
           currentPrivateTags={libraryEntry?.private_tags ?? []}
           currentNotes={libraryEntry?.notes ?? null}
@@ -101,7 +102,7 @@ export default async function ManhwaLayout({
 
           {/* Sidebar */}
           <aside className="w-full space-y-6 md:w-64 flex-shrink-0">
-            <div className="rounded-lg border border-white/5 bg-[#0d0d16] p-4">
+            <div className="rounded-lg border border-border bg-surface p-4">
               <h3 className="mb-3 text-sm font-semibold text-text-muted uppercase tracking-wide">
                 {t('info')}
               </h3>
@@ -163,7 +164,7 @@ export default async function ManhwaLayout({
 
             {/* Popularity */}
             {(manhwa.reader_count > 0 || manhwa.favorite_count > 0) && (
-              <div className="rounded-lg border border-white/5 bg-[#0d0d16] p-4">
+              <div className="rounded-lg border border-border bg-surface p-4">
                 <h3 className="mb-3 text-sm font-semibold text-text-muted uppercase tracking-wide">
                   {t('sidebar.popularity')}
                 </h3>
@@ -186,7 +187,7 @@ export default async function ManhwaLayout({
 
             {/* Alt titles */}
             {manhwa.title_alt.length > 0 && (
-              <div className="rounded-lg border border-white/5 bg-[#0d0d16] p-4">
+              <div className="rounded-lg border border-border bg-surface p-4">
                 <h3 className="mb-2 text-sm font-semibold text-text-muted uppercase tracking-wide">
                   {t('sidebar.altTitles')}
                 </h3>
