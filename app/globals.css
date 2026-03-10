@@ -337,7 +337,7 @@ body::before {
   min-height: 90vh;
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 55fr 45fr; /* was: 1fr 1fr */
   overflow: hidden;
   margin-top: 0;
 }

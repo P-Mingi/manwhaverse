@@ -66,7 +66,7 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
     getCharacterVoteRankings(manhwa.id),
     user ? getUserCharacterVote(user.id, manhwa.id) : null,
     getActivePollForManhwa(manhwa.id),
-    getManhwaFanArts(manhwa.id, 6),
+    getManhwaFanArts(manhwa.id, 6).catch(() => []),
   ])
 
   const userPollVotes = activePoll && user
