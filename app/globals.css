@@ -492,7 +492,7 @@ body::before {
 /* ============================================================
    RANKINGS
    ============================================================ */
-.rankings-layout { display:grid; grid-template-columns:1fr 1fr; gap:48px; }
+.rankings-layout { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start; }
 @media (max-width: 1024px) { .rankings-layout { grid-template-columns: 1fr; } }
 
 .podium-item { display:grid; grid-template-columns:32px 52px 1fr auto; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--color-electric-border); cursor:pointer; transition:background 0.15s ease, padding 0.15s ease; border-radius:4px; }

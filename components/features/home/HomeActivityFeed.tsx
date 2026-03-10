@@ -53,7 +53,7 @@ function activityVerb(type: string, locale: string): string {
 export async function HomeActivityFeed({ locale }: HomeActivityFeedProps) {
   let activities: ActivityWithContext[] = []
   try {
-    const result = await getPublicFeed(1, 12)
+    const result = await getPublicFeed(1, 6)
     activities = result.activities
   } catch {
     return null

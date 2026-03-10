@@ -254,7 +254,7 @@ async function RankingAndFeedSection({ locale }: { locale: string }) {
   let ranked: Awaited<ReturnType<typeof getTopRankedManhwas>> = []
   const t = await getTranslations({ locale, namespace: 'home' })
   try {
-    ranked = await getTopRankedManhwas(10, locale)
+    ranked = await getTopRankedManhwas(5, locale)
   } catch {
     // continue with empty list
   }
