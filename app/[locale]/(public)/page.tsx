@@ -217,7 +217,7 @@ async function TrendingSection({ locale }: { locale: string }) {
   try {
     ;[contentFilter, manhwas] = await Promise.all([
       getCurrentContentFilter(),
-      getTrendingManhwas(locale, 5),
+      getTrendingManhwas(locale, 10),
     ])
   } catch {
     return null
@@ -231,15 +231,11 @@ async function TrendingSection({ locale }: { locale: string }) {
         href={`/${locale}/search?sort=popularity`}
         seeAllLabel="See all →"
       />
-      <div className="trending-grid">
+      <div className="trending-scroll">
         {manhwas.map((m, i) => (
-          <div key={m.id} className="relative">
+          <div key={m.id} className="trending-scroll-item relative">
             <span className="card-rank">{i + 1}</span>
-            <ManhwaCard
-              manhwa={m}
-              locale={locale}
-              userContentFilter={contentFilter}
-            />
+            <GemCard manhwa={m} locale={locale} />
           </div>
         ))}
       </div>
