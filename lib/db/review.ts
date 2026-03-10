@@ -19,6 +19,28 @@ export type ReviewWithUser = Prisma.ReviewGetPayload<{
   include: typeof reviewWithUser
 }>
 
+const reviewWithManhwa = {
+  user: {
+    select: { id: true, username: true, display_name: true, avatar_url: true },
+  },
+  manhwa: {
+    select: { id: true, slug: true, title_en: true, title_fr: true, cover_url: true },
+  },
+} satisfies Prisma.ReviewInclude
+
+export type ReviewWithManhwa = Prisma.ReviewGetPayload<{
+  include: typeof reviewWithManhwa
+}>
+
+export async function getRecentReviews(limit = 6): Promise<ReviewWithManhwa[]> {
+  return prisma.review.findMany({
+    where: { deleted_at: null },
+    include: reviewWithManhwa,
+    orderBy: { created_at: 'desc' },
+    take: limit,
+  })
+}
+
 export async function getReviewsForManhwa(
   manhwaId: string,
   sortBy: 'popular' | 'recent' = 'popular',

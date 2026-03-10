@@ -94,11 +94,12 @@ export async function getPopularTropes(limit = 8) {
 }
 
 export async function getStats() {
-  const [manhwaCount, genreCount, tropeCount] = await Promise.all([
+  const [manhwaCount, genreCount, tropeCount, userCount] = await Promise.all([
     prisma.manhwa.count({ where: { is_published: true } }),
     prisma.genre.count(),
     prisma.trope.count(),
+    prisma.user.count(),
   ])
 
-  return { manhwaCount, genreCount, tropeCount }
+  return { manhwaCount, genreCount, tropeCount, userCount }
 }

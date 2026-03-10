@@ -83,7 +83,8 @@
       "viewAll": "Voir le classement complet"
     },
     "topLists": "Listes populaires",
-    "featuredFanArt": "Fan Art de la semaine"
+    "featuredFanArt": "Fan Art de la semaine",
+    "recentReviews": "Avis récents"
   },
   "filter": {
     "searchPlaceholder": "Rechercher un manhwa...",

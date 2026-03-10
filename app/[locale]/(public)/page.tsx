@@ -4,31 +4,22 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import {
   getTrendingManhwas,
-  getTopRated,
-  getRecentManhwas,
-  getPopularManhwas,
   getHiddenGems,
+  getRecentManhwas,
   getStats,
 } from '@/lib/db/home'
-import { getAllGenres } from '@/lib/db/genre'
-import { getAllTropes } from '@/lib/db/trope'
 import { getTopLists } from '@/lib/db/list'
 import { getTopRankedManhwas } from '@/lib/db/ranking'
 import { getCurrentContentFilter } from '@/lib/nsfw'
-import type { ContentFilter } from '@prisma/client'
 import { ManhwaCard } from '@/components/features/ManhwaCard'
 import { ManhwaCardSkeleton } from '@/components/features/ManhwaCardSkeleton'
 import { HomeSection } from '@/components/features/HomeSection'
-import { HomeFilterBar } from '@/components/features/HomeFilterBar'
 import { HomeGenreBar } from '@/components/features/home/HomeGenreBar'
 import { HomeActivityFeed } from '@/components/features/home/HomeActivityFeed'
+import { HomeReviews } from '@/components/features/home/HomeReviews'
 import { PageContainer } from '@/components/layouts/PageContainer'
-import { HomeRanking } from '@/components/features/home/HomeRanking'
 import { HomeRankingList } from '@/components/features/home/HomeRankingList'
-import { ScrollableRow } from '@/components/features/ScrollableRow'
-import type { ManhwaCardPopupData } from '@/lib/db/manhwa'
 import { formatCount } from '@/lib/utils/formatCount'
-import { getTopFanArtsThisWeek } from '@/lib/db/fan-art'
 
 export const revalidate = 300
 
@@ -38,13 +29,12 @@ interface HomeProps {
 
 export default async function HomePage({ params }: HomeProps) {
   const { locale } = await params
-  const t = await getTranslations({ locale, namespace: 'home' })
 
   return (
     <>
-      {/* Featured Hero */}
+      {/* Hero — 50/50 editorial split + cover collage */}
       <Suspense fallback={<div className="h-[420px] bg-void" />}>
-        <FeaturedHeroSection locale={locale} />
+        <HeroSection locale={locale} />
       </Suspense>
 
       {/* Live Ticker */}
@@ -56,19 +46,9 @@ export default async function HomePage({ params }: HomeProps) {
       <HomeGenreBar locale={locale} />
 
       <PageContainer>
-        {/* Trending */}
+        {/* Trending — 5-col grid with rank overlays */}
         <Suspense fallback={<SectionSkeleton />}>
           <TrendingSection locale={locale} />
-        </Suspense>
-
-        {/* Best Rated AniList */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <BestRatedAnilistSection locale={locale} />
-        </Suspense>
-
-        {/* Recently Added */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <RecentSection locale={locale} />
         </Suspense>
 
         {/* Two-col: Rankings + Activity Feed */}
@@ -76,50 +56,33 @@ export default async function HomePage({ params }: HomeProps) {
           <RankingAndFeedSection locale={locale} />
         </Suspense>
 
-        {/* Community Lists */}
+        {/* Recent Reviews — 3-col grid */}
         <Suspense fallback={<SectionSkeleton />}>
-          <TopListsSection locale={locale} />
+          <ReviewsSection locale={locale} />
         </Suspense>
 
-        {/* Fan Art of the Week */}
-        <Suspense fallback={null}>
-          <FanArtSection locale={locale} />
-        </Suspense>
-
-        {/* All-Time Popular */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <AllTimePopularSection locale={locale} />
-        </Suspense>
-
-        {/* Hidden Gems */}
+        {/* Hidden Gems — 6-col grid */}
         <Suspense fallback={<SectionSkeleton />}>
           <HiddenGemsSection locale={locale} />
+        </Suspense>
+
+        {/* Community Lists — 3-col */}
+        <Suspense fallback={<SectionSkeleton />}>
+          <TopListsSection locale={locale} />
         </Suspense>
       </PageContainer>
     </>
   )
 }
 
-async function FeaturedHeroSection({ locale }: { locale: string }) {
-  const [featured, stats] = await Promise.all([
-    getTopRankedManhwas(1, locale),
+/* ──────────────────────────────────────────────────────────────
+   HERO SECTION — editorial left + cover collage right
+   ────────────────────────────────────────────────────────────── */
+async function HeroSection({ locale }: { locale: string }) {
+  const [covers, stats] = await Promise.all([
+    getTopRankedManhwas(5, locale),
     getStats(),
   ])
-  const manhwa = featured[0]
-
-  if (!manhwa) {
-    // Fallback: simple hero without featured manhwa
-    return (
-      <section className="relative overflow-hidden bg-void px-4 py-16 text-center">
-        <h1 className="font-display text-6xl tracking-widest text-electric electric-glow md:text-8xl">
-          ManhwaVerse
-        </h1>
-        <p className="mx-auto mt-4 max-w-md text-text-secondary">
-          The ultimate manhwa database
-        </p>
-      </section>
-    )
-  }
 
   return (
     <section className="relative overflow-hidden bg-void">
@@ -141,81 +104,120 @@ async function FeaturedHeroSection({ locale }: { locale: string }) {
         />
       </div>
 
-      <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-8 px-4 py-10 md:flex-row md:items-center md:gap-12 md:py-14">
-        {/* Left — Text */}
-        <div className="flex flex-1 flex-col gap-4">
-          {/* Pulsing tag */}
+      <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 py-10 md:flex-row md:items-center md:gap-16 md:py-16">
+        {/* Left — Editorial */}
+        <div className="flex flex-1 flex-col gap-5">
+          {/* Label */}
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 animate-pulse rounded-full bg-electric" />
             <span className="text-xs uppercase tracking-widest text-electric">
-              {locale === 'fr' ? 'Manhwa en vedette' : 'Featured Manhwa'}
+              {locale === 'fr' ? 'La base de données manhwa' : 'The Manhwa Database'}
             </span>
           </div>
 
           {/* Title */}
-          <h1 className="font-display text-5xl leading-none tracking-wide text-white md:text-6xl">
-            {manhwa.title}
+          <h1 className="font-display text-6xl leading-none tracking-widest text-electric electric-glow md:text-8xl">
+            MANHWA
+            <br />
+            VERSE
           </h1>
 
-          {/* Genre badges */}
-          {manhwa.genres.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {manhwa.genres.slice(0, 3).map((g) => (
-                <span
-                  key={g}
-                  className="rounded border border-electric-border bg-electric-glow px-2 py-0.5 text-[10px] uppercase tracking-widest text-electric-dim"
-                >
-                  {g}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* CTA */}
-          <div className="mt-2 flex items-center gap-4">
-            <Link
-              href={`/${locale}/manhwa/${manhwa.slug}`}
-              className="rounded-md bg-electric px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition-all duration-150  hover:-translate-y-px"
-            >
-              {locale === 'fr' ? 'Lire maintenant' : 'Read now'}
-            </Link>
-          </div>
+          {/* Description */}
+          <p className="max-w-sm text-sm text-text-secondary">
+            {locale === 'fr'
+              ? 'Découvrez, notez et suivez vos manhwas préférés avec une communauté passionnée.'
+              : 'Discover, rate, and track your favorite manhwas with a passionate community.'}
+          </p>
 
           {/* Stats */}
           <div className="flex gap-6 border-t border-electric-border pt-4">
             <div>
-              <div className="font-mono text-lg font-bold text-electric">{formatCount(manhwa.reader_count)}</div>
-              <div className="text-[10px] uppercase tracking-widest text-text-muted">{locale === 'fr' ? 'Lecteurs' : 'Readers'}</div>
-            </div>
-            {manhwa.score != null && (
-              <div>
-                <div className="font-mono text-lg font-bold text-gold">★ {manhwa.score.toFixed(1)}</div>
-                <div className="text-[10px] uppercase tracking-widest text-text-muted">Score</div>
+              <div className="font-mono text-lg font-bold text-electric">
+                {stats.manhwaCount.toLocaleString()}
               </div>
-            )}
-            <div>
-              <div className="font-mono text-lg font-bold text-text-primary">{stats.manhwaCount.toLocaleString()}</div>
-              <div className="text-[10px] uppercase tracking-widest text-text-muted">Titles</div>
+              <div className="text-[10px] uppercase tracking-widest text-text-muted">
+                {locale === 'fr' ? 'Titres' : 'Titles'}
+              </div>
             </div>
+            <div>
+              <div className="font-mono text-lg font-bold text-electric">
+                {formatCount(stats.userCount)}
+              </div>
+              <div className="text-[10px] uppercase tracking-widest text-text-muted">
+                {locale === 'fr' ? 'Membres' : 'Members'}
+              </div>
+            </div>
+            <div>
+              <div className="font-mono text-lg font-bold text-electric">
+                {stats.genreCount}
+              </div>
+              <div className="text-[10px] uppercase tracking-widest text-text-muted">
+                {locale === 'fr' ? 'Genres' : 'Genres'}
+              </div>
+            </div>
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/${locale}/explore`}
+              className="rounded-md bg-electric px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition-all duration-150 hover:-translate-y-px"
+            >
+              {locale === 'fr' ? 'Explorer' : 'Browse Library'}
+            </Link>
+            <Link
+              href={`/${locale}/search?sort=popularity`}
+              className="rounded-md border border-electric-border bg-transparent px-6 py-3 text-xs font-bold uppercase tracking-widest text-electric transition-all duration-150 hover:bg-electric-glow"
+            >
+              {locale === 'fr' ? 'Tendances' : 'Trending Now'}
+            </Link>
           </div>
         </div>
 
-        {/* Right — Cover */}
-        {manhwa.cover_url && (
-          <div className="relative flex-shrink-0">
-            <div className="relative h-[280px] w-[200px] overflow-hidden rounded-lg ring-1 ring-electric-border shadow-[0_0_60px_rgba(0,0,0,0.7)]">
-              <Image
-                src={manhwa.cover_url}
-                alt={manhwa.title}
-                fill
-                sizes="200px"
-                className="object-cover"
-                priority
-              />
-            </div>
-            {/* #1 badge */}
-            <div className="absolute -left-3 -top-3 flex h-10 w-10 items-center justify-center rounded-full bg-gold font-display text-xl text-black shadow-[0_0_12px_rgba(255,215,0,0.4)]">
-              #1
+        {/* Right — Cover collage (desktop only) */}
+        {covers.length > 0 && (
+          <div className="relative hidden flex-shrink-0 md:flex gap-2">
+            {/* Gradient fade on left edge */}
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-void to-transparent" />
+
+            {/* Featured big cover */}
+            <Link
+              href={`/${locale}/manhwa/${covers[0]?.slug}`}
+              className="relative h-[280px] w-[176px] flex-shrink-0 overflow-hidden rounded-lg ring-1 ring-electric-border"
+            >
+              {covers[0]?.cover_url && (
+                <Image
+                  src={covers[0].cover_url}
+                  alt={covers[0].title}
+                  fill
+                  sizes="176px"
+                  className="object-cover transition-transform duration-300 hover:scale-105"
+                  priority
+                />
+              )}
+            </Link>
+
+            {/* 2×2 grid of smaller covers */}
+            <div className="grid grid-cols-2 gap-2">
+              {covers.slice(1, 5).map((m) => (
+                m.cover_url ? (
+                  <Link
+                    key={m.slug}
+                    href={`/${locale}/manhwa/${m.slug}`}
+                    className="relative h-[136px] w-[86px] overflow-hidden rounded-md ring-1 ring-electric-border/50"
+                  >
+                    <Image
+                      src={m.cover_url}
+                      alt={m.title}
+                      fill
+                      sizes="86px"
+                      className="object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                  </Link>
+                ) : (
+                  <div key={m.slug} className="h-[136px] w-[86px] rounded-md bg-elevated ring-1 ring-electric-border/30" />
+                )
+              ))}
             </div>
           </div>
         )}
@@ -224,6 +226,9 @@ async function FeaturedHeroSection({ locale }: { locale: string }) {
   )
 }
 
+/* ──────────────────────────────────────────────────────────────
+   TICKER
+   ────────────────────────────────────────────────────────────── */
 async function TickerSection({ locale }: { locale: string }) {
   const recent = await getRecentManhwas(10)
   if (recent.length === 0) return null
@@ -231,7 +236,6 @@ async function TickerSection({ locale }: { locale: string }) {
   const items = recent.map((m) =>
     locale === 'fr' ? (m.title_fr ?? m.title_en) : m.title_en
   )
-  // Duplicate for seamless loop
   const doubled = [...items, ...items]
 
   return (
@@ -251,78 +255,55 @@ async function TickerSection({ locale }: { locale: string }) {
   )
 }
 
-async function FilterBarSection({ locale }: { locale: string }) {
-  const [genres, tropes] = await Promise.all([getAllGenres(), getAllTropes()])
-  return (
-    <HomeFilterBar
-      locale={locale}
-      genres={genres.map((g) => ({
-        slug: g.slug,
-        name: locale === 'fr' ? g.name_fr : g.name_en,
-      }))}
-      tropes={tropes.map((tr) => ({
-        slug: tr.slug,
-        name: tr.name,
-      }))}
-    />
-  )
-}
-
+/* ──────────────────────────────────────────────────────────────
+   TRENDING — 5-col grid with rank number overlays
+   ────────────────────────────────────────────────────────────── */
 async function TrendingSection({ locale }: { locale: string }) {
   const [contentFilter, manhwas, t] = await Promise.all([
     getCurrentContentFilter(),
-    getTrendingManhwas(locale, 10),
+    getTrendingManhwas(locale, 5),
     getTranslations({ locale, namespace: 'home' }),
   ])
   if (manhwas.length === 0) return null
+
   return (
     <HomeSection title={t('trending')} viewAllHref={`/${locale}/search?sort=popularity`} locale={locale}>
-      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+        {manhwas.map((m, i) => (
+          <div key={m.id} className="relative">
+            {/* Rank overlay */}
+            <span className="pointer-events-none absolute -bottom-1 -left-1 z-10 font-display text-[56px] leading-none text-text-primary/10 select-none">
+              {i + 1}
+            </span>
+            <ManhwaCard
+              manhwa={m}
+              locale={locale}
+              userContentFilter={contentFilter}
+            />
+          </div>
+        ))}
+      </div>
     </HomeSection>
   )
 }
 
-async function BestRatedAnilistSection({ locale }: { locale: string }) {
-  const [contentFilter, manhwas, t] = await Promise.all([
-    getCurrentContentFilter(),
-    getTopRated(10),
-    getTranslations({ locale, namespace: 'home' }),
-  ])
-  if (manhwas.length === 0) return null
-  return (
-    <HomeSection title={t('bestRatedAnilist')} viewAllHref={`/${locale}/search?sort=score`} locale={locale}>
-      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} />
-    </HomeSection>
-  )
-}
-
-async function RecentSection({ locale }: { locale: string }) {
-  const [contentFilter, manhwas, t] = await Promise.all([
-    getCurrentContentFilter(),
-    getRecentManhwas(10),
-    getTranslations({ locale, namespace: 'home' }),
-  ])
-  if (manhwas.length === 0) return null
-  return (
-    <HomeSection title={t('recentlyAdded')} viewAllHref={`/${locale}/search?sort=recent`} locale={locale}>
-      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} />
-    </HomeSection>
-  )
-}
-
+/* ──────────────────────────────────────────────────────────────
+   TWO-COLUMN: Rankings + Activity Feed
+   ────────────────────────────────────────────────────────────── */
 async function RankingAndFeedSection({ locale }: { locale: string }) {
   const [t, ranked] = await Promise.all([
     getTranslations({ locale, namespace: 'home' }),
     getTopRankedManhwas(10, locale),
   ])
   const readersLabel = locale === 'fr' ? 'lecteurs' : 'readers'
+
   return (
     <section className="mt-12">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Left: compact ranking list */}
         <div>
           <h2 className="section-title-bar mb-4 font-display text-xl uppercase tracking-wider text-text-primary">
-            {t('ranking')}
+            {t('ranking.title')}
           </h2>
           <HomeRankingList manhwas={ranked} locale={locale} readersLabel={readersLabel} />
         </div>
@@ -338,64 +319,55 @@ async function RankingAndFeedSection({ locale }: { locale: string }) {
   )
 }
 
-async function AllTimePopularSection({ locale }: { locale: string }) {
-  const [contentFilter, manhwas, t] = await Promise.all([
-    getCurrentContentFilter(),
-    getPopularManhwas(10),
-    getTranslations({ locale, namespace: 'home' }),
-  ])
-  if (manhwas.length === 0) return null
+/* ──────────────────────────────────────────────────────────────
+   RECENT REVIEWS — 3-col grid
+   ────────────────────────────────────────────────────────────── */
+async function ReviewsSection({ locale }: { locale: string }) {
+  const t = await getTranslations({ locale, namespace: 'home' })
   return (
-    <HomeSection title={t('allTimePopular')} viewAllHref={`/${locale}/search?sort=popularity`} locale={locale}>
-      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} />
+    <HomeSection title={t('recentReviews')} viewAllHref={`/${locale}/explore`} locale={locale}>
+      <HomeReviews locale={locale} />
     </HomeSection>
   )
 }
 
+/* ──────────────────────────────────────────────────────────────
+   HIDDEN GEMS — 6-col grid with cover overlay
+   ────────────────────────────────────────────────────────────── */
 async function HiddenGemsSection({ locale }: { locale: string }) {
   const [contentFilter, manhwas, t] = await Promise.all([
     getCurrentContentFilter(),
-    getHiddenGems(10),
+    getHiddenGems(6),
     getTranslations({ locale, namespace: 'home' }),
   ])
   if (manhwas.length === 0) return null
+
   return (
     <HomeSection title={t('hiddenGems')} viewAllHref={`/${locale}/search?sort=score`} locale={locale}>
-      <CardGrid manhwas={manhwas} locale={locale} contentFilter={contentFilter} />
-    </HomeSection>
-  )
-}
-
-function CardGrid({
-  manhwas,
-  locale,
-  contentFilter,
-}: {
-  manhwas: ManhwaCardPopupData[]
-  locale: string
-  contentFilter: ContentFilter
-}) {
-  return (
-    <ScrollableRow>
-      {manhwas.map((m) => (
-        <div key={m.id} className="w-36 flex-none sm:w-40 md:w-44">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+        {manhwas.map((m) => (
           <ManhwaCard
+            key={m.id}
             manhwa={m}
             locale={locale}
             userContentFilter={contentFilter}
           />
-        </div>
-      ))}
-    </ScrollableRow>
+        ))}
+      </div>
+    </HomeSection>
   )
 }
 
+/* ──────────────────────────────────────────────────────────────
+   TOP LISTS — 3-col grid with cover mosaic
+   ────────────────────────────────────────────────────────────── */
 async function TopListsSection({ locale }: { locale: string }) {
   const [lists, t] = await Promise.all([
     getTopLists(6),
     getTranslations({ locale, namespace: 'home' }),
   ])
   if (lists.length === 0) return null
+
   return (
     <HomeSection title={t('topLists')} viewAllHref={`/${locale}/lists`} locale={locale}>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -403,9 +375,9 @@ async function TopListsSection({ locale }: { locale: string }) {
           <Link
             key={list.id}
             href={`/${locale}/lists/${list.slug}`}
-            className="group flex gap-3 rounded-xl border border-white/5 bg-card p-3 transition-colors hover:border-electric-border-hover"
+            className="group flex gap-3 rounded-xl border border-electric-border bg-card p-3 transition-colors hover:border-electric-border-hover"
           >
-            {/* Mini cover strip */}
+            {/* Cover mosaic */}
             <div className="flex h-16 w-28 flex-shrink-0 overflow-hidden rounded-lg">
               {list.preview_covers.length > 0 ? (
                 list.preview_covers.slice(0, 3).map((cover, i) => (
@@ -414,7 +386,7 @@ async function TopListsSection({ locale }: { locale: string }) {
                   </div>
                 ))
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-elevated text-text-muted text-xs">
+                <div className="flex h-full w-full items-center justify-center bg-elevated text-xs text-text-muted">
                   —
                 </div>
               )}
@@ -422,7 +394,7 @@ async function TopListsSection({ locale }: { locale: string }) {
 
             {/* Info */}
             <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-              <p className="line-clamp-2 text-sm font-semibold leading-snug text-text-primary group-hover:text-electric">
+              <p className="line-clamp-2 text-sm font-semibold leading-snug text-text-primary transition-colors group-hover:text-electric">
                 {list.title}
               </p>
               <p className="text-xs text-text-muted">
@@ -436,56 +408,16 @@ async function TopListsSection({ locale }: { locale: string }) {
   )
 }
 
-async function FanArtSection({ locale }: { locale: string }) {
-  let posts: Awaited<ReturnType<typeof getTopFanArtsThisWeek>> = []
-  try {
-    posts = await getTopFanArtsThisWeek(6)
-  } catch {
-    return null
-  }
-  const t = await getTranslations({ locale, namespace: 'home' })
-  if (posts.length === 0) return null
-  return (
-    <HomeSection title={t('featuredFanArt')} viewAllHref={`/${locale}/artwork`} locale={locale}>
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-        {posts.map((post) => {
-          const img = post.images[0]
-          if (!img) return null
-          return (
-            <Link
-              key={post.id}
-              href={`/${locale}/artwork/${post.id}`}
-              className="group relative aspect-square overflow-hidden rounded-lg bg-card"
-              title={post.title}
-            >
-              <img
-                src={img.thumb_url || img.image_url}
-                alt={img.alt_text ?? post.title}
-                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/30" />
-              {post.manhwa && (
-                <div className="absolute bottom-0 left-0 right-0 translate-y-full bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5 transition-transform duration-200 group-hover:translate-y-0">
-                  <p className="line-clamp-1 text-[10px] text-white">{post.manhwa.title_en}</p>
-                </div>
-              )}
-            </Link>
-          )
-        })}
-      </div>
-    </HomeSection>
-  )
-}
-
+/* ──────────────────────────────────────────────────────────────
+   SKELETONS
+   ────────────────────────────────────────────────────────────── */
 function SectionSkeleton() {
   return (
     <section className="mt-10">
       <div className="mb-4 h-7 w-40 animate-pulse rounded bg-elevated" />
-      <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scroll-pl-4">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="w-36 flex-none snap-start sm:w-40 md:w-44">
-            <ManhwaCardSkeleton />
-          </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <ManhwaCardSkeleton key={i} />
         ))}
       </div>
     </section>
