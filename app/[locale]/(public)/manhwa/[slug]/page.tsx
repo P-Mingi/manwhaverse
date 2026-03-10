@@ -207,7 +207,7 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
                 <a
                   key={post.id}
                   href={`/${locale}/artwork/${post.id}`}
-                  className="group relative aspect-square overflow-hidden rounded-lg bg-[#0d0d16]"
+                  className="group relative aspect-square overflow-hidden rounded-lg bg-surface"
                   title={post.title}
                 >
                   <img
