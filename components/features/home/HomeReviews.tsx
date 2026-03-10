@@ -8,7 +8,12 @@ interface HomeReviewsProps {
 }
 
 export async function HomeReviews({ locale }: HomeReviewsProps) {
-  const reviews = await getRecentReviews(6)
+  let reviews: Awaited<ReturnType<typeof getRecentReviews>> = []
+  try {
+    reviews = await getRecentReviews(6)
+  } catch {
+    return null
+  }
   if (reviews.length === 0) return null
 
   return (

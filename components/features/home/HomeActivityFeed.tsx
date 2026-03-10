@@ -32,7 +32,13 @@ function activityLabel(activity: ActivityWithContext, locale: string): string {
 }
 
 export async function HomeActivityFeed({ locale }: HomeActivityFeedProps) {
-  const { activities } = await getPublicFeed(1, 12)
+  let activities: ActivityWithContext[] = []
+  try {
+    const result = await getPublicFeed(1, 12)
+    activities = result.activities
+  } catch {
+    return null
+  }
 
   if (activities.length === 0) return null
 

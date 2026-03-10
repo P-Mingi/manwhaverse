@@ -79,10 +79,16 @@ export default async function HomePage({ params }: HomeProps) {
    HERO SECTION — editorial left + cover collage right
    ────────────────────────────────────────────────────────────── */
 async function HeroSection({ locale }: { locale: string }) {
-  const [covers, stats] = await Promise.all([
-    getTopRankedManhwas(5, locale),
-    getStats(),
-  ])
+  let covers: Awaited<ReturnType<typeof getTopRankedManhwas>> = []
+  let stats = { manhwaCount: 0, genreCount: 0, tropeCount: 0, userCount: 0 }
+  try {
+    ;[covers, stats] = await Promise.all([
+      getTopRankedManhwas(5, locale),
+      getStats(),
+    ])
+  } catch {
+    // DB unavailable — render hero without stats/collage
+  }
 
   return (
     <section className="relative overflow-hidden bg-void">
@@ -230,7 +236,12 @@ async function HeroSection({ locale }: { locale: string }) {
    TICKER
    ────────────────────────────────────────────────────────────── */
 async function TickerSection({ locale }: { locale: string }) {
-  const recent = await getRecentManhwas(10)
+  let recent: Awaited<ReturnType<typeof getRecentManhwas>> = []
+  try {
+    recent = await getRecentManhwas(10)
+  } catch {
+    return null
+  }
   if (recent.length === 0) return null
 
   const items = recent.map((m) =>
@@ -259,11 +270,17 @@ async function TickerSection({ locale }: { locale: string }) {
    TRENDING — 5-col grid with rank number overlays
    ────────────────────────────────────────────────────────────── */
 async function TrendingSection({ locale }: { locale: string }) {
-  const [contentFilter, manhwas, t] = await Promise.all([
-    getCurrentContentFilter(),
-    getTrendingManhwas(locale, 5),
-    getTranslations({ locale, namespace: 'home' }),
-  ])
+  let contentFilter: Awaited<ReturnType<typeof getCurrentContentFilter>> = 'SAFE'
+  let manhwas: Awaited<ReturnType<typeof getTrendingManhwas>> = []
+  const t = await getTranslations({ locale, namespace: 'home' })
+  try {
+    ;[contentFilter, manhwas] = await Promise.all([
+      getCurrentContentFilter(),
+      getTrendingManhwas(locale, 5),
+    ])
+  } catch {
+    return null
+  }
   if (manhwas.length === 0) return null
 
   return (
@@ -291,10 +308,13 @@ async function TrendingSection({ locale }: { locale: string }) {
    TWO-COLUMN: Rankings + Activity Feed
    ────────────────────────────────────────────────────────────── */
 async function RankingAndFeedSection({ locale }: { locale: string }) {
-  const [t, ranked] = await Promise.all([
-    getTranslations({ locale, namespace: 'home' }),
-    getTopRankedManhwas(10, locale),
-  ])
+  let ranked: Awaited<ReturnType<typeof getTopRankedManhwas>> = []
+  const t = await getTranslations({ locale, namespace: 'home' })
+  try {
+    ranked = await getTopRankedManhwas(10, locale)
+  } catch {
+    // continue with empty list
+  }
   const readersLabel = locale === 'fr' ? 'lecteurs' : 'readers'
 
   return (
@@ -335,11 +355,17 @@ async function ReviewsSection({ locale }: { locale: string }) {
    HIDDEN GEMS — 6-col grid with cover overlay
    ────────────────────────────────────────────────────────────── */
 async function HiddenGemsSection({ locale }: { locale: string }) {
-  const [contentFilter, manhwas, t] = await Promise.all([
-    getCurrentContentFilter(),
-    getHiddenGems(6),
-    getTranslations({ locale, namespace: 'home' }),
-  ])
+  let contentFilter: Awaited<ReturnType<typeof getCurrentContentFilter>> = 'SAFE'
+  let manhwas: Awaited<ReturnType<typeof getHiddenGems>> = []
+  const t = await getTranslations({ locale, namespace: 'home' })
+  try {
+    ;[contentFilter, manhwas] = await Promise.all([
+      getCurrentContentFilter(),
+      getHiddenGems(6),
+    ])
+  } catch {
+    return null
+  }
   if (manhwas.length === 0) return null
 
   return (
@@ -362,10 +388,13 @@ async function HiddenGemsSection({ locale }: { locale: string }) {
    TOP LISTS — 3-col grid with cover mosaic
    ────────────────────────────────────────────────────────────── */
 async function TopListsSection({ locale }: { locale: string }) {
-  const [lists, t] = await Promise.all([
-    getTopLists(6),
-    getTranslations({ locale, namespace: 'home' }),
-  ])
+  let lists: Awaited<ReturnType<typeof getTopLists>> = []
+  const t = await getTranslations({ locale, namespace: 'home' })
+  try {
+    lists = await getTopLists(6)
+  } catch {
+    return null
+  }
   if (lists.length === 0) return null
 
   return (
