@@ -13,12 +13,12 @@ import { getTopRankedManhwas } from '@/lib/db/ranking'
 import { getCurrentContentFilter } from '@/lib/nsfw'
 import { ManhwaCard } from '@/components/features/ManhwaCard'
 import { ManhwaCardSkeleton } from '@/components/features/ManhwaCardSkeleton'
-import { HomeSection } from '@/components/features/HomeSection'
 import { HomeGenreBar } from '@/components/features/home/HomeGenreBar'
 import { HomeActivityFeed } from '@/components/features/home/HomeActivityFeed'
 import { HomeReviews } from '@/components/features/home/HomeReviews'
-import { PageContainer } from '@/components/layouts/PageContainer'
 import { HomeRankingList } from '@/components/features/home/HomeRankingList'
+import { GemCard } from '@/components/features/home/GemCard'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 import { formatCount } from '@/lib/utils/formatCount'
 
 export const revalidate = 300
@@ -32,8 +32,8 @@ export default async function HomePage({ params }: HomeProps) {
 
   return (
     <>
-      {/* Hero — 50/50 editorial split + cover collage */}
-      <Suspense fallback={<div className="h-[420px] bg-void" />}>
+      {/* Hero */}
+      <Suspense fallback={<div className="h-[90vh] bg-void" />}>
         <HeroSection locale={locale} />
       </Suspense>
 
@@ -45,8 +45,8 @@ export default async function HomePage({ params }: HomeProps) {
       {/* Genre pill bar */}
       <HomeGenreBar locale={locale} />
 
-      <PageContainer>
-        {/* Trending — 5-col grid with rank overlays */}
+      <div className="page-main">
+        {/* Trending */}
         <Suspense fallback={<SectionSkeleton />}>
           <TrendingSection locale={locale} />
         </Suspense>
@@ -56,175 +56,119 @@ export default async function HomePage({ params }: HomeProps) {
           <RankingAndFeedSection locale={locale} />
         </Suspense>
 
-        {/* Recent Reviews — 3-col grid */}
+        {/* Recent Reviews */}
         <Suspense fallback={<SectionSkeleton />}>
           <ReviewsSection locale={locale} />
         </Suspense>
 
-        {/* Hidden Gems — 6-col grid */}
+        {/* Hidden Gems */}
         <Suspense fallback={<SectionSkeleton />}>
           <HiddenGemsSection locale={locale} />
         </Suspense>
 
-        {/* Community Lists — 3-col */}
+        {/* Community Lists */}
         <Suspense fallback={<SectionSkeleton />}>
           <TopListsSection locale={locale} />
         </Suspense>
-      </PageContainer>
+      </div>
     </>
   )
 }
 
 /* ──────────────────────────────────────────────────────────────
-   HERO SECTION — editorial left + cover collage right
+   HERO SECTION — editorial left + 3×3 collage right
    ────────────────────────────────────────────────────────────── */
 async function HeroSection({ locale }: { locale: string }) {
   let covers: Awaited<ReturnType<typeof getTopRankedManhwas>> = []
-  let stats = { manhwaCount: 0, genreCount: 0, tropeCount: 0, userCount: 0 }
+  let stats = { manhwaCount: 0, genreCount: 0, tropeCount: 0, userCount: 0, reviewCount: 0 }
   try {
     ;[covers, stats] = await Promise.all([
-      getTopRankedManhwas(5, locale),
+      getTopRankedManhwas(6, locale),
       getStats(),
     ])
   } catch {
     // DB unavailable — render hero without stats/collage
   }
 
+  const t = await getTranslations({ locale, namespace: 'home' })
+
   return (
-    <section className="relative overflow-hidden bg-void">
-      {/* Animated blob background */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full opacity-10"
-          style={{
-            background: 'radial-gradient(circle, var(--color-electric) 0%, transparent 70%)',
-            animation: 'blob-float 12s ease-in-out infinite',
-          }}
-        />
-        <div
-          className="absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full opacity-8"
-          style={{
-            background: 'radial-gradient(circle, var(--color-electric-dim) 0%, transparent 70%)',
-            animation: 'blob-float 15s ease-in-out infinite reverse',
-          }}
-        />
-      </div>
+    <section className="hero">
+      {/* Left: editorial */}
+      <div className="hero-editorial">
+        <div className="hero-eyebrow">{t('hero.eyebrow')}</div>
 
-      <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 py-10 md:flex-row md:items-center md:gap-16 md:py-16">
-        {/* Left — Editorial */}
-        <div className="flex flex-1 flex-col gap-5">
-          {/* Label */}
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-electric" />
-            <span className="text-xs uppercase tracking-widest text-electric">
-              {locale === 'fr' ? 'La base de données manhwa' : 'The Manhwa Database'}
-            </span>
+        <h1 className="hero-title">
+          {t('hero.title_line1')}
+          <span className="hero-title-accent">{t('hero.title_accent')}</span>
+          {t('hero.title_line3')}
+        </h1>
+
+        <p className="hero-tagline">{t('hero.tagline')}</p>
+
+        <div className="hero-stats">
+          <div>
+            <div className="hero-stat-num">{formatCount(stats.manhwaCount)}</div>
+            <div className="hero-stat-label">{t('hero.stat_titles')}</div>
           </div>
-
-          {/* Title */}
-          <h1 className="font-display text-6xl leading-none tracking-widest text-electric electric-glow md:text-8xl">
-            MANHWA
-            <br />
-            VERSE
-          </h1>
-
-          {/* Description */}
-          <p className="max-w-sm text-sm text-text-secondary">
-            {locale === 'fr'
-              ? 'Découvrez, notez et suivez vos manhwas préférés avec une communauté passionnée.'
-              : 'Discover, rate, and track your favorite manhwas with a passionate community.'}
-          </p>
-
-          {/* Stats */}
-          <div className="flex gap-6 border-t border-electric-border pt-4">
-            <div>
-              <div className="font-mono text-lg font-bold text-electric">
-                {stats.manhwaCount.toLocaleString()}
-              </div>
-              <div className="text-[10px] uppercase tracking-widest text-text-muted">
-                {locale === 'fr' ? 'Titres' : 'Titles'}
-              </div>
-            </div>
-            <div>
-              <div className="font-mono text-lg font-bold text-electric">
-                {formatCount(stats.userCount)}
-              </div>
-              <div className="text-[10px] uppercase tracking-widest text-text-muted">
-                {locale === 'fr' ? 'Membres' : 'Members'}
-              </div>
-            </div>
-            <div>
-              <div className="font-mono text-lg font-bold text-electric">
-                {stats.genreCount}
-              </div>
-              <div className="text-[10px] uppercase tracking-widest text-text-muted">
-                {locale === 'fr' ? 'Genres' : 'Genres'}
-              </div>
-            </div>
+          <div>
+            <div className="hero-stat-num">{formatCount(stats.userCount)}</div>
+            <div className="hero-stat-label">{t('hero.stat_readers')}</div>
           </div>
-
-          {/* CTAs */}
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href={`/${locale}/explore`}
-              className="rounded-md bg-electric px-6 py-3 text-xs font-bold uppercase tracking-widest text-black transition-all duration-150 hover:-translate-y-px"
-            >
-              {locale === 'fr' ? 'Explorer' : 'Browse Library'}
-            </Link>
-            <Link
-              href={`/${locale}/search?sort=popularity`}
-              className="rounded-md border border-electric-border bg-transparent px-6 py-3 text-xs font-bold uppercase tracking-widest text-electric transition-all duration-150 hover:bg-electric-glow"
-            >
-              {locale === 'fr' ? 'Tendances' : 'Trending Now'}
-            </Link>
+          <div>
+            <div className="hero-stat-num">{formatCount(stats.reviewCount)}</div>
+            <div className="hero-stat-label">{t('hero.stat_reviews')}</div>
           </div>
         </div>
 
-        {/* Right — Cover collage (desktop only) */}
-        {covers.length > 0 && (
-          <div className="relative hidden flex-shrink-0 md:flex gap-2">
-            {/* Gradient fade on left edge */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-void to-transparent" />
+        <div className="hero-cta-row">
+          <Link href={`/${locale}/sign-in`} className="btn-primary">
+            {t('hero.cta_primary')} →
+          </Link>
+          <Link href={`/${locale}/top`} className="btn-secondary">
+            {t('hero.cta_secondary')}
+          </Link>
+        </div>
+      </div>
 
-            {/* Featured big cover */}
-            <Link
-              href={`/${locale}/manhwa/${covers[0]?.slug}`}
-              className="relative h-[280px] w-[176px] flex-shrink-0 overflow-hidden rounded-lg ring-1 ring-electric-border"
-            >
+      {/* Right: 3×3 collage */}
+      <div className="hero-visual">
+        {covers.length > 0 && (
+          <div className="hero-collage">
+            {/* Featured (2×2) */}
+            <Link href={`/${locale}/manhwa/${covers[0]?.slug}`} className="collage-item featured">
               {covers[0]?.cover_url && (
                 <Image
                   src={covers[0].cover_url}
                   alt={covers[0].title}
                   fill
-                  sizes="176px"
-                  className="object-cover transition-transform duration-300 hover:scale-105"
+                  sizes="40vw"
+                  className="collage-cover"
                   priority
                 />
               )}
+              {covers[0]?.score != null && (
+                <div className="collage-score">★ {covers[0].score.toFixed(1)}</div>
+              )}
             </Link>
 
-            {/* 2×2 grid of smaller covers */}
-            <div className="grid grid-cols-2 gap-2">
-              {covers.slice(1, 5).map((m) => (
-                m.cover_url ? (
-                  <Link
-                    key={m.slug}
-                    href={`/${locale}/manhwa/${m.slug}`}
-                    className="relative h-[136px] w-[86px] overflow-hidden rounded-md ring-1 ring-electric-border/50"
-                  >
-                    <Image
-                      src={m.cover_url}
-                      alt={m.title}
-                      fill
-                      sizes="86px"
-                      className="object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                  </Link>
-                ) : (
-                  <div key={m.slug} className="h-[136px] w-[86px] rounded-md bg-elevated ring-1 ring-electric-border/30" />
-                )
-              ))}
-            </div>
+            {/* 5 smaller cells */}
+            {covers.slice(1, 6).map((m) => (
+              <Link key={m.slug} href={`/${locale}/manhwa/${m.slug}`} className="collage-item">
+                {m.cover_url && (
+                  <Image
+                    src={m.cover_url}
+                    alt={m.title}
+                    fill
+                    sizes="20vw"
+                    className="collage-cover"
+                  />
+                )}
+                {m.score != null && (
+                  <div className="collage-score">★ {m.score.toFixed(1)}</div>
+                )}
+              </Link>
+            ))}
           </div>
         )}
       </div>
@@ -250,16 +194,13 @@ async function TickerSection({ locale }: { locale: string }) {
   const doubled = [...items, ...items]
 
   return (
-    <div className="overflow-hidden border-y border-electric-border bg-electric-glow/30 py-2.5">
+    <div className="ticker-wrap">
       <div
         className="flex gap-8 whitespace-nowrap"
         style={{ animation: 'ticker 30s linear infinite' }}
       >
         {doubled.map((title, i) => (
-          <span key={i} className="text-xs text-text-muted">
-            <span className="mr-3 text-electric">→</span>
-            {title}
-          </span>
+          <span key={i} className="ticker-item">{title}</span>
         ))}
       </div>
     </div>
@@ -267,7 +208,7 @@ async function TickerSection({ locale }: { locale: string }) {
 }
 
 /* ──────────────────────────────────────────────────────────────
-   TRENDING — 5-col grid with rank number overlays
+   TRENDING — 5-col grid with rank overlays
    ────────────────────────────────────────────────────────────── */
 async function TrendingSection({ locale }: { locale: string }) {
   let contentFilter: Awaited<ReturnType<typeof getCurrentContentFilter>> = 'SAFE'
@@ -284,14 +225,16 @@ async function TrendingSection({ locale }: { locale: string }) {
   if (manhwas.length === 0) return null
 
   return (
-    <HomeSection title={t('trending')} viewAllHref={`/${locale}/search?sort=popularity`} locale={locale}>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+    <div className="section">
+      <SectionHeader
+        title={t('trending')}
+        href={`/${locale}/search?sort=popularity`}
+        seeAllLabel="See all →"
+      />
+      <div className="trending-grid">
         {manhwas.map((m, i) => (
           <div key={m.id} className="relative">
-            {/* Rank overlay */}
-            <span className="pointer-events-none absolute -bottom-1 -left-1 z-10 font-display text-[56px] leading-none text-text-primary/10 select-none">
-              {i + 1}
-            </span>
+            <span className="card-rank">{i + 1}</span>
             <ManhwaCard
               manhwa={m}
               locale={locale}
@@ -300,7 +243,7 @@ async function TrendingSection({ locale }: { locale: string }) {
           </div>
         ))}
       </div>
-    </HomeSection>
+    </div>
   )
 }
 
@@ -315,27 +258,28 @@ async function RankingAndFeedSection({ locale }: { locale: string }) {
   } catch {
     // continue with empty list
   }
-  const readersLabel = locale === 'fr' ? 'lecteurs' : 'readers'
 
   return (
-    <section className="mt-12">
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {/* Left: compact ranking list */}
+    <div className="section">
+      <div className="rankings-layout">
         <div>
-          <h2 className="section-title-bar mb-4 font-display text-xl uppercase tracking-wider text-text-primary">
-            {t('ranking.title')}
-          </h2>
-          <HomeRankingList manhwas={ranked} locale={locale} readersLabel={readersLabel} />
+          <SectionHeader
+            title={t('ranking_title')}
+            href={`/${locale}/top`}
+            seeAllLabel={t('ranking.viewAll')}
+          />
+          <HomeRankingList manhwas={ranked} locale={locale} />
         </div>
-        {/* Right: activity feed */}
         <div>
-          <h2 className="section-title-bar mb-4 font-display text-xl uppercase tracking-wider text-text-primary">
-            {locale === 'fr' ? 'Activité récente' : 'Recent Activity'}
-          </h2>
+          <SectionHeader
+            title={t('activity_title')}
+            href={`/${locale}/feed`}
+            seeAllLabel="See all →"
+          />
           <HomeActivityFeed locale={locale} />
         </div>
       </div>
-    </section>
+    </div>
   )
 }
 
@@ -345,42 +289,43 @@ async function RankingAndFeedSection({ locale }: { locale: string }) {
 async function ReviewsSection({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: 'home' })
   return (
-    <HomeSection title={t('recentReviews')} viewAllHref={`/${locale}/explore`} locale={locale}>
+    <div className="section">
+      <SectionHeader
+        title={t('recentReviews')}
+        href={`/${locale}/explore`}
+        seeAllLabel="See all →"
+      />
       <HomeReviews locale={locale} />
-    </HomeSection>
+    </div>
   )
 }
 
 /* ──────────────────────────────────────────────────────────────
-   HIDDEN GEMS — 6-col grid with cover overlay
+   HIDDEN GEMS — 6-col grid with overlay
    ────────────────────────────────────────────────────────────── */
 async function HiddenGemsSection({ locale }: { locale: string }) {
-  let contentFilter: Awaited<ReturnType<typeof getCurrentContentFilter>> = 'SAFE'
   let manhwas: Awaited<ReturnType<typeof getHiddenGems>> = []
   const t = await getTranslations({ locale, namespace: 'home' })
   try {
-    ;[contentFilter, manhwas] = await Promise.all([
-      getCurrentContentFilter(),
-      getHiddenGems(6),
-    ])
+    manhwas = await getHiddenGems(6)
   } catch {
     return null
   }
   if (manhwas.length === 0) return null
 
   return (
-    <HomeSection title={t('hiddenGems')} viewAllHref={`/${locale}/search?sort=score`} locale={locale}>
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+    <div className="section">
+      <SectionHeader
+        title={t('hiddenGems')}
+        href={`/${locale}/search?sort=score`}
+        seeAllLabel="See all →"
+      />
+      <div className="gems-grid">
         {manhwas.map((m) => (
-          <ManhwaCard
-            key={m.id}
-            manhwa={m}
-            locale={locale}
-            userContentFilter={contentFilter}
-          />
+          <GemCard key={m.id} manhwa={m} locale={locale} />
         ))}
       </div>
-    </HomeSection>
+    </div>
   )
 }
 
@@ -398,42 +343,38 @@ async function TopListsSection({ locale }: { locale: string }) {
   if (lists.length === 0) return null
 
   return (
-    <HomeSection title={t('topLists')} viewAllHref={`/${locale}/lists`} locale={locale}>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="section">
+      <SectionHeader
+        title={t('topLists')}
+        href={`/${locale}/lists`}
+        seeAllLabel="See all →"
+      />
+      <div className="lists-grid">
         {lists.map((list) => (
           <Link
             key={list.id}
             href={`/${locale}/lists/${list.slug}`}
-            className="group flex gap-3 rounded-xl border border-electric-border bg-card p-3 transition-colors hover:border-electric-border-hover"
+            className="list-card"
           >
-            {/* Cover mosaic */}
-            <div className="flex h-16 w-28 flex-shrink-0 overflow-hidden rounded-lg">
-              {list.preview_covers.length > 0 ? (
-                list.preview_covers.slice(0, 3).map((cover, i) => (
-                  <div key={i} className="relative flex-1 overflow-hidden">
-                    <Image src={cover} alt="" fill sizes="40px" className="object-cover" />
-                  </div>
-                ))
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-elevated text-xs text-text-muted">
-                  —
+            <div className="list-card-covers">
+              {list.preview_covers.slice(0, 4).map((cover, i) => (
+                <div key={i} className="list-cover-mini">
+                  <Image src={cover} alt="" fill sizes="40px" className="object-cover" />
                 </div>
+              ))}
+              {list.preview_covers.length === 0 && (
+                <div className="flex h-full w-full items-center justify-center bg-elevated text-xs text-text-muted">—</div>
               )}
             </div>
-
-            {/* Info */}
-            <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-              <p className="line-clamp-2 text-sm font-semibold leading-snug text-text-primary transition-colors group-hover:text-electric">
-                {list.title}
-              </p>
-              <p className="text-xs text-text-muted">
-                {list.item_count} titles · ♥ {list.likes_count}
-              </p>
+            <div className="list-title">{list.title}</div>
+            <div className="list-meta">
+              <span>{list.item_count} titles</span>
+              <span className="list-meta-heart">♥ {list.likes_count}</span>
             </div>
           </Link>
         ))}
       </div>
-    </HomeSection>
+    </div>
   )
 }
 
@@ -442,13 +383,13 @@ async function TopListsSection({ locale }: { locale: string }) {
    ────────────────────────────────────────────────────────────── */
 function SectionSkeleton() {
   return (
-    <section className="mt-10">
-      <div className="mb-4 h-7 w-40 animate-pulse rounded bg-elevated" />
+    <div className="section">
+      <div className="mb-6 h-7 w-40 animate-pulse rounded bg-elevated" />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
           <ManhwaCardSkeleton key={i} />
         ))}
       </div>
-    </section>
+    </div>
   )
 }

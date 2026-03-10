@@ -34,7 +34,7 @@ export async function HomeRanking({ locale }: HomeRankingProps) {
       <HomePodium top3={top3} locale={locale} readersLabel={t('readers')} />
 
       {rest.length > 0 && (
-        <HomeRankingList manhwas={rest} locale={locale} readersLabel={t('readers')} />
+        <HomeRankingList manhwas={rest} locale={locale} />
       )}
     </section>
   )

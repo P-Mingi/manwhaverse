@@ -14,20 +14,39 @@ function timeAgo(date: Date): string {
   if (mins < 60) return `${mins}m`
   const hours = Math.floor(mins / 60)
   if (hours < 24) return `${hours}h`
-  const days = Math.floor(hours / 24)
-  return `${days}d`
+  return `${Math.floor(hours / 24)}d`
 }
 
-function activityLabel(activity: ActivityWithContext, locale: string): string {
-  const title = activity.manhwa
-    ? (locale === 'fr' ? activity.manhwa.title_fr ?? activity.manhwa.title_en : activity.manhwa.title_en)
-    : null
+function activityBadge(activity: ActivityWithContext): string {
+  const score =
+    activity.type === 'RATED' && activity.metadata
+      ? (activity.metadata as Record<string, unknown>).score as number | undefined
+      : undefined
+  if (score != null) return `★ ${score.toFixed(1)}`
   switch (activity.type) {
-    case 'RATED':         return title ? `rated ${title}` : 'rated a manhwa'
-    case 'COMPLETED':     return title ? `completed ${title}` : 'completed a manhwa'
-    case 'REVIEWED':      return title ? `reviewed ${title}` : 'wrote a review'
-    case 'CREATED_LIST':  return 'created a list'
-    default:              return title ? `added ${title}` : 'added to library'
+    case 'COMPLETED':    return '★'
+    case 'REVIEWED':     return '✍️'
+    case 'CREATED_LIST': return '📋'
+    default:             return '+📚'
+  }
+}
+
+function activityVerb(type: string, locale: string): string {
+  if (locale === 'fr') {
+    switch (type) {
+      case 'RATED':        return 'a noté'
+      case 'COMPLETED':    return 'a terminé'
+      case 'REVIEWED':     return 'a reviewé'
+      case 'CREATED_LIST': return 'a créé une liste'
+      default:             return 'a ajouté'
+    }
+  }
+  switch (type) {
+    case 'RATED':        return 'rated'
+    case 'COMPLETED':    return 'completed'
+    case 'REVIEWED':     return 'reviewed'
+    case 'CREATED_LIST': return 'created a list'
+    default:             return 'added'
   }
 }
 
@@ -43,59 +62,49 @@ export async function HomeActivityFeed({ locale }: HomeActivityFeedProps) {
   if (activities.length === 0) return null
 
   return (
-    <div className="flex flex-col divide-y divide-electric-border">
+    <div className="activity-feed">
       {activities.map((activity) => {
-        const label = activityLabel(activity, locale)
         const username = activity.user.display_name ?? activity.user.username ?? '?'
-        const score = activity.type === 'RATED' && activity.metadata
-          ? (activity.metadata as Record<string, unknown>).score as number | undefined
-          : undefined
         const profileHref = `/${locale}/profile/${activity.user.username}`
+        const badge = activityBadge(activity)
+        const verb = activityVerb(activity.type, locale)
+        const manhwaTitle = activity.manhwa
+          ? (locale === 'fr' ? activity.manhwa.title_fr ?? activity.manhwa.title_en : activity.manhwa.title_en)
+          : null
 
         return (
-          <div key={activity.id} className="grid grid-cols-[36px_1fr_auto] items-start gap-3 py-3 px-1">
+          <div key={activity.id} className="activity-item">
             {/* Avatar */}
-            <Link href={profileHref} className="flex-shrink-0">
+            <Link href={profileHref} className="activity-avatar">
               {activity.user.avatar_url ? (
                 <Image
                   src={activity.user.avatar_url}
-                  alt={username ?? ''}
+                  alt={username}
                   width={36}
                   height={36}
-                  className="rounded-full object-cover ring-1 ring-electric-border"
+                  className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="h-9 w-9 rounded-full bg-elevated flex items-center justify-center text-xs font-bold text-electric uppercase">
-                  {username[0]}
-                </div>
+                <span className="text-xs font-bold text-electric uppercase">{username[0]}</span>
               )}
             </Link>
 
             {/* Text */}
-            <div className="min-w-0">
-              <p className="text-xs leading-snug text-text-secondary line-clamp-2">
-                <Link href={profileHref} className="font-semibold text-text-primary hover:text-electric transition-colors">
-                  {username}
-                </Link>
-                {' '}
-                {activity.manhwa ? (
-                  <>
-                    {activity.type === 'RATED' ? 'rated ' : activity.type === 'COMPLETED' ? 'completed ' : activity.type === 'REVIEWED' ? 'reviewed ' : 'added '}
-                    <Link href={`/${locale}/manhwa/${activity.manhwa.slug}`} className="text-electric hover:underline">
-                      {locale === 'fr' ? activity.manhwa.title_fr ?? activity.manhwa.title_en : activity.manhwa.title_en}
-                    </Link>
-                  </>
-                ) : label}
+            <div>
+              <p className="activity-text">
+                <Link href={profileHref} className="activity-username">{username}</Link>
+                {' '}{verb}{' '}
+                {activity.manhwa && manhwaTitle ? (
+                  <Link href={`/${locale}/manhwa/${activity.manhwa.slug}`} className="activity-manhwa">
+                    {manhwaTitle}
+                  </Link>
+                ) : null}
               </p>
+              <p className="activity-time">{timeAgo(activity.created_at)}</p>
             </div>
 
-            {/* Time + score */}
-            <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
-              <span className="text-[10px] text-text-muted">{timeAgo(activity.created_at)}</span>
-              {score != null && (
-                <span className="font-mono text-[11px] font-bold text-gold">★{score.toFixed(1)}</span>
-              )}
-            </div>
+            {/* Badge */}
+            <span className="activity-score">{badge}</span>
           </div>
         )
       })}

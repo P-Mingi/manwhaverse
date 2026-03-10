@@ -63,7 +63,16 @@
   },
   "home": {
     "hero": {
-      "tagline": "Ton univers manhwa, un scroll à la fois",
+      "eyebrow": "Manhwa en vedette · #1 cette semaine",
+      "title_line1": "Suivre chaque",
+      "title_accent": "manhwa",
+      "title_line3": "que vous avez aimé.",
+      "tagline": "Votre univers personnel pour les webtoons coréens — notez, critiquez, découvrez.",
+      "stat_titles": "Titres",
+      "stat_readers": "Lecteurs",
+      "stat_reviews": "Avis",
+      "cta_primary": "Commencer",
+      "cta_secondary": "Voir le classement",
       "cta": "Commencer le suivi",
       "ctaSecondary": "Parcourir les manhwa"
     },
@@ -82,6 +91,8 @@
       "title": "Le Classement ManhwaVerse",
       "viewAll": "Voir le classement complet"
     },
+    "ranking_title": "Meilleur score",
+    "activity_title": "Activité communautaire",
     "topLists": "Listes populaires",
     "featuredFanArt": "Fan Art de la semaine",
     "recentReviews": "Avis récents"

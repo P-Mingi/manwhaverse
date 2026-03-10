@@ -26,6 +26,7 @@ const reviewWithManhwa = {
   manhwa: {
     select: { id: true, slug: true, title_en: true, title_fr: true, cover_url: true },
   },
+  reactions: { select: { reaction: true } },
 } satisfies Prisma.ReviewInclude
 
 export type ReviewWithManhwa = Prisma.ReviewGetPayload<{
