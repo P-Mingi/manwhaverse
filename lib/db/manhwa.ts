@@ -24,16 +24,18 @@ export type ManhwaWithRelations = Prisma.ManhwaGetPayload<{
   include: typeof manhwaWithRelations
 }>
 
-export const getManhwaBySlug = unstable_cache(
-  async (slug: string): Promise<ManhwaWithRelations | null> => {
-    return prisma.manhwa.findUnique({
-      where: { slug, is_published: true, deleted_at: null },
-      include: manhwaWithRelations,
-    })
-  },
-  ['manhwa-by-slug'],
-  { revalidate: 3600, tags: ['manhwa'] }
-)
+export function getManhwaBySlug(slug: string): Promise<ManhwaWithRelations | null> {
+  return unstable_cache(
+    async () => {
+      return prisma.manhwa.findUnique({
+        where: { slug, is_published: true, deleted_at: null },
+        include: manhwaWithRelations,
+      })
+    },
+    [`manhwa-by-slug-${slug}`],
+    { revalidate: 3600, tags: ['manhwa', `manhwa-${slug}`] }
+  )()
+}
 
 // Lightweight type for cards/grids
 export const manhwaCardSelect = {

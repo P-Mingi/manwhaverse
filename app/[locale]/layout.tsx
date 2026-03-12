@@ -10,6 +10,7 @@ import { ThemeProvider } from 'next-themes'
 import { SessionProvider } from '@/components/providers/SessionProvider'
 import { PostHogTracker } from '@/components/providers/PostHogProvider'
 import { Header } from '@/components/layouts/Header'
+import { getUser } from '@/lib/auth/session'
 import { MobileNav } from '@/components/layouts/MobileNav'
 import { Footer } from '@/components/layouts/Footer'
 interface LocaleLayoutProps {
@@ -70,7 +71,10 @@ export default async function LocaleLayout({
     notFound()
   }
 
-  const messages = await getMessages()
+  const [messages, user] = await Promise.all([
+    getMessages(),
+    getUser().catch(() => null),
+  ])
 
   return (
     <ThemeProvider
@@ -84,7 +88,7 @@ export default async function LocaleLayout({
           <Suspense fallback={null}>
             <PostHogTracker />
           </Suspense>
-          <Header />
+          <Header user={user} />
           <div className="min-h-screen pb-16 md:pb-0">
             {children}
           </div>

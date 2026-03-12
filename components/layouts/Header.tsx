@@ -5,17 +5,17 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useParams, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useAuth } from '@/hooks/useAuth'
+import { signOut as nextAuthSignOut } from 'next-auth/react'
 import { NotificationBell } from '@/components/features/NotificationBell'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
-function AvatarDropdown({ user, locale, signOut, t }: {
+function AvatarDropdown({ user, locale, t }: {
   user: { username?: string | null; avatar_url?: string | null }
   locale: string
-  signOut: () => void
   t: ReturnType<typeof useTranslations>
 }) {
   const [open, setOpen] = useState(false)
+  const signOut = () => nextAuthSignOut({ redirectTo: '/' })
 
   return (
     <div className="relative">
@@ -86,11 +86,14 @@ function AvatarDropdown({ user, locale, signOut, t }: {
   )
 }
 
-export function Header() {
+interface HeaderProps {
+  user: { username?: string | null; avatar_url?: string | null } | null
+}
+
+export function Header({ user }: HeaderProps) {
   const t = useTranslations('nav')
   const { locale } = useParams<{ locale: string }>()
   const pathname = usePathname()
-  const { user, loading, signOut } = useAuth()
 
   const otherLocale = locale === 'fr' ? 'en' : 'fr'
   const switchedPath = pathname.replace(/^\/[a-z]{2}/, `/${otherLocale}`)
@@ -184,13 +187,11 @@ export function Header() {
           <ThemeToggle />
 
           {/* Notifications — logged in only */}
-          {!loading && user && <NotificationBell />}
+          {user && <NotificationBell />}
 
           {/* Avatar dropdown (logged in) or Sign In (guest) */}
-          {loading ? (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-elevated" />
-          ) : user ? (
-            <AvatarDropdown user={user} locale={locale} signOut={signOut} t={t} />
+          {user ? (
+            <AvatarDropdown user={user} locale={locale} t={t} />
           ) : (
             <Link
               href={`/${locale}/sign-in`}

@@ -34,18 +34,20 @@ export type ReviewWithManhwa = Prisma.ReviewGetPayload<{
   include: typeof reviewWithManhwa
 }>
 
-export const getRecentReviews = unstable_cache(
-  async (limit = 6): Promise<ReviewWithManhwa[]> => {
-    return prisma.review.findMany({
-      where: { deleted_at: null },
-      include: reviewWithManhwa,
-      orderBy: { created_at: 'desc' },
-      take: limit,
-    })
-  },
-  ['recent-reviews'],
-  { revalidate: 120, tags: ['reviews'] }
-)
+export function getRecentReviews(limit = 6): Promise<ReviewWithManhwa[]> {
+  return unstable_cache(
+    async () => {
+      return prisma.review.findMany({
+        where: { deleted_at: null },
+        include: reviewWithManhwa,
+        orderBy: { created_at: 'desc' },
+        take: limit,
+      })
+    },
+    [`recent-reviews-${limit}`],
+    { revalidate: 120, tags: ['reviews'] }
+  )()
+}
 
 export async function getReviewsForManhwa(
   manhwaId: string,

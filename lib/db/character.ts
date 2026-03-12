@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { prisma } from './client'
 import type { Prisma } from '@prisma/client'
 
@@ -9,16 +10,20 @@ export type CharacterWithRole = Prisma.ManhwaCharacterGetPayload<{
   include: typeof characterWithRole
 }>
 
-export async function getCharactersByManhwaId(
-  manhwaId: string
-): Promise<CharacterWithRole[]> {
-  return prisma.manhwaCharacter.findMany({
-    where: { manhwa_id: manhwaId },
-    include: characterWithRole,
-    orderBy: [
-      { role: 'asc' }, // MAIN first (alphabetically: BACKGROUND, MAIN, SUPPORTING)
-    ],
-  })
+export function getCharactersByManhwaId(manhwaId: string): Promise<CharacterWithRole[]> {
+  return unstable_cache(
+    async () => {
+      return prisma.manhwaCharacter.findMany({
+        where: { manhwa_id: manhwaId },
+        include: characterWithRole,
+        orderBy: [
+          { role: 'asc' }, // MAIN first (alphabetically: BACKGROUND, MAIN, SUPPORTING)
+        ],
+      })
+    },
+    [`characters-by-manhwa-${manhwaId}`],
+    { revalidate: 3600, tags: ['characters', `manhwa-${manhwaId}`] }
+  )()
 }
 
 export async function getAllCharacters(

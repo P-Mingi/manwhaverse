@@ -161,8 +161,9 @@ export async function getUserLists(userId: string) {
   })
 }
 
-export const getTopLists = unstable_cache(
-  async (limit = 6): Promise<ManhwaListSummary[]> => {
+export function getTopLists(limit = 6): Promise<ManhwaListSummary[]> {
+  return unstable_cache(
+    async () => {
     const raw = await prisma.manhwaList.findMany({
       where: { is_public: true },
       orderBy: { likes_count: 'desc' },
@@ -201,10 +202,11 @@ export const getTopLists = unstable_cache(
         .map((i) => i.manhwa.cover_url)
         .filter((c): c is string => !!c),
     }))
-  },
-  ['top-lists'],
-  { revalidate: 300, tags: ['lists'] }
-)
+    },
+    [`top-lists-${limit}`],
+    { revalidate: 300, tags: ['lists'] }
+  )()
+}
 
 export async function checkUserLikedList(userId: string, listId: string): Promise<boolean> {
   const vote = await prisma.listVote.findUnique({

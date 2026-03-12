@@ -96,27 +96,29 @@ export async function getFeedForUser(
   return { activities, total }
 }
 
-export const getPublicFeed = unstable_cache(
-  async (
-    page = 1,
-    limit = 20,
-  ): Promise<{ activities: ActivityWithContext[]; total: number }> => {
-    const [raw, total] = await Promise.all([
-      prisma.activity.findMany({
-        include: activityWithContext,
-        orderBy: { created_at: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      prisma.activity.count(),
-    ])
+export function getPublicFeed(
+  page = 1,
+  limit = 20,
+): Promise<{ activities: ActivityWithContext[]; total: number }> {
+  return unstable_cache(
+    async () => {
+      const [raw, total] = await Promise.all([
+        prisma.activity.findMany({
+          include: activityWithContext,
+          orderBy: { created_at: 'desc' },
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+        prisma.activity.count(),
+      ])
 
-    const activities = await enrichWithManhwa(raw)
-    return { activities, total }
-  },
-  ['public-feed'],
-  { revalidate: 60, tags: ['activity'] }
-)
+      const activities = await enrichWithManhwa(raw)
+      return { activities, total }
+    },
+    [`public-feed-${page}-${limit}`],
+    { revalidate: 60, tags: ['activity'] }
+  )()
+}
 
 export async function getFriendsFeed(
   userId: string,
