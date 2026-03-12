@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { prisma } from './client'
 import { manhwaCardSelect, type ManhwaCardData } from './manhwa'
 
@@ -160,46 +161,50 @@ export async function getUserLists(userId: string) {
   })
 }
 
-export async function getTopLists(limit = 6): Promise<ManhwaListSummary[]> {
-  const raw = await prisma.manhwaList.findMany({
-    where: { is_public: true },
-    orderBy: { likes_count: 'desc' },
-    take: limit,
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      description: true,
-      likes_count: true,
-      item_count: true,
-      created_at: true,
-      user: {
-        select: { username: true, display_name: true, avatar_url: true },
-      },
-      items: {
-        orderBy: { position: 'asc' },
-        take: 4,
-        select: {
-          manhwa: { select: { cover_url: true, title_en: true } },
+export const getTopLists = unstable_cache(
+  async (limit = 6): Promise<ManhwaListSummary[]> => {
+    const raw = await prisma.manhwaList.findMany({
+      where: { is_public: true },
+      orderBy: { likes_count: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        likes_count: true,
+        item_count: true,
+        created_at: true,
+        user: {
+          select: { username: true, display_name: true, avatar_url: true },
+        },
+        items: {
+          orderBy: { position: 'asc' },
+          take: 4,
+          select: {
+            manhwa: { select: { cover_url: true, title_en: true } },
+          },
         },
       },
-    },
-  })
+    })
 
-  return raw.map((l) => ({
-    id: l.id,
-    slug: l.slug,
-    title: l.title,
-    description: l.description,
-    likes_count: l.likes_count,
-    item_count: l.item_count,
-    created_at: l.created_at,
-    user: l.user,
-    preview_covers: l.items
-      .map((i) => i.manhwa.cover_url)
-      .filter((c): c is string => !!c),
-  }))
-}
+    return raw.map((l) => ({
+      id: l.id,
+      slug: l.slug,
+      title: l.title,
+      description: l.description,
+      likes_count: l.likes_count,
+      item_count: l.item_count,
+      created_at: l.created_at,
+      user: l.user,
+      preview_covers: l.items
+        .map((i) => i.manhwa.cover_url)
+        .filter((c): c is string => !!c),
+    }))
+  },
+  ['top-lists'],
+  { revalidate: 300, tags: ['lists'] }
+)
 
 export async function checkUserLikedList(userId: string, listId: string): Promise<boolean> {
   const vote = await prisma.listVote.findUnique({

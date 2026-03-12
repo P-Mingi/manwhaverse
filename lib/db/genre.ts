@@ -1,18 +1,23 @@
+import { unstable_cache } from 'next/cache'
 import { prisma } from './client'
 import { manhwaCardSelect, type ManhwaCardData } from './manhwa'
 
-export async function getAllGenres() {
-  return prisma.genre.findMany({
-    select: {
-      id: true,
-      slug: true,
-      name_en: true,
-      name_fr: true,
-      _count: { select: { manhwa_links: true } },
-    },
-    orderBy: { manhwa_links: { _count: 'desc' } },
-  })
-}
+export const getAllGenres = unstable_cache(
+  async () => {
+    return prisma.genre.findMany({
+      select: {
+        id: true,
+        slug: true,
+        name_en: true,
+        name_fr: true,
+        _count: { select: { manhwa_links: true } },
+      },
+      orderBy: { manhwa_links: { _count: 'desc' } },
+    })
+  },
+  ['all-genres'],
+  { revalidate: 3600, tags: ['genres'] }
+)
 
 export async function getGenreBySlug(slug: string) {
   return prisma.genre.findUnique({

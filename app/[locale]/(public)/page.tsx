@@ -142,9 +142,10 @@ async function HeroSection({ locale }: { locale: string }) {
                   src={covers[0].cover_url}
                   alt={covers[0].title}
                   fill
-                  sizes="40vw"
+                  sizes="(max-width: 768px) 100vw, 30vw"
                   className="collage-cover"
                   priority
+                  quality={85}
                 />
               )}
               {covers[0]?.score != null && (
@@ -152,16 +153,18 @@ async function HeroSection({ locale }: { locale: string }) {
               )}
             </Link>
 
-            {/* 5 smaller cells */}
-            {covers.slice(1, 6).map((m) => (
-              <Link key={m.slug} href={`/${locale}/manhwa/${m.slug}`} className="collage-item">
+            {/* 5 smaller cells — hidden on mobile to avoid loading 5 extra images */}
+            {covers.slice(1, 6).map((m, i) => (
+              <Link key={m.slug} href={`/${locale}/manhwa/${m.slug}`} className="collage-item hidden md:block">
                 {m.cover_url && (
                   <Image
                     src={m.cover_url}
                     alt={m.title}
                     fill
-                    sizes="20vw"
+                    sizes="(max-width: 768px) 50vw, 15vw"
                     className="collage-cover"
+                    priority={i < 2}
+                    quality={75}
                   />
                 )}
                 {m.score != null && (
@@ -355,7 +358,7 @@ async function TopListsSection({ locale }: { locale: string }) {
             <div className="list-card-covers">
               {list.preview_covers.slice(0, 4).map((cover, i) => (
                 <div key={i} className="list-cover-mini">
-                  <Image src={cover} alt="" fill sizes="40px" className="object-cover" />
+                  <Image src={cover} alt="" fill sizes="40px" className="object-cover" loading="lazy" />
                 </div>
               ))}
               {list.preview_covers.length === 0 && (

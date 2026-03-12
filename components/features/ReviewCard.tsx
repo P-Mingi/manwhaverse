@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { ReviewWithUser } from '@/lib/db/review'
@@ -122,7 +123,7 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
           {locale && review.user.username ? (
             <Link href={`/${locale}/profile/${review.user.username}`} className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-elevated text-xs font-medium text-text-muted overflow-hidden hover:opacity-80">
               {review.user.avatar_url ? (
-                <img src={review.user.avatar_url} alt={review.user.username} className="h-full w-full rounded-full object-cover" />
+                <Image src={review.user.avatar_url} alt={review.user.username} width={32} height={32} sizes="32px" loading="lazy" className="h-full w-full rounded-full object-cover" />
               ) : (
                 review.user.username.charAt(0).toUpperCase()
               )}
@@ -130,7 +131,7 @@ export function ReviewCard({ review, currentUserId, isAdmin = false, locale, man
           ) : (
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-elevated text-xs font-medium text-text-muted overflow-hidden">
               {review.user.avatar_url ? (
-                <img src={review.user.avatar_url} alt={review.user.username ?? ''} className="h-full w-full rounded-full object-cover" />
+                <Image src={review.user.avatar_url} alt={review.user.username ?? ''} width={32} height={32} sizes="32px" loading="lazy" className="h-full w-full rounded-full object-cover" />
               ) : (
                 (review.user.username ?? '?').charAt(0).toUpperCase()
               )}

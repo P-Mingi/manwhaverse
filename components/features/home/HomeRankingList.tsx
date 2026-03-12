@@ -25,6 +25,8 @@ export function HomeRankingList({ manhwas, locale }: HomeRankingListProps) {
                 alt={manhwa.title}
                 width={52}
                 height={70}
+                sizes="52px"
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             ) : (

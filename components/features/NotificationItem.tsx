@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { getRelativeTime } from '@/lib/utils/time'
@@ -63,7 +64,7 @@ export function NotificationItem({ notification, locale, onMarkRead }: Notificat
       {/* Avatar / Icon */}
       <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-elevated text-xs text-text-muted overflow-hidden">
         {avatar ? (
-          <img src={avatar} alt="" className="h-full w-full rounded-full object-cover" />
+          <Image src={avatar} alt="" width={32} height={32} sizes="32px" loading="lazy" className="h-full w-full rounded-full object-cover" />
         ) : (
           <NotifTypeIcon type={notification.type} />
         )}

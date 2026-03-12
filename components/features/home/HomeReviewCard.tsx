@@ -51,7 +51,9 @@ export function HomeReviewCard({ review, locale }: Props) {
               src={review.user.avatar_url}
               width={32}
               height={32}
+              sizes="32px"
               alt={username}
+              loading="lazy"
               className="w-full h-full object-cover"
             />
           ) : (
@@ -76,7 +78,9 @@ export function HomeReviewCard({ review, locale }: Props) {
                 src={review.manhwa.cover_url}
                 width={32}
                 height={44}
+                sizes="32px"
                 alt=""
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             )}

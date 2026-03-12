@@ -1,17 +1,22 @@
+import { unstable_cache } from 'next/cache'
 import { prisma } from './client'
 import { manhwaCardWithPopupSelect, type ManhwaCardPopupData } from './manhwa'
 
 const published = { is_published: true, deleted_at: null } as const
 
-export async function getTrendingManhwas(locale: string, limit = 10): Promise<ManhwaCardPopupData[]> {
-  const trendingField = locale === 'fr' ? 'trending_fr' : 'trending_en'
-  return prisma.manhwa.findMany({
-    where: published,
-    select: manhwaCardWithPopupSelect,
-    orderBy: [{ [trendingField]: 'desc' }, { reader_count: 'desc' }],
-    take: limit,
-  })
-}
+export const getTrendingManhwas = unstable_cache(
+  async (locale: string, limit = 10): Promise<ManhwaCardPopupData[]> => {
+    const trendingField = locale === 'fr' ? 'trending_fr' : 'trending_en'
+    return prisma.manhwa.findMany({
+      where: published,
+      select: manhwaCardWithPopupSelect,
+      orderBy: [{ [trendingField]: 'desc' }, { reader_count: 'desc' }],
+      take: limit,
+    })
+  },
+  ['trending-manhwas'],
+  { revalidate: 300, tags: ['trending'] }
+)
 
 export async function getPopularThisYear(limit = 10): Promise<ManhwaCardPopupData[]> {
   const currentYear = new Date().getFullYear()
@@ -36,14 +41,18 @@ export async function getTopRated(limit = 10): Promise<ManhwaCardPopupData[]> {
   })
 }
 
-export async function getRecentManhwas(limit = 10): Promise<ManhwaCardPopupData[]> {
-  return prisma.manhwa.findMany({
-    where: published,
-    select: manhwaCardWithPopupSelect,
-    orderBy: { created_at: 'desc' },
-    take: limit,
-  })
-}
+export const getRecentManhwas = unstable_cache(
+  async (limit = 10): Promise<ManhwaCardPopupData[]> => {
+    return prisma.manhwa.findMany({
+      where: published,
+      select: manhwaCardWithPopupSelect,
+      orderBy: { created_at: 'desc' },
+      take: limit,
+    })
+  },
+  ['recent-manhwas'],
+  { revalidate: 300, tags: ['recent'] }
+)
 
 export async function getPopularManhwas(limit = 10): Promise<ManhwaCardPopupData[]> {
   return prisma.manhwa.findMany({
@@ -66,18 +75,22 @@ export async function getTopRatedManhwas(limit = 10): Promise<ManhwaCardPopupDat
   })
 }
 
-export async function getHiddenGems(limit = 10): Promise<ManhwaCardPopupData[]> {
-  return prisma.manhwa.findMany({
-    where: {
-      ...published,
-      display_score: { gte: 7.5 },
-      display_popularity: { lt: 1000 },
-    },
-    select: manhwaCardWithPopupSelect,
-    orderBy: { display_score: 'desc' },
-    take: limit,
-  })
-}
+export const getHiddenGems = unstable_cache(
+  async (limit = 10): Promise<ManhwaCardPopupData[]> => {
+    return prisma.manhwa.findMany({
+      where: {
+        ...published,
+        display_score: { gte: 7.5 },
+        display_popularity: { lt: 1000 },
+      },
+      select: manhwaCardWithPopupSelect,
+      orderBy: { display_score: 'desc' },
+      take: limit,
+    })
+  },
+  ['hidden-gems'],
+  { revalidate: 3600, tags: ['hidden-gems'] }
+)
 
 export async function getPopularTropes(limit = 8) {
   return prisma.trope.findMany({
@@ -93,14 +106,17 @@ export async function getPopularTropes(limit = 8) {
   })
 }
 
-export async function getStats() {
-  const [manhwaCount, genreCount, tropeCount, userCount, reviewCount] = await Promise.all([
-    prisma.manhwa.count({ where: { is_published: true } }),
-    prisma.genre.count(),
-    prisma.trope.count(),
-    prisma.user.count({ where: { is_seed: false } }),
-    prisma.review.count({ where: { deleted_at: null } }),
-  ])
-
-  return { manhwaCount, genreCount, tropeCount, userCount, reviewCount }
-}
+export const getStats = unstable_cache(
+  async () => {
+    const [manhwaCount, genreCount, tropeCount, userCount, reviewCount] = await Promise.all([
+      prisma.manhwa.count({ where: { is_published: true } }),
+      prisma.genre.count(),
+      prisma.trope.count(),
+      prisma.user.count({ where: { is_seed: false } }),
+      prisma.review.count({ where: { deleted_at: null } }),
+    ])
+    return { manhwaCount, genreCount, tropeCount, userCount, reviewCount }
+  },
+  ['site-stats'],
+  { revalidate: 3600, tags: ['stats'] }
+)

@@ -138,6 +138,9 @@ model Manhwa {
   @@index([type, status])
   @@index([score_avg(sort: Desc)])
   @@index([trending_score(sort: Desc)])
+  @@index([trending_fr(sort: Desc)])
+  @@index([trending_en(sort: Desc)])
+  @@index([reader_count(sort: Desc)])
   @@index([release_year])
   @@index([display_score(sort: Desc)])
   @@index([display_popularity(sort: Desc)])
@@ -618,6 +621,7 @@ model UserLibrary {
   updated_at    DateTime      @updatedAt
 
   @@unique([user_id, manhwa_id])
+  @@index([manhwa_id])
   @@index([user_id, status])
   @@index([user_id, updated_at(sort: Desc)])
 }
@@ -807,6 +811,8 @@ model ManhwaList {
 
   items       ListItem[]
   votes       ListVote[]
+
+  @@index([likes_count(sort: Desc)])
 }
 
 model ListItem {

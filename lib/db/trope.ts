@@ -1,18 +1,23 @@
+import { unstable_cache } from 'next/cache'
 import { prisma } from './client'
 import { manhwaCardSelect, type ManhwaCardData } from './manhwa'
 
-export async function getAllTropes() {
-  return prisma.trope.findMany({
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      category: true,
-      _count: { select: { manhwa_links: true } },
-    },
-    orderBy: { manhwa_links: { _count: 'desc' } },
-  })
-}
+export const getAllTropes = unstable_cache(
+  async () => {
+    return prisma.trope.findMany({
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        category: true,
+        _count: { select: { manhwa_links: true } },
+      },
+      orderBy: { manhwa_links: { _count: 'desc' } },
+    })
+  },
+  ['all-tropes'],
+  { revalidate: 3600, tags: ['tropes'] }
+)
 
 export async function getTropeBySlug(slug: string) {
   return prisma.trope.findUnique({

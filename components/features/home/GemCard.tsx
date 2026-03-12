@@ -21,6 +21,7 @@ export function GemCard({ manhwa, locale }: GemCardProps) {
             alt={title}
             fill
             sizes="(max-width: 768px) 33vw, 16vw"
+            loading="lazy"
             className="object-cover"
           />
         )}
