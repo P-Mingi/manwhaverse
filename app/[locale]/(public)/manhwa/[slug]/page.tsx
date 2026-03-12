@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -30,8 +32,7 @@ interface ManhwaPageProps {
 }
 
 export async function generateStaticParams() {
-  const slugs = await getTopManhwaSlugs(100)
-  return slugs.map((slug) => ({ slug }))
+  return [] // rendered on demand
 }
 
 export async function generateMetadata({

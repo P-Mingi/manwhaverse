@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
@@ -18,13 +20,7 @@ interface GenrePageProps {
 }
 
 export async function generateStaticParams() {
-  const genres = await getAllGenres()
-  const params: Array<{ locale: string; slug: string }> = []
-  for (const genre of genres) {
-    params.push({ locale: 'en', slug: genre.slug })
-    params.push({ locale: 'fr', slug: genre.slug })
-  }
-  return params
+  return [] // rendered on demand
 }
 
 export async function generateMetadata({ params }: GenrePageProps) {

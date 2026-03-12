@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getTropeBySlug, getManhwasByTrope, getAllTropes } from '@/lib/db/trope'
@@ -17,13 +19,7 @@ interface TropePageProps {
 }
 
 export async function generateStaticParams() {
-  const tropes = await getAllTropes()
-  const params: Array<{ locale: string; slug: string }> = []
-  for (const trope of tropes) {
-    params.push({ locale: 'en', slug: trope.slug })
-    params.push({ locale: 'fr', slug: trope.slug })
-  }
-  return params
+  return [] // rendered on demand
 }
 
 export async function generateMetadata({ params }: TropePageProps) {
