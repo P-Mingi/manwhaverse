@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
@@ -9,10 +8,10 @@ import {
   getStats,
 } from '@/lib/db/home'
 import { getTopLists } from '@/lib/db/list'
-import { getTopRankedManhwas } from '@/lib/db/ranking'
-import { getCurrentContentFilter } from '@/lib/nsfw'
-import { ManhwaCard } from '@/components/features/ManhwaCard'
-import { ManhwaCardSkeleton } from '@/components/features/ManhwaCardSkeleton'
+import { getTopRankedManhwas, type RankedManhwa } from '@/lib/db/ranking'
+import { getPublicFeed, type ActivityWithContext } from '@/lib/db/activity'
+import { getRecentReviews, type ReviewWithManhwa } from '@/lib/db/review'
+import type { ManhwaCardPopupData } from '@/lib/db/manhwa'
 import { HomeGenreBar } from '@/components/features/home/HomeGenreBar'
 import { HomeActivityFeed } from '@/components/features/home/HomeActivityFeed'
 import { HomeReviews } from '@/components/features/home/HomeReviews'
@@ -28,49 +27,71 @@ interface HomeProps {
   params: Promise<{ locale: string }>
 }
 
+type Stats = Awaited<ReturnType<typeof getStats>>
+type TopLists = Awaited<ReturnType<typeof getTopLists>>
+
 export default async function HomePage({ params }: HomeProps) {
   const { locale } = await params
+
+  // Fetch all data in a single parallel burst — eliminates Suspense waterfall
+  let covers: RankedManhwa[] = []
+  let stats: Stats = { manhwaCount: 0, genreCount: 0, tropeCount: 0, userCount: 0, reviewCount: 0 }
+  let trending: ManhwaCardPopupData[] = []
+  let hiddenGems: ManhwaCardPopupData[] = []
+  let recent: ManhwaCardPopupData[] = []
+  let lists: TopLists = []
+  let activities: ActivityWithContext[] = []
+  let reviews: ReviewWithManhwa[] = []
+
+  try {
+    const [c, s, tr, hg, rc, ls, feed, rev] = await Promise.all([
+      getTopRankedManhwas(6, locale),
+      getStats(),
+      getTrendingManhwas(locale, 10),
+      getHiddenGems(6),
+      getRecentManhwas(10),
+      getTopLists(3),
+      getPublicFeed(1, 5),
+      getRecentReviews(4),
+    ])
+    covers = c
+    stats = s
+    trending = tr
+    hiddenGems = hg
+    recent = rc
+    lists = ls
+    activities = feed.activities
+    reviews = rev
+  } catch {
+    // DB unavailable — render with empty data
+  }
 
   return (
     <>
       {/* Hero */}
-      <Suspense fallback={<div className="h-[90vh] bg-void" />}>
-        <HeroSection locale={locale} />
-      </Suspense>
+      <HeroSection locale={locale} covers={covers} stats={stats} />
 
       {/* Live Ticker */}
-      <Suspense fallback={null}>
-        <TickerSection locale={locale} />
-      </Suspense>
+      <TickerSection locale={locale} recent={recent} />
 
       {/* Genre pill bar */}
       <HomeGenreBar locale={locale} />
 
       <div className="page-main">
         {/* Trending */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <TrendingSection locale={locale} />
-        </Suspense>
+        <TrendingSection locale={locale} manhwas={trending} />
 
         {/* Two-col: Rankings + Activity Feed */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <RankingAndFeedSection locale={locale} />
-        </Suspense>
+        <RankingAndFeedSection locale={locale} ranked={covers.slice(0, 5)} activities={activities} />
 
         {/* Recent Reviews */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <ReviewsSection locale={locale} />
-        </Suspense>
+        <ReviewsSection locale={locale} reviews={reviews} />
 
         {/* Hidden Gems */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <HiddenGemsSection locale={locale} />
-        </Suspense>
+        <HiddenGemsSection locale={locale} manhwas={hiddenGems} />
 
         {/* Community Lists */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <TopListsSection locale={locale} />
-        </Suspense>
+        <TopListsSection locale={locale} lists={lists} />
       </div>
     </>
   )
@@ -79,18 +100,7 @@ export default async function HomePage({ params }: HomeProps) {
 /* ──────────────────────────────────────────────────────────────
    HERO SECTION — editorial left + 3×3 collage right
    ────────────────────────────────────────────────────────────── */
-async function HeroSection({ locale }: { locale: string }) {
-  let covers: Awaited<ReturnType<typeof getTopRankedManhwas>> = []
-  let stats = { manhwaCount: 0, genreCount: 0, tropeCount: 0, userCount: 0, reviewCount: 0 }
-  try {
-    ;[covers, stats] = await Promise.all([
-      getTopRankedManhwas(6, locale),
-      getStats(),
-    ])
-  } catch {
-    // DB unavailable — render hero without stats/collage
-  }
-
+async function HeroSection({ locale, covers, stats }: { locale: string; covers: RankedManhwa[]; stats: Stats }) {
   const t = await getTranslations({ locale, namespace: 'home' })
 
   return (
@@ -183,13 +193,7 @@ async function HeroSection({ locale }: { locale: string }) {
 /* ──────────────────────────────────────────────────────────────
    TICKER
    ────────────────────────────────────────────────────────────── */
-async function TickerSection({ locale }: { locale: string }) {
-  let recent: Awaited<ReturnType<typeof getRecentManhwas>> = []
-  try {
-    recent = await getRecentManhwas(10)
-  } catch {
-    return null
-  }
+function TickerSection({ locale, recent }: { locale: string; recent: ManhwaCardPopupData[] }) {
   if (recent.length === 0) return null
 
   const items = recent.map((m) =>
@@ -212,21 +216,11 @@ async function TickerSection({ locale }: { locale: string }) {
 }
 
 /* ──────────────────────────────────────────────────────────────
-   TRENDING — 5-col grid with rank overlays
+   TRENDING — horizontal scroll with rank overlays
    ────────────────────────────────────────────────────────────── */
-async function TrendingSection({ locale }: { locale: string }) {
-  let contentFilter: Awaited<ReturnType<typeof getCurrentContentFilter>> = 'SAFE'
-  let manhwas: Awaited<ReturnType<typeof getTrendingManhwas>> = []
-  const t = await getTranslations({ locale, namespace: 'home' })
-  try {
-    ;[contentFilter, manhwas] = await Promise.all([
-      getCurrentContentFilter(),
-      getTrendingManhwas(locale, 10),
-    ])
-  } catch {
-    return null
-  }
+async function TrendingSection({ locale, manhwas }: { locale: string; manhwas: ManhwaCardPopupData[] }) {
   if (manhwas.length === 0) return null
+  const t = await getTranslations({ locale, namespace: 'home' })
 
   return (
     <div className="section">
@@ -250,14 +244,8 @@ async function TrendingSection({ locale }: { locale: string }) {
 /* ──────────────────────────────────────────────────────────────
    TWO-COLUMN: Rankings + Activity Feed
    ────────────────────────────────────────────────────────────── */
-async function RankingAndFeedSection({ locale }: { locale: string }) {
-  let ranked: Awaited<ReturnType<typeof getTopRankedManhwas>> = []
+async function RankingAndFeedSection({ locale, ranked, activities }: { locale: string; ranked: RankedManhwa[]; activities: ActivityWithContext[] }) {
   const t = await getTranslations({ locale, namespace: 'home' })
-  try {
-    ranked = await getTopRankedManhwas(5, locale)
-  } catch {
-    // continue with empty list
-  }
 
   return (
     <div className="section">
@@ -276,7 +264,7 @@ async function RankingAndFeedSection({ locale }: { locale: string }) {
             href={`/${locale}/feed`}
             seeAllLabel="See all →"
           />
-          <HomeActivityFeed locale={locale} />
+          <HomeActivityFeed locale={locale} activities={activities} />
         </div>
       </div>
     </div>
@@ -286,8 +274,10 @@ async function RankingAndFeedSection({ locale }: { locale: string }) {
 /* ──────────────────────────────────────────────────────────────
    RECENT REVIEWS — 3-col grid
    ────────────────────────────────────────────────────────────── */
-async function ReviewsSection({ locale }: { locale: string }) {
+async function ReviewsSection({ locale, reviews }: { locale: string; reviews: ReviewWithManhwa[] }) {
+  if (reviews.length === 0) return null
   const t = await getTranslations({ locale, namespace: 'home' })
+
   return (
     <div className="section">
       <SectionHeader
@@ -295,7 +285,7 @@ async function ReviewsSection({ locale }: { locale: string }) {
         href={`/${locale}/explore`}
         seeAllLabel="See all →"
       />
-      <HomeReviews locale={locale} />
+      <HomeReviews locale={locale} reviews={reviews} />
     </div>
   )
 }
@@ -303,15 +293,9 @@ async function ReviewsSection({ locale }: { locale: string }) {
 /* ──────────────────────────────────────────────────────────────
    HIDDEN GEMS — 6-col grid with overlay
    ────────────────────────────────────────────────────────────── */
-async function HiddenGemsSection({ locale }: { locale: string }) {
-  let manhwas: Awaited<ReturnType<typeof getHiddenGems>> = []
-  const t = await getTranslations({ locale, namespace: 'home' })
-  try {
-    manhwas = await getHiddenGems(6)
-  } catch {
-    return null
-  }
+async function HiddenGemsSection({ locale, manhwas }: { locale: string; manhwas: ManhwaCardPopupData[] }) {
   if (manhwas.length === 0) return null
+  const t = await getTranslations({ locale, namespace: 'home' })
 
   return (
     <div className="section">
@@ -332,15 +316,9 @@ async function HiddenGemsSection({ locale }: { locale: string }) {
 /* ──────────────────────────────────────────────────────────────
    TOP LISTS — 3-col grid with cover mosaic
    ────────────────────────────────────────────────────────────── */
-async function TopListsSection({ locale }: { locale: string }) {
-  let lists: Awaited<ReturnType<typeof getTopLists>> = []
-  const t = await getTranslations({ locale, namespace: 'home' })
-  try {
-    lists = await getTopLists(3)
-  } catch {
-    return null
-  }
+async function TopListsSection({ locale, lists }: { locale: string; lists: TopLists }) {
   if (lists.length === 0) return null
+  const t = await getTranslations({ locale, namespace: 'home' })
 
   return (
     <div className="section">
@@ -372,22 +350,6 @@ async function TopListsSection({ locale }: { locale: string }) {
               <span className="list-meta-heart">♥ {list.likes_count}</span>
             </div>
           </Link>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/* ──────────────────────────────────────────────────────────────
-   SKELETONS
-   ────────────────────────────────────────────────────────────── */
-function SectionSkeleton() {
-  return (
-    <div className="section">
-      <div className="mb-6 h-7 w-40 animate-pulse rounded bg-elevated" />
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <ManhwaCardSkeleton key={i} />
         ))}
       </div>
     </div>

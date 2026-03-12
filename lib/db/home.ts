@@ -4,19 +4,21 @@ import { manhwaCardWithPopupSelect, type ManhwaCardPopupData } from './manhwa'
 
 const published = { is_published: true, deleted_at: null } as const
 
-export const getTrendingManhwas = unstable_cache(
-  async (locale: string, limit = 10): Promise<ManhwaCardPopupData[]> => {
-    const trendingField = locale === 'fr' ? 'trending_fr' : 'trending_en'
-    return prisma.manhwa.findMany({
-      where: published,
-      select: manhwaCardWithPopupSelect,
-      orderBy: [{ [trendingField]: 'desc' }, { reader_count: 'desc' }],
-      take: limit,
-    })
-  },
-  ['trending-manhwas'],
-  { revalidate: 300, tags: ['trending'] }
-)
+export function getTrendingManhwas(locale: string, limit = 10): Promise<ManhwaCardPopupData[]> {
+  return unstable_cache(
+    async () => {
+      const trendingField = locale === 'fr' ? 'trending_fr' : 'trending_en'
+      return prisma.manhwa.findMany({
+        where: published,
+        select: manhwaCardWithPopupSelect,
+        orderBy: [{ [trendingField]: 'desc' }, { reader_count: 'desc' }],
+        take: limit,
+      })
+    },
+    [`trending-manhwas-${locale}-${limit}`],
+    { revalidate: 300, tags: ['trending'] }
+  )()
+}
 
 export async function getPopularThisYear(limit = 10): Promise<ManhwaCardPopupData[]> {
   const currentYear = new Date().getFullYear()

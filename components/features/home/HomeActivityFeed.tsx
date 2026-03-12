@@ -1,10 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { getPublicFeed } from '@/lib/db/activity'
 import type { ActivityWithContext } from '@/lib/db/activity'
 
 interface HomeActivityFeedProps {
   locale: string
+  activities: ActivityWithContext[]
 }
 
 function timeAgo(date: Date | string): string {
@@ -51,15 +51,7 @@ function activityVerb(type: string, locale: string): string {
   }
 }
 
-export async function HomeActivityFeed({ locale }: HomeActivityFeedProps) {
-  let activities: ActivityWithContext[] = []
-  try {
-    const result = await getPublicFeed(1, 5)
-    activities = result.activities
-  } catch {
-    return null
-  }
-
+export function HomeActivityFeed({ locale, activities }: HomeActivityFeedProps) {
   if (activities.length === 0) return null
 
   return (

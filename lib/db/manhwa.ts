@@ -9,8 +9,9 @@ const manhwaWithRelations = {
   trope_links: {
     include: { trope: true },
     orderBy: { upvotes: 'desc' as const },
+    take: 20,
   },
-  read_links: true,
+  read_links: { take: 5 },
   arcs: { orderBy: { position: 'asc' as const } },
   characters: {
     include: { character: true },

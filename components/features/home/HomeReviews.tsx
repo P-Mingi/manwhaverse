@@ -1,17 +1,12 @@
-import { getRecentReviews } from '@/lib/db/review'
+import type { ReviewWithManhwa } from '@/lib/db/review'
 import { HomeReviewCard } from './HomeReviewCard'
 
 interface HomeReviewsProps {
   locale: string
+  reviews: ReviewWithManhwa[]
 }
 
-export async function HomeReviews({ locale }: HomeReviewsProps) {
-  let reviews: Awaited<ReturnType<typeof getRecentReviews>> = []
-  try {
-    reviews = await getRecentReviews(4)
-  } catch {
-    return null
-  }
+export function HomeReviews({ locale, reviews }: HomeReviewsProps) {
   if (reviews.length === 0) return null
 
   return (
