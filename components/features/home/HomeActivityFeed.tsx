@@ -7,8 +7,9 @@ interface HomeActivityFeedProps {
   locale: string
 }
 
-function timeAgo(date: Date): string {
-  const secs = Math.floor((Date.now() - date.getTime()) / 1000)
+function timeAgo(date: Date | string): string {
+  const d = date instanceof Date ? date : new Date(date)
+  const secs = Math.floor((Date.now() - d.getTime()) / 1000)
   if (secs < 60) return `${secs}s`
   const mins = Math.floor(secs / 60)
   if (mins < 60) return `${mins}m`
@@ -53,7 +54,7 @@ function activityVerb(type: string, locale: string): string {
 export async function HomeActivityFeed({ locale }: HomeActivityFeedProps) {
   let activities: ActivityWithContext[] = []
   try {
-    const result = await getPublicFeed(1, 6)
+    const result = await getPublicFeed(1, 5)
     activities = result.activities
   } catch {
     return null
@@ -82,6 +83,8 @@ export async function HomeActivityFeed({ locale }: HomeActivityFeedProps) {
                   alt={username}
                   width={36}
                   height={36}
+                  sizes="36px"
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               ) : (

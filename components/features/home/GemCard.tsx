@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ManhwaCardPopupData } from '@/lib/db/manhwa'
+import { getAnilistCover } from '@/lib/utils/anilist-image'
 
 interface GemCardProps {
   manhwa: ManhwaCardPopupData
@@ -17,7 +18,7 @@ export function GemCard({ manhwa, locale }: GemCardProps) {
       <div className="gem-cover">
         {manhwa.cover_url && (
           <Image
-            src={manhwa.cover_url}
+            src={getAnilistCover(manhwa.cover_url, 'card')}
             alt={title}
             fill
             sizes="(max-width: 768px) 33vw, 16vw"

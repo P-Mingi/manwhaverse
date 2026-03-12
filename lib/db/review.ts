@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { prisma } from './client'
 import type { Prisma, KoreanReaction } from '@prisma/client'
 
@@ -33,14 +34,18 @@ export type ReviewWithManhwa = Prisma.ReviewGetPayload<{
   include: typeof reviewWithManhwa
 }>
 
-export async function getRecentReviews(limit = 6): Promise<ReviewWithManhwa[]> {
-  return prisma.review.findMany({
-    where: { deleted_at: null },
-    include: reviewWithManhwa,
-    orderBy: { created_at: 'desc' },
-    take: limit,
-  })
-}
+export const getRecentReviews = unstable_cache(
+  async (limit = 6): Promise<ReviewWithManhwa[]> => {
+    return prisma.review.findMany({
+      where: { deleted_at: null },
+      include: reviewWithManhwa,
+      orderBy: { created_at: 'desc' },
+      take: limit,
+    })
+  },
+  ['recent-reviews'],
+  { revalidate: 120, tags: ['reviews'] }
+)
 
 export async function getReviewsForManhwa(
   manhwaId: string,

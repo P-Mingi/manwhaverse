@@ -20,6 +20,7 @@ import { HomeRankingList } from '@/components/features/home/HomeRankingList'
 import { GemCard } from '@/components/features/home/GemCard'
 import { SectionHeader } from '@/components/ui/SectionHeader'
 import { formatCount } from '@/lib/utils/formatCount'
+import { getAnilistCover } from '@/lib/utils/anilist-image'
 
 export const revalidate = 300
 
@@ -135,11 +136,11 @@ async function HeroSection({ locale }: { locale: string }) {
       <div className="hero-visual">
         {covers.length > 0 && (
           <div className="hero-collage">
-            {/* Featured (2×2) */}
+            {/* Featured (2×2) — only image with priority */}
             <Link href={`/${locale}/manhwa/${covers[0]?.slug}`} className="collage-item featured">
               {covers[0]?.cover_url && (
                 <Image
-                  src={covers[0].cover_url}
+                  src={getAnilistCover(covers[0].cover_url, 'hero')}
                   alt={covers[0].title}
                   fill
                   sizes="(max-width: 768px) 100vw, 30vw"
@@ -153,17 +154,17 @@ async function HeroSection({ locale }: { locale: string }) {
               )}
             </Link>
 
-            {/* 5 smaller cells — hidden on mobile to avoid loading 5 extra images */}
-            {covers.slice(1, 6).map((m, i) => (
+            {/* 5 smaller cells — hidden on mobile, all lazy */}
+            {covers.slice(1, 6).map((m) => (
               <Link key={m.slug} href={`/${locale}/manhwa/${m.slug}`} className="collage-item hidden md:block">
                 {m.cover_url && (
                   <Image
-                    src={m.cover_url}
+                    src={getAnilistCover(m.cover_url, 'card')}
                     alt={m.title}
                     fill
-                    sizes="(max-width: 768px) 50vw, 15vw"
+                    sizes="15vw"
                     className="collage-cover"
-                    priority={i < 2}
+                    loading="lazy"
                     quality={75}
                   />
                 )}
@@ -335,7 +336,7 @@ async function TopListsSection({ locale }: { locale: string }) {
   let lists: Awaited<ReturnType<typeof getTopLists>> = []
   const t = await getTranslations({ locale, namespace: 'home' })
   try {
-    lists = await getTopLists(6)
+    lists = await getTopLists(3)
   } catch {
     return null
   }
@@ -358,7 +359,7 @@ async function TopListsSection({ locale }: { locale: string }) {
             <div className="list-card-covers">
               {list.preview_covers.slice(0, 4).map((cover, i) => (
                 <div key={i} className="list-cover-mini">
-                  <Image src={cover} alt="" fill sizes="40px" className="object-cover" loading="lazy" />
+                  <Image src={getAnilistCover(cover, 'thumb')} alt="" fill sizes="40px" className="object-cover" loading="lazy" />
                 </div>
               ))}
               {list.preview_covers.length === 0 && (

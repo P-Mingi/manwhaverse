@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { RankedManhwa } from '@/lib/db/ranking'
+import { getAnilistCover } from '@/lib/utils/anilist-image'
 
 interface HomeRankingListProps {
   manhwas: RankedManhwa[]
@@ -21,7 +22,7 @@ export function HomeRankingList({ manhwas, locale }: HomeRankingListProps) {
           <div className="podium-thumb">
             {manhwa.cover_url ? (
               <Image
-                src={manhwa.cover_url}
+                src={getAnilistCover(manhwa.cover_url, 'thumb')}
                 alt={manhwa.title}
                 width={52}
                 height={70}

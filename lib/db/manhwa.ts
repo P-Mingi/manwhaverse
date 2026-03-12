@@ -1,4 +1,4 @@
-import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
 import { prisma } from './client'
 import type { Prisma } from '@prisma/client'
 
@@ -23,14 +23,16 @@ export type ManhwaWithRelations = Prisma.ManhwaGetPayload<{
   include: typeof manhwaWithRelations
 }>
 
-export const getManhwaBySlug = cache(async (
-  slug: string
-): Promise<ManhwaWithRelations | null> => {
-  return prisma.manhwa.findUnique({
-    where: { slug, is_published: true, deleted_at: null },
-    include: manhwaWithRelations,
-  })
-})
+export const getManhwaBySlug = unstable_cache(
+  async (slug: string): Promise<ManhwaWithRelations | null> => {
+    return prisma.manhwa.findUnique({
+      where: { slug, is_published: true, deleted_at: null },
+      include: manhwaWithRelations,
+    })
+  },
+  ['manhwa-by-slug'],
+  { revalidate: 3600, tags: ['manhwa'] }
+)
 
 // Lightweight type for cards/grids
 export const manhwaCardSelect = {

@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ReviewWithManhwa } from '@/lib/db/review'
+import { getAnilistCover } from '@/lib/utils/anilist-image'
 
 const REACTION_MAP: Record<string, { emoji: string; label: string }> = {
   HEOL:    { emoji: '😱', label: '헐' },
@@ -19,8 +20,9 @@ function aggregateReactions(reactions: { reaction: string }[]) {
     .sort((a, b) => b.count - a.count)
 }
 
-function timeAgo(date: Date) {
-  const secs = Math.floor((Date.now() - date.getTime()) / 1000)
+function timeAgo(date: Date | string) {
+  const d = date instanceof Date ? date : new Date(date)
+  const secs = Math.floor((Date.now() - d.getTime()) / 1000)
   if (secs < 60) return `${secs}s`
   const mins = Math.floor(secs / 60)
   if (mins < 60) return `${mins}m`
@@ -75,7 +77,7 @@ export function HomeReviewCard({ review, locale }: Props) {
           <div className="review-manhwa-thumb">
             {review.manhwa.cover_url && (
               <Image
-                src={review.manhwa.cover_url}
+                src={getAnilistCover(review.manhwa.cover_url, 'thumb')}
                 width={32}
                 height={44}
                 sizes="32px"

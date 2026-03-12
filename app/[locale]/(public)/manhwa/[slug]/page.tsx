@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic'
-
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -26,13 +24,20 @@ import { PollWidget } from '@/components/features/poll/PollWidget'
 import { getManhwaFanArts } from '@/lib/db/fan-art'
 
 export const revalidate = 3600
+export const dynamicParams = true
 
 interface ManhwaPageProps {
   params: Promise<{ locale: string; slug: string }>
 }
 
 export async function generateStaticParams() {
-  return [] // rendered on demand
+  try {
+    const slugs = await getTopManhwaSlugs(200)
+    const locales = ['en', 'fr']
+    return locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })))
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({
