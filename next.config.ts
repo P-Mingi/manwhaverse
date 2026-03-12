@@ -44,6 +44,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'logo.clearbit.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.googleusercontent.com',
+      },
     ],
   },
   async headers() {

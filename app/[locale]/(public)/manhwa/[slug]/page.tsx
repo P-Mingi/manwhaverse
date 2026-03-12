@@ -33,9 +33,15 @@ interface ManhwaPageProps {
 export async function generateStaticParams() {
   try {
     const slugs = await getTopManhwaSlugs(200)
+    if (slugs.length === 0) {
+      console.warn('[generateStaticParams] getTopManhwaSlugs returned 0 results — no pages pre-built. Check DIRECT_URL env var.')
+      return []
+    }
     const locales = ['en', 'fr']
+    console.log(`[generateStaticParams] Pre-building ${slugs.length * locales.length} manhwa pages`)
     return locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })))
-  } catch {
+  } catch (e) {
+    console.error('[generateStaticParams] Failed:', e)
     return []
   }
 }
