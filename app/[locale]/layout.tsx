@@ -8,7 +8,6 @@ import type { Locale } from '@/i18n/routing'
 import { ThemeProvider } from 'next-themes'
 import { SessionProvider } from '@/components/providers/SessionProvider'
 import { Header } from '@/components/layouts/Header'
-import { MobileNav } from '@/components/layouts/MobileNav'
 import { Footer } from '@/components/layouts/Footer'
 
 interface LocaleLayoutProps {
@@ -70,11 +69,10 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
       <NextIntlClientProvider messages={messages}>
         <SessionProvider>
           <Header locale={locale} />
-          <div style={{ minHeight: '100vh', paddingBottom: '4rem' }}>
+          <div style={{ minHeight: '100vh' }}>
             {children}
           </div>
           <Footer locale={locale} />
-          <MobileNav locale={locale} />
         </SessionProvider>
       </NextIntlClientProvider>
     </ThemeProvider>

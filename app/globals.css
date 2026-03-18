@@ -132,6 +132,37 @@ body {
   }
 }
 
+/* Filter pills — active/inactive states using CSS variables */
+.filter-pill {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: transparent;
+  transition: all 150ms;
+}
+.filter-pill:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-muted);
+}
+.filter-pill.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-muted);
+  font-weight: 600;
+}
+
+/* Ranking rows */
+.rank-row { text-decoration: none; display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: 8px; transition: background 150ms; }
+.rank-row:hover { background: var(--bg-elevated); }
+.rank-row:hover .rank-title { color: var(--accent); }
+.rank-title { transition: color 150ms; }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

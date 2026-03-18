@@ -2,11 +2,13 @@ import Link from 'next/link'
 import {
   getTrendingManhwas,
   getHiddenGems,
+  getRecentManhwas,
   getStats,
 } from '@/lib/db/home'
 import { getTopRankedManhwas } from '@/lib/db/ranking'
 import { getPublicFeed } from '@/lib/db/activity'
 import { getRecentReviews } from '@/lib/db/review'
+import { getTopLists } from '@/lib/db/list'
 import { TrendingSection } from '@/components/features/home/TrendingSection'
 import { RankingsSidebar } from '@/components/features/home/RankingsSidebar'
 import { ActivityFeed } from '@/components/features/home/ActivityFeed'
@@ -29,15 +31,19 @@ export default async function HomePage({ params }: HomeProps) {
   let ranked = [] as Awaited<ReturnType<typeof getTopRankedManhwas>>
   let activities = [] as Awaited<ReturnType<typeof getPublicFeed>>['activities']
   let reviews = [] as Awaited<ReturnType<typeof getRecentReviews>>
+  let topLists = [] as Awaited<ReturnType<typeof getTopLists>>
+  let recentManhwas = [] as Awaited<ReturnType<typeof getRecentManhwas>>
 
   try {
-    const [s, tr, hg, r, feed, rev] = await Promise.all([
+    const [s, tr, hg, r, feed, rev, lists, recent] = await Promise.all([
       getStats(),
       getTrendingManhwas(locale, 5),
       getHiddenGems(6),
       getTopRankedManhwas(10, locale),
-      getPublicFeed(1, 8),
-      getRecentReviews(4),
+      getPublicFeed(1, 5),
+      getRecentReviews(2),
+      getTopLists(3),
+      getRecentManhwas(6),
     ])
     stats = s
     trending = tr
@@ -45,6 +51,8 @@ export default async function HomePage({ params }: HomeProps) {
     ranked = r
     activities = feed.activities
     reviews = rev
+    topLists = lists
+    recentManhwas = recent
   } catch {
     // DB unavailable — render with empty data
   }
@@ -197,6 +205,66 @@ export default async function HomePage({ params }: HomeProps) {
                 <ManhwaCard key={m.id} manhwa={m} locale={locale} priority={i < 3} />
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── TOP LISTS ── */}
+      {topLists.length > 0 && (
+        <section style={{ maxWidth: '1024px', margin: '0 auto', padding: '28px 24px 0' }}>
+          <SectionHeader
+            title={locale === 'fr' ? 'Top Listes' : 'Top Lists'}
+            href={`/${locale}/lists`}
+            seeAllLabel={locale === 'fr' ? 'Voir tout →' : 'See all →'}
+          />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            {topLists.map((list) => (
+              <Link key={list.slug} href={`/${locale}/lists/${list.slug}`} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '10px',
+                  padding: '14px',
+                  height: '100%',
+                }}>
+                  <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
+                    {list.preview_covers.slice(0, 3).map((url, i) => (
+                      <div key={i} style={{ width: '40px', height: '56px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-elevated)' }}>
+                        {url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        )}
+                      </div>
+                    ))}
+                    {Array.from({ length: Math.max(0, 3 - list.preview_covers.length) }).map((_, i) => (
+                      <div key={`empty-${i}`} style={{ width: '40px', height: '56px', borderRadius: '4px', background: 'var(--bg-elevated)', flexShrink: 0 }} />
+                    ))}
+                  </div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px', lineHeight: 1.3 }}>
+                    {list.title}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    {list.item_count} {locale === 'fr' ? 'titres' : 'titles'} · {locale === 'fr' ? 'par' : 'by'} {list.user.display_name ?? list.user.username}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── RECENTLY ADDED ── */}
+      {recentManhwas.length > 0 && (
+        <section style={{ maxWidth: '1024px', margin: '0 auto', padding: '28px 24px 0' }}>
+          <SectionHeader
+            title={locale === 'fr' ? 'Ajouts récents' : 'Recently Added'}
+            href={`/${locale}/explore?sort=recent`}
+            seeAllLabel={locale === 'fr' ? 'Voir tout →' : 'See all →'}
+          />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px' }}>
+            {recentManhwas.map((m) => (
+              <ManhwaCard key={m.id} manhwa={m} locale={locale} />
+            ))}
           </div>
         </section>
       )}

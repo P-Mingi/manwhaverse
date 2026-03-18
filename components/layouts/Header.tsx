@@ -3,6 +3,7 @@ import { getUser } from '@/lib/auth/session'
 import { ThemeToggle } from './ThemeToggle'
 import { NotificationBell } from './NotificationBell'
 import { AvatarDropdown } from './AvatarDropdown'
+import { MobileMenuButton } from './MobileMenuButton'
 
 export async function Header({ locale }: { locale: string }) {
   const user = await getUser()
@@ -51,8 +52,11 @@ export async function Header({ locale }: { locale: string }) {
           ManhwaVerse
         </Link>
 
-        {/* Desktop nav */}
-        <nav style={{ display: 'flex', gap: '0.25rem', flex: 1 }}>
+        {/* Desktop nav — hidden on mobile, flex on md+ */}
+        <nav
+          className="hidden md:flex"
+          style={{ gap: '0.25rem', flex: 1 }}
+        >
           {navLinks.map(({ href, label }) => (
             <Link
               key={href}
@@ -88,7 +92,7 @@ export async function Header({ locale }: { locale: string }) {
         </nav>
 
         {/* Right side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0, marginLeft: 'auto' }}>
           <Link
             href={`/${otherLocale}`}
             style={{
@@ -110,12 +114,15 @@ export async function Header({ locale }: { locale: string }) {
           ) : (
             <Link
               href={`/${locale}/sign-in`}
-              className="btn-primary"
+              className="btn-primary hidden md:inline-flex"
               style={{ textDecoration: 'none', fontSize: '12px' }}
             >
               {locale === 'fr' ? 'Connexion' : 'Sign in'}
             </Link>
           )}
+
+          {/* Hamburger — mobile only */}
+          <MobileMenuButton locale={locale} isLoggedIn={!!user} />
         </div>
       </div>
     </header>

@@ -63,11 +63,8 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
           <Link
             key={s}
             href={`/${locale}/genre/${slug}?sort=${s}`}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium ${
-              sortBy === s
-                ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
-                : 'bg-elevated text-text-secondary hover:bg-border'
-            }`}
+            className={`filter-pill${sortBy === s ? ' active' : ''}`}
+            style={{ borderRadius: '6px', fontSize: '12px' }}
           >
             {s === 'popularity' ? 'Popular' : s === 'score' ? 'Top Rated' : 'Recent'}
           </Link>
@@ -97,11 +94,8 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
               <Link
                 key={p}
                 href={`/${locale}/genre/${slug}?sort=${sortBy}&page=${p}`}
-                className={`rounded-md px-3 py-1.5 text-sm ${
-                  p === currentPage
-                    ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
-                    : 'bg-elevated text-text-secondary hover:bg-border'
-                }`}
+                className={`filter-pill${p === currentPage ? ' active' : ''}`}
+                style={{ borderRadius: '6px', fontSize: '13px' }}
               >
                 {p}
               </Link>

@@ -43,7 +43,8 @@ const selectStyle = {
   padding: '0.5rem 0.625rem',
   fontSize: '12px',
   cursor: 'pointer',
-  width: '100%',
+  flex: '1 1 auto',
+  minWidth: '120px',
 }
 
 export function FilterPanel({ genres, locale }: Props) {

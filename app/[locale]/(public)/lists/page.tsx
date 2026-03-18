@@ -41,7 +41,13 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
         </div>
         <Link
           href={`/${locale}/lists/new`}
-          className="inline-flex items-center gap-2 rounded-lg border border-[rgba(0,255,255,0.3)] px-4 py-2 text-sm font-medium text-[#00ffff] transition-colors hover:bg-[rgba(0,255,255,0.08)]"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            borderRadius: '8px', border: '1px solid var(--accent)',
+            padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+            color: 'var(--accent)', textDecoration: 'none',
+            background: 'var(--accent-muted)',
+          }}
         >
           + {t('new')}
         </Link>
@@ -53,11 +59,8 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
           <Link
             key={s}
             href={`/${locale}/lists?sort=${s}`}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium ${
-              currentSort === s
-                ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
-                : 'bg-elevated text-text-secondary hover:bg-border'
-            }`}
+            className={`filter-pill${currentSort === s ? ' active' : ''}`}
+          style={{ borderRadius: '6px', fontSize: '12px' }}
           >
             {s === 'popular' ? t('sortPopular') : s === 'recent' ? t('sortRecent') : t('sortSize')}
           </Link>
@@ -73,7 +76,7 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
             <Link
               key={list.id}
               href={`/${locale}/lists/${list.slug}`}
-              className="group flex flex-col rounded-xl border border-border bg-elevated hover:border-[rgba(0,255,255,0.25)] transition-colors"
+              className="group flex flex-col rounded-xl border border-border bg-elevated transition-colors" style={{ borderColor: 'var(--border)' }}
             >
               {/* Cover strip */}
               <div className="flex h-24 overflow-hidden rounded-t-xl">
@@ -101,7 +104,7 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
 
               {/* Info */}
               <div className="flex flex-1 flex-col gap-1.5 p-4">
-                <h2 className="font-semibold text-text-primary group-hover:text-[#00ffff] line-clamp-2 leading-snug">
+                <h2 className="font-semibold line-clamp-2 leading-snug" style={{ color: 'var(--text-primary)' }}>
                   {list.title}
                 </h2>
                 {list.description && (
@@ -135,11 +138,8 @@ export default async function ListsPage({ params, searchParams }: ListsPageProps
               <Link
                 key={p}
                 href={`/${locale}/lists?sort=${currentSort}&page=${p}`}
-                className={`rounded-md px-3 py-1.5 text-sm ${
-                  p === currentPage
-                    ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
-                    : 'bg-elevated text-text-secondary hover:bg-border'
-                }`}
+                className={`filter-pill${p === currentPage ? ' active' : ''}`}
+                style={{ borderRadius: '6px', fontSize: '13px', fontWeight: p === currentPage ? 700 : 400 }}
               >
                 {p}
               </Link>
