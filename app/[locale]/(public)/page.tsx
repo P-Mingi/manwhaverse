@@ -170,10 +170,56 @@ export default async function HomePage({ params }: HomeProps) {
           alignItems: 'start',
         }}
       >
-        {/* LEFT — reviews + activity */}
+        {/* LEFT — reviews + activity + lists */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {reviews.length > 0 && <RecentReviews reviews={reviews} locale={locale} />}
           <ActivityFeed activities={activities} locale={locale} />
+          {topLists.length > 0 && (
+            <div>
+              <SectionHeader
+                title={locale === 'fr' ? 'Top Listes' : 'Top Lists'}
+                href={`/${locale}/lists`}
+                seeAllLabel={locale === 'fr' ? 'Voir tout →' : 'See all →'}
+              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {topLists.map((list) => (
+                  <Link key={list.slug} href={`/${locale}/lists/${list.slug}`} style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '10px',
+                      padding: '10px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                    }}>
+                      <div style={{ display: 'flex', gap: '3px', flexShrink: 0 }}>
+                        {list.preview_covers.slice(0, 3).map((url, i) => (
+                          <div key={i} style={{ width: '28px', height: '40px', borderRadius: '3px', overflow: 'hidden', background: 'var(--bg-elevated)' }}>
+                            {url && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            )}
+                          </div>
+                        ))}
+                        {Array.from({ length: Math.max(0, 3 - list.preview_covers.length) }).map((_, i) => (
+                          <div key={`empty-${i}`} style={{ width: '28px', height: '40px', borderRadius: '3px', background: 'var(--bg-elevated)' }} />
+                        ))}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {list.title}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                          {list.item_count} {locale === 'fr' ? 'titres' : 'titles'} · {locale === 'fr' ? 'par' : 'by'} {list.user.display_name ?? list.user.username}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* RIGHT SIDEBAR — rankings */}
@@ -205,50 +251,6 @@ export default async function HomePage({ params }: HomeProps) {
                 <ManhwaCard key={m.id} manhwa={m} locale={locale} priority={i < 3} />
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── TOP LISTS ── */}
-      {topLists.length > 0 && (
-        <section style={{ maxWidth: '1024px', margin: '0 auto', padding: '28px 24px 0' }}>
-          <SectionHeader
-            title={locale === 'fr' ? 'Top Listes' : 'Top Lists'}
-            href={`/${locale}/lists`}
-            seeAllLabel={locale === 'fr' ? 'Voir tout →' : 'See all →'}
-          />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-            {topLists.map((list) => (
-              <Link key={list.slug} href={`/${locale}/lists/${list.slug}`} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '10px',
-                  padding: '14px',
-                  height: '100%',
-                }}>
-                  <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
-                    {list.preview_covers.slice(0, 3).map((url, i) => (
-                      <div key={i} style={{ width: '40px', height: '56px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, background: 'var(--bg-elevated)' }}>
-                        {url && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                        )}
-                      </div>
-                    ))}
-                    {Array.from({ length: Math.max(0, 3 - list.preview_covers.length) }).map((_, i) => (
-                      <div key={`empty-${i}`} style={{ width: '40px', height: '56px', borderRadius: '4px', background: 'var(--bg-elevated)', flexShrink: 0 }} />
-                    ))}
-                  </div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px', lineHeight: 1.3 }}>
-                    {list.title}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    {list.item_count} {locale === 'fr' ? 'titres' : 'titles'} · {locale === 'fr' ? 'par' : 'by'} {list.user.display_name ?? list.user.username}
-                  </div>
-                </div>
-              </Link>
-            ))}
           </div>
         </section>
       )}

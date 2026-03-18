@@ -62,7 +62,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   return (
     <ThemeProvider
       attribute="data-theme"
-      defaultTheme="dark"
+      defaultTheme="light"
       enableSystem={false}
       storageKey="manhwaverse-theme"
     >

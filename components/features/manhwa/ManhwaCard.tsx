@@ -38,7 +38,7 @@ export function ManhwaCard({ manhwa, locale, priority }: Props) {
           </div>
         )}
       </div>
-      <div>
+      <div style={{ height: 64, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
         <p
           style={{
             margin: 0,
@@ -50,11 +50,12 @@ export function ManhwaCard({ manhwa, locale, priority }: Props) {
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
+            minHeight: '34px',
           }}
         >
           {title}
         </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+        <div style={{ display: 'flex', flexWrap: 'nowrap', overflow: 'hidden', gap: 4, height: 20, alignItems: 'center' }}>
           {manhwa.genre_links.slice(0, 2).map((gl) => (
             <Badge key={gl.genre.slug} variant="genre">
               {locale === 'fr' ? gl.genre.name_fr : gl.genre.name_en}
