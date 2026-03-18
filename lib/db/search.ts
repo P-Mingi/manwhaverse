@@ -40,7 +40,7 @@ export async function searchManhwas({
     ...(status ? { status: status as 'ONGOING' | 'COMPLETED' | 'HIATUS' | 'CANCELLED' } : {}),
     ...(type ? { type: type as 'MANHWA' | 'MANHUA' } : {}),
     ...(genre === '__adult__'
-      ? { content_rating: { in: ['R18', 'X'] } }
+      ? { content_rating: { in: ['R18', 'X'] as ('R18' | 'X')[] } }
       : genre
       ? { genre_links: { some: { genre: { slug: genre } } } }
       : {}),
