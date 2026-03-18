@@ -5,14 +5,12 @@ import { getMessages, getTranslations } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import type { Locale } from '@/i18n/routing'
-import { Suspense } from 'react'
 import { ThemeProvider } from 'next-themes'
 import { SessionProvider } from '@/components/providers/SessionProvider'
-import { PostHogTracker } from '@/components/providers/PostHogProvider'
 import { Header } from '@/components/layouts/Header'
-import { getUser } from '@/lib/auth/session'
 import { MobileNav } from '@/components/layouts/MobileNav'
 import { Footer } from '@/components/layouts/Footer'
+
 interface LocaleLayoutProps {
   children: ReactNode
   params: Promise<{ locale: string }>
@@ -39,10 +37,7 @@ export async function generateMetadata({
     metadataBase: new URL('https://manhwaverse.com'),
     alternates: {
       canonical: '/',
-      languages: {
-        en: '/en',
-        fr: '/fr',
-      },
+      languages: { en: '/en', fr: '/fr' },
     },
     openGraph: {
       type: 'website',
@@ -51,30 +46,19 @@ export async function generateMetadata({
       description: t('defaultDescription'),
       locale: locale === 'fr' ? 'fr_FR' : 'en_US',
     },
-    twitter: {
-      card: 'summary_large_image',
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    twitter: { card: 'summary_large_image' },
+    robots: { index: true, follow: true },
   }
 }
 
-export default async function LocaleLayout({
-  children,
-  params,
-}: LocaleLayoutProps) {
+export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale } = await params
 
   if (!routing.locales.includes(locale as Locale)) {
     notFound()
   }
 
-  const [messages, user] = await Promise.all([
-    getMessages(),
-    getUser().catch(() => null),
-  ])
+  const messages = await getMessages()
 
   return (
     <ThemeProvider
@@ -85,15 +69,12 @@ export default async function LocaleLayout({
     >
       <NextIntlClientProvider messages={messages}>
         <SessionProvider>
-          <Suspense fallback={null}>
-            <PostHogTracker />
-          </Suspense>
-          <Header user={user} />
-          <div className="min-h-screen pb-16 md:pb-0">
+          <Header locale={locale} />
+          <div style={{ minHeight: '100vh', paddingBottom: '4rem' }}>
             {children}
           </div>
           <Footer locale={locale} />
-          <MobileNav />
+          <MobileNav locale={locale} />
         </SessionProvider>
       </NextIntlClientProvider>
     </ThemeProvider>

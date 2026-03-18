@@ -4,14 +4,11 @@ import { getTranslations } from 'next-intl/server'
 import { getUserByUsername } from '@/lib/db/user'
 import { getUserLibrary } from '@/lib/db/library'
 import { getUserActivity } from '@/lib/db/activity'
-import { getFollowerPreview } from '@/lib/db/follow'
-import { getUser, isAdmin } from '@/lib/auth/session'
-import { isFollowing } from '@/lib/db/follow'
-import { MODERATOR_USERNAMES } from '@/lib/auth/moderators'
-import { getChallengeSummary } from '@/lib/db/challenge'
-import { ManhwaCard } from '@/components/features/ManhwaCard'
-import { ActivityCard } from '@/components/features/ActivityCard'
-import { FollowButton } from '@/components/features/FollowButton'
+import { getFollowerPreview, isFollowing } from '@/lib/db/follow'
+import { getUser } from '@/lib/auth/session'
+import { ManhwaCard } from '@/components/features/manhwa/ManhwaCard'
+import { ActivityRow } from '@/components/features/social/ActivityRow'
+import { FollowButton } from '@/components/features/social/FollowButton'
 import { PageContainer } from '@/components/layouts/PageContainer'
 
 export const revalidate = 300
@@ -40,8 +37,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   if (!profileUser) notFound()
 
   const isOwnProfile = currentUser?.id === profileUser.id
-  const currentYear = new Date().getFullYear()
-  const [userFollowing, recentLibrary, { activities: recentActivity }, followerPreview, adminOk, challengeSummary] =
+
+  const [userFollowing, recentLibrary, { activities: recentActivity }, followerPreview] =
     await Promise.all([
       currentUser && !isOwnProfile
         ? isFollowing(currentUser.id, profileUser.id)
@@ -49,13 +46,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       getUserLibrary(profileUser.id),
       getUserActivity(profileUser.id, 1, 5),
       getFollowerPreview(profileUser.id, 5),
-      isAdmin(),
-      getChallengeSummary(profileUser.id, currentYear).catch(() => null),
     ])
-
-  const canAdminEdit =
-    !isOwnProfile &&
-    (adminOk || (currentUser?.username && MODERATOR_USERNAMES.includes(currentUser.username)))
 
   return (
     <PageContainer>
@@ -88,17 +79,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             {isOwnProfile && (
               <Link
                 href={`/${locale}/settings`}
-                className="rounded-lg border border-electric-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-electric/40 hover:text-electric"
+                className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary"
               >
                 {t('editProfile')}
-              </Link>
-            )}
-            {canAdminEdit && (
-              <Link
-                href={`/${locale}/admin/users/${profileUser.username}`}
-                className="rounded-lg bg-amber-500/20 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/30"
-              >
-                Admin edit
               </Link>
             )}
           </div>
@@ -127,11 +110,11 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <div className="font-mono text-lg font-bold">{profileUser._count.reviews}</div>
           <div className="text-xs text-text-muted">{t('reviewsWritten')}</div>
         </div>
-        <Link href={`/${locale}/profile/${profileUser.username}/followers`} className="transition-colors hover:text-electric">
+        <Link href={`/${locale}/profile/${profileUser.username}/followers`} className="transition-colors hover:text-accent">
           <div className="font-mono text-lg font-bold">{profileUser._count.followers}</div>
           <div className="text-xs text-text-muted">{t('followers')}</div>
         </Link>
-        <Link href={`/${locale}/profile/${profileUser.username}/following`} className="transition-colors hover:text-electric">
+        <Link href={`/${locale}/profile/${profileUser.username}/following`} className="transition-colors hover:text-accent">
           <div className="font-mono text-lg font-bold">{profileUser._count.follows}</div>
           <div className="text-xs text-text-muted">{t('following')}</div>
         </Link>
@@ -169,49 +152,13 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         </Link>
       )}
 
-      {/* Journal link */}
-      <div className="mt-4">
-        <Link
-          href={`/${locale}/profile/${profileUser.username}/journal`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-electric-border px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-electric/40 hover:text-electric"
-        >
-          📖 {t('viewJournal')}
-        </Link>
-      </div>
-
-      {/* Reading Challenge widget (only if they have an active challenge) */}
-      {challengeSummary && (
-        <Link
-          href={`/${locale}/challenge/${currentYear}`}
-          className="mt-4 flex items-center gap-4 rounded-xl border border-electric-border bg-card px-4 py-3 transition-colors hover:border-electric/40"
-        >
-          <span className="text-2xl">{challengeSummary.isCompleted ? '🏆' : '📚'}</span>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium text-text-primary">
-                {t('challengeYear', { year: currentYear })}
-              </span>
-              <span className="text-xs text-text-muted">
-                {challengeSummary.completed}/{challengeSummary.goal}
-              </span>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-elevated">
-              <div
-                className={`h-full rounded-full ${challengeSummary.isCompleted ? 'bg-yellow-400' : 'bg-electric'}`}
-                style={{ width: `${challengeSummary.percent}%` }}
-              />
-            </div>
-          </div>
-        </Link>
-      )}
-
       {/* Recent Activity */}
       {recentActivity.length > 0 && (
         <section className="mt-8">
           <h2 className="mb-4 font-display text-lg font-bold">{t('recentActivity')}</h2>
           <div className="space-y-2">
             {recentActivity.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} locale={locale} />
+              <ActivityRow key={activity.id} activity={activity} locale={locale} />
             ))}
           </div>
         </section>
@@ -223,7 +170,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <h2 className="mb-4 font-display text-lg font-bold">{t('titles')}</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {recentLibrary.slice(0, 12).map((entry) => (
-              <ManhwaCard key={entry.id} manhwa={entry.manhwa} locale={locale} userScore={entry.score} />
+              <ManhwaCard key={entry.id} manhwa={entry.manhwa} locale={locale} />
             ))}
           </div>
         </section>

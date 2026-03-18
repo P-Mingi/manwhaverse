@@ -25,13 +25,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
-          select: { username: true, locale: true, avatar_url: true, display_name: true },
+          select: { username: true, locale: true, avatar_url: true, display_name: true, content_filter: true },
         })
         if (dbUser) {
           token.username = dbUser.username
           token.locale = dbUser.locale
           token.avatar_url = dbUser.avatar_url
           token.display_name = dbUser.display_name
+          token.content_filter = dbUser.content_filter
         }
       }
       return token
@@ -44,6 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.locale = token.locale as string
         session.user.avatar_url = token.avatar_url as string | null
         session.user.display_name = token.display_name as string | null
+        session.user.content_filter = (token.content_filter as string) ?? 'SAFE'
       }
       return session
     },

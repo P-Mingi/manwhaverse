@@ -1,203 +1,119 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { useParams, usePathname } from 'next/navigation'
-import { useTranslations } from 'next-intl'
-import { signOut as nextAuthSignOut } from 'next-auth/react'
-import { NotificationBell } from '@/components/features/NotificationBell'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { getUser } from '@/lib/auth/session'
+import { ThemeToggle } from './ThemeToggle'
+import { NotificationBell } from './NotificationBell'
+import { AvatarDropdown } from './AvatarDropdown'
 
-function AvatarDropdown({ user, locale, t }: {
-  user: { username?: string | null; avatar_url?: string | null }
-  locale: string
-  t: ReturnType<typeof useTranslations>
-}) {
-  const [open, setOpen] = useState(false)
-  const signOut = () => nextAuthSignOut({ redirectTo: '/' })
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(prev => !prev)}
-        aria-label="User menu"
-        className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-electric text-sm font-semibold transition-opacity hover:opacity-80"
-      >
-        {user.avatar_url ? (
-          <Image
-            src={user.avatar_url}
-            width={32}
-            height={32}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="text-electric">
-            {user.username?.[0]?.toUpperCase() ?? '?'}
-          </span>
-        )}
-      </button>
-
-      {open && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-[199]"
-            onClick={() => setOpen(false)}
-          />
-
-          {/* Dropdown panel */}
-          <div className="absolute right-0 z-[200] mt-2 min-w-[160px] overflow-hidden rounded-lg border border-electric-border bg-card shadow-lg">
-            <Link
-              href={`/${locale}/profile/${user.username}`}
-              onClick={() => setOpen(false)}
-              className="dropdown-item"
-            >
-              {t('profile')}
-            </Link>
-            <Link
-              href={`/${locale}/library`}
-              onClick={() => setOpen(false)}
-              className="dropdown-item"
-            >
-              {t('library')}
-            </Link>
-            <Link
-              href={`/${locale}/settings`}
-              onClick={() => setOpen(false)}
-              className="dropdown-item"
-            >
-              {t('settings')}
-            </Link>
-
-            <div className="my-1 h-px bg-electric-border" />
-
-            <button
-              onClick={() => { setOpen(false); signOut() }}
-              className="dropdown-item w-full text-left text-error"
-            >
-              {t('signOut')}
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
-
-interface HeaderProps {
-  user: { username?: string | null; avatar_url?: string | null } | null
-}
-
-export function Header({ user }: HeaderProps) {
-  const t = useTranslations('nav')
-  const { locale } = useParams<{ locale: string }>()
-  const pathname = usePathname()
-
+export async function Header({ locale }: { locale: string }) {
+  const user = await getUser()
   const otherLocale = locale === 'fr' ? 'en' : 'fr'
-  const switchedPath = pathname.replace(/^\/[a-z]{2}/, `/${otherLocale}`)
+
+  const navLinks = [
+    { href: `/${locale}/explore`, label: locale === 'fr' ? 'Découvrir' : 'Discover' },
+    { href: `/${locale}/top`, label: locale === 'fr' ? 'Classement' : 'Rankings' },
+    { href: `/${locale}/lists`, label: 'Lists' },
+  ]
 
   return (
-    <header className="sticky top-0 z-50 border-b border-electric-border bg-void/85 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+    <header
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        background: 'var(--bg-surface)',
+        borderBottom: '1px solid var(--border)',
+        height: 56,
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1280,
+          margin: '0 auto',
+          padding: '0 1rem',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1.5rem',
+        }}
+      >
         {/* Logo */}
         <Link
           href={`/${locale}`}
-          className="font-display text-2xl tracking-widest text-electric drop-shadow-[0_0_20px_rgba(0,255,255,0.5)]"
+          className="font-display"
+          style={{
+            color: 'var(--accent)',
+            fontSize: '1.25rem',
+            textDecoration: 'none',
+            letterSpacing: '0.08em',
+            flexShrink: 0,
+          }}
         >
           ManhwaVerse
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-3 md:flex">
-          <Link
-            href={`/${locale}/explore`}
-            className="text-[10px] font-medium uppercase tracking-wide text-text-secondary transition-colors hover:text-electric"
-          >
-            {t('discover')}
-          </Link>
-
-          {/* Browse dropdown */}
-          <div className="group relative flex items-center">
-            <button className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-text-secondary transition-colors hover:text-electric">
-              {t('browse')}
-              <svg className="h-2.5 w-2.5 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
-            </button>
-            <div className="absolute left-0 top-full z-50 hidden min-w-[160px] rounded-lg border border-electric-border bg-card p-1 shadow-lg group-hover:block">
-              <Link href={`/${locale}/character`} className="block rounded-md px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-electric-glow hover:text-electric">
-                {t('characters')}
-              </Link>
-              <Link href={`/${locale}/people`} className="block rounded-md px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-electric-glow hover:text-electric">
-                {t('staff')}
-              </Link>
-              <Link href={`/${locale}/publisher`} className="block rounded-md px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-electric-glow hover:text-electric">
-                {t('publishers')}
-              </Link>
-            </div>
-          </div>
-
-          <Link
-            href={`/${locale}/news`}
-            className="text-[10px] font-medium uppercase tracking-wide text-text-secondary transition-colors hover:text-electric"
-          >
-            {t('news')}
-          </Link>
-
-          {/* Community dropdown */}
-          <div className="group relative flex items-center">
-            <button className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-text-secondary transition-colors hover:text-electric">
-              {t('community')}
-              <svg className="h-2.5 w-2.5 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
-            </button>
-            <div className="absolute left-0 top-full z-50 hidden min-w-[160px] rounded-lg border border-electric-border bg-card p-1 shadow-lg group-hover:block">
-              <Link href={`/${locale}/members`} className="block rounded-md px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-electric-glow hover:text-electric">
-                {t('members')}
-              </Link>
-              <Link href={`/${locale}/lists`} className="block rounded-md px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-electric-glow hover:text-electric">
-                {t('lists')}
-              </Link>
-              <Link href={`/${locale}/artwork`} className="block rounded-md px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-electric-glow hover:text-electric">
-                {t('artwork')}
-              </Link>
-            </div>
-          </div>
-
+        <nav style={{ display: 'flex', gap: '0.25rem', flex: 1 }}>
+          {navLinks.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              style={{
+                padding: '0.375rem 0.75rem',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                borderRadius: 6,
+                transition: 'color 150ms',
+              }}
+            >
+              {label}
+            </Link>
+          ))}
           {user && (
             <Link
               href={`/${locale}/library`}
-              className="text-[10px] font-medium uppercase tracking-wide text-text-secondary transition-colors hover:text-electric"
+              style={{
+                padding: '0.375rem 0.75rem',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: 'var(--text-secondary)',
+                textDecoration: 'none',
+                borderRadius: 6,
+              }}
             >
-              {t('library')}
+              {locale === 'fr' ? 'Bibliothèque' : 'Library'}
             </Link>
           )}
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center gap-4">
-          {/* Locale switcher — plain text, no box */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
           <Link
-            href={switchedPath}
-            className="text-[11px] font-medium uppercase tracking-[0.08em] text-text-secondary transition-colors hover:text-text-primary"
+            href={`/${otherLocale}`}
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              color: 'var(--text-muted)',
+              textDecoration: 'none',
+              letterSpacing: '0.05em',
+            }}
           >
-            {otherLocale}
+            {otherLocale.toUpperCase()}
           </Link>
-
-          {/* Theme toggle */}
           <ThemeToggle />
-
-          {/* Notifications — logged in only */}
-          {user && <NotificationBell />}
-
-          {/* Avatar dropdown (logged in) or Sign In (guest) */}
           {user ? (
-            <AvatarDropdown user={user} locale={locale} t={t} />
+            <>
+              <NotificationBell locale={locale} />
+              <AvatarDropdown user={user} locale={locale} />
+            </>
           ) : (
             <Link
               href={`/${locale}/sign-in`}
-              className="rounded-md bg-electric px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-black transition-all duration-150 hover:-translate-y-px"
+              className="btn-primary"
+              style={{ textDecoration: 'none', fontSize: '12px' }}
             >
-              {t('signIn')}
+              {locale === 'fr' ? 'Connexion' : 'Sign in'}
             </Link>
           )}
         </div>

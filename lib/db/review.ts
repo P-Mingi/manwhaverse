@@ -49,32 +49,26 @@ export function getRecentReviews(limit = 6): Promise<ReviewWithManhwa[]> {
   )()
 }
 
-export async function getReviewsForManhwa(
+export function getReviewsForManhwa(
   manhwaId: string,
   sortBy: 'popular' | 'recent' = 'popular',
   page = 1,
   limit = 10
 ): Promise<{ reviews: ReviewWithUser[]; total: number }> {
-  const where = {
-    manhwa_id: manhwaId,
-    deleted_at: null,
-  }
-
-  const orderBy: Prisma.ReviewOrderByWithRelationInput =
-    sortBy === 'popular' ? { likes_count: 'desc' } : { created_at: 'desc' }
-
-  const [reviews, total] = await Promise.all([
-    prisma.review.findMany({
-      where,
-      include: reviewWithUser,
-      orderBy,
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.review.count({ where }),
-  ])
-
-  return { reviews, total }
+  return unstable_cache(
+    async () => {
+      const where = { manhwa_id: manhwaId, deleted_at: null }
+      const orderBy: Prisma.ReviewOrderByWithRelationInput =
+        sortBy === 'popular' ? { likes_count: 'desc' } : { created_at: 'desc' }
+      const [reviews, total] = await Promise.all([
+        prisma.review.findMany({ where, include: reviewWithUser, orderBy, skip: (page - 1) * limit, take: limit }),
+        prisma.review.count({ where }),
+      ])
+      return { reviews, total }
+    },
+    [`reviews-manhwa-${manhwaId}-${sortBy}-${page}-${limit}`],
+    { revalidate: 300, tags: ['reviews', `manhwa-${manhwaId}`] }
+  )()
 }
 
 export async function getReviewById(reviewId: string): Promise<ReviewWithUser | null> {

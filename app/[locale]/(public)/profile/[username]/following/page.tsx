@@ -5,7 +5,7 @@ import { getUserByUsername } from '@/lib/db/user'
 import { getFollowing } from '@/lib/db/follow'
 import { getUser } from '@/lib/auth/session'
 import { isFollowing } from '@/lib/db/follow'
-import { FollowButton } from '@/components/features/FollowButton'
+import { FollowButton } from '@/components/features/social/FollowButton'
 import { PageContainer } from '@/components/layouts/PageContainer'
 
 interface FollowingPageProps {

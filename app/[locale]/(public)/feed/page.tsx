@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { requireSession } from '@/lib/auth/session'
 import { getFeedForUser, getPublicFeed } from '@/lib/db/activity'
-import { ActivityCard } from '@/components/features/ActivityCard'
+import { ActivityRow } from '@/components/features/social/ActivityRow'
 import { PageContainer } from '@/components/layouts/PageContainer'
 
 interface FeedPageProps {
@@ -34,15 +34,15 @@ export default async function FeedPage({ params, searchParams }: FeedPageProps) 
   return (
     <PageContainer>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="section-title-bar font-display text-2xl uppercase tracking-wider text-text-primary">
+        <h1 className="font-display text-2xl uppercase tracking-wider text-text-primary">
           {t('title')}
         </h1>
         {/* Friends / Everyone toggle */}
-        <div className="flex rounded-lg border border-electric-border p-0.5">
+        <div className="flex rounded-lg border border-border p-0.5">
           <Link
             href={`/${locale}/feed?mode=friends`}
             className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-              isFriends ? 'bg-electric text-black' : 'text-text-muted hover:text-text-primary'
+              isFriends ? 'bg-accent text-black' : 'text-text-muted hover:text-text-primary'
             }`}
           >
             {locale === 'fr' ? 'Amis' : 'Friends'}
@@ -50,7 +50,7 @@ export default async function FeedPage({ params, searchParams }: FeedPageProps) 
           <Link
             href={`/${locale}/feed`}
             className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-              !isFriends ? 'bg-electric text-black' : 'text-text-muted hover:text-text-primary'
+              !isFriends ? 'bg-accent text-black' : 'text-text-muted hover:text-text-primary'
             }`}
           >
             {locale === 'fr' ? 'Tous' : 'Everyone'}
@@ -63,7 +63,7 @@ export default async function FeedPage({ params, searchParams }: FeedPageProps) 
       ) : (
         <div className="space-y-2">
           {activities.map((activity) => (
-            <ActivityCard
+            <ActivityRow
               key={activity.id}
               activity={activity}
               locale={locale}
@@ -86,8 +86,8 @@ export default async function FeedPage({ params, searchParams }: FeedPageProps) 
                 href={`/${locale}/feed?page=${p}${isFriends ? '&mode=friends' : ''}`}
                 className={`rounded-md px-3 py-1.5 text-sm ${
                   p === currentPage
-                    ? 'bg-electric text-black'
-                    : 'bg-elevated text-text-secondary hover:bg-electric-glow'
+                    ? 'bg-accent text-black'
+                    : 'bg-elevated text-text-secondary hover:bg-elevated'
                 }`}
               >
                 {p}

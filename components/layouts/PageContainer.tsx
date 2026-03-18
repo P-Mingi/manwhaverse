@@ -1,14 +1,16 @@
 import type { ReactNode } from 'react'
 
-interface PageContainerProps {
-  children: ReactNode
-  className?: string
-}
-
-export function PageContainer({ children, className = '' }: PageContainerProps) {
+export function PageContainer({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <main className={`mx-auto max-w-5xl px-4 py-6 md:py-8 ${className}`}>
+    <div
+      className={className}
+      style={{
+        maxWidth: 1280,
+        margin: '0 auto',
+        padding: '2rem 1rem',
+      }}
+    >
       {children}
-    </main>
+    </div>
   )
 }

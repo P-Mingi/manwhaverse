@@ -5,8 +5,8 @@ import { getUserById } from '@/lib/db/user'
 import { getUserLibrary } from '@/lib/db/library'
 import { getUserActivity } from '@/lib/db/activity'
 import { getFollowerPreview } from '@/lib/db/follow'
-import { ManhwaCard } from '@/components/features/ManhwaCard'
-import { ActivityCard } from '@/components/features/ActivityCard'
+import { ManhwaCard } from '@/components/features/manhwa/ManhwaCard'
+import { ActivityRow } from '@/components/features/social/ActivityRow'
 import { PageContainer } from '@/components/layouts/PageContainer'
 
 interface MyProfilePageProps {
@@ -86,11 +86,11 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
           <div className="font-mono text-lg font-bold">{user._count.reviews}</div>
           <div className="text-xs text-text-muted">{t('reviewsWritten')}</div>
         </div>
-        <Link href={`/${locale}/profile/${user.username}/followers`} className="transition-colors hover:text-crystal-blue">
+        <Link href={`/${locale}/profile/${user.username}/followers`} className="transition-colors hover:text-accent">
           <div className="font-mono text-lg font-bold">{user._count.followers}</div>
           <div className="text-xs text-text-muted">{t('followers')}</div>
         </Link>
-        <Link href={`/${locale}/profile/${user.username}/following`} className="transition-colors hover:text-crystal-blue">
+        <Link href={`/${locale}/profile/${user.username}/following`} className="transition-colors hover:text-accent">
           <div className="font-mono text-lg font-bold">{user._count.follows}</div>
           <div className="text-xs text-text-muted">{t('following')}</div>
         </Link>
@@ -106,7 +106,7 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
             {followerPreview.map((f) => (
               <div
                 key={f.id}
-                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-base bg-elevated text-[10px] text-text-muted"
+                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-void bg-elevated text-[10px] text-text-muted"
               >
                 {f.avatar_url ? (
                   <img
@@ -135,7 +135,7 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
             <h2 className="font-display text-lg font-bold">{t('myLibrary')}</h2>
             <Link
               href={`/${locale}/library`}
-              className="text-sm text-crystal-blue hover:underline"
+              className="text-sm text-accent hover:underline"
             >
               {t('viewAll')}
             </Link>
@@ -148,23 +148,13 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
         </section>
       )}
 
-      {/* Journal link */}
-      <div className="mt-5">
-        <Link
-          href={`/${locale}/profile/${user.username}/journal`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-[rgba(74,158,255,0.3)] hover:text-crystal-blue"
-        >
-          📖 {t('viewJournal')}
-        </Link>
-      </div>
-
       {/* Recent Activity */}
       {recentActivity.length > 0 && (
         <section className="mt-8">
           <h2 className="mb-4 font-display text-lg font-bold">{t('recentActivity')}</h2>
           <div className="space-y-2">
             {recentActivity.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} locale={locale} />
+              <ActivityRow key={activity.id} activity={activity} locale={locale} />
             ))}
           </div>
         </section>

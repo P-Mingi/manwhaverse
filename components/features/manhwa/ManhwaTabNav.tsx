@@ -2,54 +2,56 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useTranslations } from 'next-intl'
 
-interface ManhwaTabNavProps {
+interface Props {
   slug: string
   locale: string
-  hasCharacters: boolean
-  hasStaff: boolean
 }
 
-export function ManhwaTabNav({ slug, locale, hasCharacters, hasStaff }: ManhwaTabNavProps) {
-  const t = useTranslations('manhwa.tabs')
+export function ManhwaTabNav({ slug, locale }: Props) {
   const pathname = usePathname()
   const base = `/${locale}/manhwa/${slug}`
 
   const tabs = [
-    { key: 'overview', href: base, label: t('overview') },
-    ...(hasCharacters ? [{ key: 'characters', href: `${base}/characters`, label: t('characters') }] : []),
-    ...(hasStaff ? [{ key: 'staff', href: `${base}/staff`, label: t('staff') }] : []),
-    { key: 'reviews', href: `${base}/reviews`, label: t('reviews') },
-    { key: 'stats', href: `${base}/stats`, label: t('stats') },
+    { href: base, label: locale === 'fr' ? 'Aperçu' : 'Overview' },
+    { href: `${base}/reviews`, label: locale === 'fr' ? 'Avis' : 'Reviews' },
+    { href: `${base}/characters`, label: locale === 'fr' ? 'Personnages' : 'Characters' },
+    { href: `${base}/staff`, label: 'Staff' },
   ]
 
   return (
-    <nav className="sticky top-0 z-20 border-b border-electric-border bg-void/80 backdrop-blur-md">
-      <div className="mx-auto max-w-5xl px-4">
-        <div className="flex gap-1 overflow-x-auto scrollbar-none">
-          {tabs.map((tab) => {
-            const isActive =
-              tab.key === 'overview'
-                ? pathname === base
-                : pathname.startsWith(tab.href)
-
+    <div
+      style={{
+        background: 'var(--bg-surface)',
+        borderBottom: '1px solid var(--border)',
+        overflowX: 'auto',
+      }}
+    >
+      <div style={{ maxWidth: 1024, margin: '0 auto', padding: '0 1rem' }}>
+        <nav style={{ display: 'flex', gap: 0 }}>
+          {tabs.map(({ href, label }) => {
+            const isActive = pathname === href
             return (
               <Link
-                key={tab.key}
-                href={tab.href}
-                className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'border-electric text-electric'
-                    : 'border-transparent text-text-muted hover:border-electric-border hover:text-text-primary'
-                }`}
+                key={href}
+                href={href}
+                style={{
+                  padding: '0.875rem 1rem',
+                  fontSize: '13px',
+                  fontWeight: isActive ? 700 : 500,
+                  color: isActive ? 'var(--accent)' : 'var(--text-muted)',
+                  textDecoration: 'none',
+                  borderBottom: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+                  whiteSpace: 'nowrap',
+                  transition: 'color 150ms',
+                }}
               >
-                {tab.label}
+                {label}
               </Link>
             )
           })}
-        </div>
+        </nav>
       </div>
-    </nav>
+    </div>
   )
 }

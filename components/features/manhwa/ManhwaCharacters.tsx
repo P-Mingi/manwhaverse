@@ -1,75 +1,52 @@
 import Image from 'next/image'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { Badge } from '@/components/ui/Badge'
 import type { CharacterWithRole } from '@/lib/db/character'
 
-interface ManhwaCharactersProps {
+interface Props {
   characters: CharacterWithRole[]
   locale: string
-  manhwaSlug: string
-  showAll?: boolean
 }
 
-export function ManhwaCharacters({
-  characters,
-  locale,
-  manhwaSlug,
-  showAll = false,
-}: ManhwaCharactersProps) {
-  const t = useTranslations('manhwa')
-
-  if (characters.length === 0) {
-    return <p className="text-sm text-text-muted">{t('noCharacters')}</p>
-  }
-
-  const displayed = showAll ? characters : characters.slice(0, 6)
+export function ManhwaCharacters({ characters, locale }: Props) {
+  if (characters.length === 0) return null
 
   return (
     <div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
-        {displayed.map((mc) => (
-          <div
-            key={mc.character.id}
-            className="flex gap-3 rounded-lg bg-surface p-3"
-          >
-            {mc.character.image_url ? (
-              <Image
-                src={mc.character.image_url}
-                alt={mc.character.name_en}
-                width={56}
-                height={80}
-                className="h-20 w-14 flex-shrink-0 rounded-md object-cover"
-              />
-            ) : (
-              <div className="flex h-20 w-14 flex-shrink-0 items-center justify-center rounded-md bg-elevated text-xs text-text-muted">
-                ?
-              </div>
-            )}
-            <div className="flex flex-col justify-center min-w-0">
-              <span className="text-sm font-semibold text-text-primary break-words">
-                {mc.character.name_en}
-              </span>
-              {mc.character.name_native && (
-                <span className="truncate text-xs text-text-muted">
-                  {mc.character.name_native}
-                </span>
+      <h2 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        {locale === 'fr' ? 'Personnages' : 'Characters'}
+      </h2>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+          gap: '0.75rem',
+        }}
+      >
+        {characters.map((ch) => {
+          const name = ch.character.name_en
+          return (
+            <div
+              key={ch.character.id}
+              className="card"
+              style={{ padding: '0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}
+            >
+              {ch.character.image_url ? (
+                <Image
+                  src={ch.character.image_url}
+                  alt={name}
+                  width={60}
+                  height={60}
+                  style={{ borderRadius: '50%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--bg-elevated)' }} />
               )}
-              <span className="mt-1 text-xs text-text-secondary">
-                {t(`characterRole.${mc.role}`)}
-              </span>
+              <p style={{ margin: 0, fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>{name}</p>
+              <Badge variant="type">{ch.role}</Badge>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
-
-      {!showAll && characters.length > 6 && (
-        <Link
-          href={`/${locale}/manhwa/${manhwaSlug}/characters`}
-          className="mt-4 inline-block text-sm font-medium text-accent hover:underline"
-        >
-          {t('seeAllCharacters')} ({characters.length})
-        </Link>
-      )}
     </div>
   )
 }

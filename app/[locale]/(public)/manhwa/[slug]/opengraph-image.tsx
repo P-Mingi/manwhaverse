@@ -1,4 +1,4 @@
-import { ImageResponse } from '@vercel/og'
+import { ImageResponse } from 'next/og'
 import { getManhwaBySlug } from '@/lib/db/manhwa'
 import { getDisplayScore } from '@/lib/scoring/engine'
 import { formatScore } from '@/lib/utils/formatScore'

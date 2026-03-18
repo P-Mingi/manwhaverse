@@ -97,54 +97,58 @@ export async function getManhwaForCard(
   })
 }
 
-export async function getRelatedManhwas(
+export function getRelatedManhwas(
   manhwaId: string,
   limit = 6
 ): Promise<ManhwaCardData[]> {
-  // Get similar manhwas ordered by similarity
-  const similar = await prisma.similarManhwa.findMany({
-    where: { source_id: manhwaId },
-    orderBy: { similarity: 'desc' },
-    take: limit,
-    include: {
-      target: { select: manhwaCardSelect },
+  return unstable_cache(
+    async () => {
+      const similar = await prisma.similarManhwa.findMany({
+        where: { source_id: manhwaId },
+        orderBy: { similarity: 'desc' },
+        take: limit,
+        include: { target: { select: manhwaCardSelect } },
+      })
+
+      if (similar.length > 0) return similar.map((s) => s.target)
+
+      const manhwa = await prisma.manhwa.findUnique({
+        where: { id: manhwaId },
+        select: { genre_links: { select: { genre_id: true } } },
+      })
+
+      if (!manhwa) return []
+
+      const genreIds = manhwa.genre_links.map((g) => g.genre_id)
+
+      return prisma.manhwa.findMany({
+        where: {
+          id: { not: manhwaId },
+          is_published: true,
+          genre_links: { some: { genre_id: { in: genreIds } } },
+        },
+        select: manhwaCardSelect,
+        orderBy: { score_avg: 'desc' },
+        take: limit,
+      })
     },
-  })
-
-  if (similar.length > 0) {
-    return similar.map((s) => s.target)
-  }
-
-  // Fallback: get manhwas with same genres
-  const manhwa = await prisma.manhwa.findUnique({
-    where: { id: manhwaId },
-    select: { genre_links: { select: { genre_id: true } } },
-  })
-
-  if (!manhwa) return []
-
-  const genreIds = manhwa.genre_links.map((g) => g.genre_id)
-
-  return prisma.manhwa.findMany({
-    where: {
-      id: { not: manhwaId },
-      is_published: true,
-      genre_links: { some: { genre_id: { in: genreIds } } },
-    },
-    select: manhwaCardSelect,
-    orderBy: { score_avg: 'desc' },
-    take: limit,
-  })
+    [`related-manhwas-${manhwaId}-${limit}`],
+    { revalidate: 3600, tags: [`manhwa-${manhwaId}`] }
+  )()
 }
 
-export async function getTopManhwaSlugs(
-  limit = 100
-): Promise<string[]> {
-  const manhwas = await prisma.manhwa.findMany({
-    where: { is_published: true },
-    select: { slug: true },
-    orderBy: { reader_count: 'desc' },
-    take: limit,
-  })
-  return manhwas.map((m) => m.slug)
+export function getTopManhwaSlugs(limit = 100): Promise<string[]> {
+  return unstable_cache(
+    async () => {
+      const manhwas = await prisma.manhwa.findMany({
+        where: { is_published: true },
+        select: { slug: true },
+        orderBy: { reader_count: 'desc' },
+        take: limit,
+      })
+      return manhwas.map((m) => m.slug)
+    },
+    [`top-manhwa-slugs-${limit}`],
+    { revalidate: 3600, tags: ['manhwa'] }
+  )()
 }

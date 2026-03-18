@@ -169,3 +169,5 @@ export async function getUserActivity(
   const activities = await enrichWithManhwa(raw)
   return { activities, total }
 }
+
+export type ActivityWithRelations = ActivityWithContext

@@ -9,6 +9,7 @@ export interface RankedManhwa {
   title: string
   cover_url: string | null
   score: number | null
+  score_count: number
   reader_count: number
   genres: string[]
 }
@@ -29,6 +30,7 @@ export function getTopRankedManhwas(limit: number, locale: string): Promise<Rank
           title_fr: true,
           cover_url: true,
           display_score: true,
+          score_count: true,
           reader_count: true,
           genre_links: {
             include: { genre: { select: { name_en: true, name_fr: true } } },
@@ -43,6 +45,7 @@ export function getTopRankedManhwas(limit: number, locale: string): Promise<Rank
         title: locale === 'fr' && m.title_fr ? m.title_fr : m.title_en,
         cover_url: m.cover_url,
         score: m.display_score,
+        score_count: m.score_count,
         reader_count: m.reader_count,
         genres: m.genre_links.map((gl) =>
           locale === 'fr' ? gl.genre.name_fr : gl.genre.name_en,
@@ -73,6 +76,7 @@ export async function getTopRankedByGenre(
       title_fr: true,
       cover_url: true,
       display_score: true,
+      score_count: true,
       reader_count: true,
       genre_links: {
         include: { genre: { select: { name_en: true, name_fr: true } } },
@@ -87,6 +91,7 @@ export async function getTopRankedByGenre(
     title: locale === 'fr' && m.title_fr ? m.title_fr : m.title_en,
     cover_url: m.cover_url,
     score: m.display_score,
+    score_count: m.score_count,
     reader_count: m.reader_count,
     genres: m.genre_links.map((gl) =>
       locale === 'fr' ? gl.genre.name_fr : gl.genre.name_en,

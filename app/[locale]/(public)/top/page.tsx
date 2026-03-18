@@ -6,6 +6,8 @@ import { getAllGenres } from '@/lib/db/genre'
 import { formatCount } from '@/lib/utils/formatCount'
 import { PageContainer } from '@/components/layouts/PageContainer'
 
+export const revalidate = 3600
+
 interface TopPageProps {
   params: Promise<{ locale: string }>
   searchParams: Promise<{ genre?: string }>

@@ -1,19 +1,32 @@
 import type { ReactNode } from 'react'
-import { headers } from 'next/headers'
-import { bebasNeue, sora, jetbrainsMono, crimsonPro, dmSans } from '@/app/fonts'
-import '@/app/globals.css'
+import { Bebas_Neue, Playfair_Display, DM_Sans } from 'next/font/google'
+import './globals.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  const headersList = await headers()
-  const locale = headersList.get('x-next-intl-locale') ?? 'en'
+const bebasNeue = Bebas_Neue({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--loaded-bebas',
+  display: 'swap',
+})
 
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--loaded-playfair',
+  display: 'swap',
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--loaded-dm-sans',
+  display: 'swap',
+})
+
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <body
-        className={`${bebasNeue.variable} ${sora.variable} ${jetbrainsMono.variable} ${crimsonPro.variable} ${dmSans.variable} overflow-x-hidden bg-void text-text-primary antialiased`}
-      >
+    <html suppressHydrationWarning>
+      <body className={`${bebasNeue.variable} ${playfair.variable} ${dmSans.variable}`}>
         {children}
         <SpeedInsights />
         <Analytics />

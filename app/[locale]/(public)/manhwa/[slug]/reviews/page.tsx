@@ -1,27 +1,24 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
 import { getManhwaBySlug } from '@/lib/db/manhwa'
 import { getReviewsForManhwa } from '@/lib/db/review'
 import { getUser } from '@/lib/auth/session'
-import { ReviewCard } from '@/components/features/ReviewCard'
-import { ReviewForm } from '@/components/features/ReviewForm'
+import { ReviewCard } from '@/components/features/reviews/ReviewCard'
+import { ReviewForm } from '@/components/features/reviews/ReviewForm'
+
+export const revalidate = 300
 
 interface ReviewsPageProps {
   params: Promise<{ locale: string; slug: string }>
   searchParams: Promise<{ sort?: string; page?: string }>
 }
 
-export async function generateMetadata({
-  params,
-}: ReviewsPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ReviewsPageProps): Promise<Metadata> {
   const { locale, slug } = await params
   const manhwa = await getManhwaBySlug(slug)
   if (!manhwa) return { title: 'Not Found' }
   const title = locale === 'fr' ? (manhwa.title_fr ?? manhwa.title_en) : manhwa.title_en
-  return {
-    title: `${title} Reviews — ManhwaVerse`,
-  }
+  return { title: `${title} — ${locale === 'fr' ? 'Avis' : 'Reviews'}` }
 }
 
 export default async function ReviewsPage({ params, searchParams }: ReviewsPageProps) {
@@ -30,10 +27,7 @@ export default async function ReviewsPage({ params, searchParams }: ReviewsPageP
   const manhwa = await getManhwaBySlug(slug)
   if (!manhwa) notFound()
 
-  const t = await getTranslations({ locale, namespace: 'manhwa' })
-  const tReview = await getTranslations({ locale, namespace: 'review' })
   const user = await getUser()
-
   const sortBy = sort === 'recent' ? 'recent' : 'popular'
   const currentPage = Math.max(1, parseInt(page, 10) || 1)
   const { reviews, total } = await getReviewsForManhwa(manhwa.id, sortBy, currentPage, 20)
@@ -43,98 +37,79 @@ export default async function ReviewsPage({ params, searchParams }: ReviewsPageP
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-display text-lg font-semibold">
-          {t('reviews')} ({total})
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <h2 className="font-display" style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>
+          {locale === 'fr' ? `Avis (${total})` : `Reviews (${total})`}
         </h2>
-        <div className="flex gap-2">
-          <a
-            href={`/${locale}/manhwa/${slug}/reviews?sort=popular`}
-            className={`rounded-md px-3 py-1 text-sm ${
-              sortBy === 'popular'
-                ? 'bg-accent text-white'
-                : 'bg-elevated text-text-muted hover:text-text-primary'
-            }`}
-          >
-            {tReview('popular')}
-          </a>
-          <a
-            href={`/${locale}/manhwa/${slug}/reviews?sort=recent`}
-            className={`rounded-md px-3 py-1 text-sm ${
-              sortBy === 'recent'
-                ? 'bg-accent text-white'
-                : 'bg-elevated text-text-muted hover:text-text-primary'
-            }`}
-          >
-            {tReview('recent')}
-          </a>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {(['popular', 'recent'] as const).map((s) => (
+            <a
+              key={s}
+              href={`/${locale}/manhwa/${slug}/reviews?sort=${s}`}
+              style={{
+                padding: '0.25rem 0.75rem',
+                borderRadius: 6,
+                fontSize: '12px',
+                textDecoration: 'none',
+                background: sortBy === s ? 'var(--accent)' : 'var(--bg-elevated)',
+                color: sortBy === s ? 'var(--accent-text)' : 'var(--text-muted)',
+                fontWeight: sortBy === s ? 700 : 500,
+              }}
+            >
+              {s === 'popular' ? (locale === 'fr' ? 'Populaires' : 'Popular') : (locale === 'fr' ? 'Récents' : 'Recent')}
+            </a>
+          ))}
         </div>
       </div>
 
       {user && (
-        <div className="mb-6">
-          <ReviewForm manhwaId={manhwa.id} hasExistingReviews={total > 0} />
+        <div style={{ marginBottom: '1.5rem' }}>
+          <ReviewForm manhwaId={manhwa.id} />
         </div>
       )}
 
       {reviews.length === 0 && (
-        <p className="text-sm text-text-muted">No reviews yet. Be the first!</p>
+        <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+          {locale === 'fr' ? 'Aucun avis. Soyez le premier !' : 'No reviews yet. Be the first!'}
+        </p>
       )}
 
-      {/* Long reviews */}
       {longReviews.length > 0 && (
-        <div className="mb-8 space-y-4">
+        <div style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {microReviews.length > 0 && (
-            <h3 className="text-sm font-semibold text-text-primary">{tReview('longReviews')}</h3>
+            <p style={{ margin: 0, fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+              {locale === 'fr' ? 'Avis détaillés' : 'Detailed Reviews'}
+            </p>
           )}
           {longReviews.map((review) => (
-            <ReviewCard
-              key={review.id}
-              review={review}
-              currentUserId={user?.id}
-              locale={locale}
-              manhwaSlug={slug}
-              preview={true}
-            />
+            <ReviewCard key={review.id} review={review} locale={locale} />
           ))}
         </div>
       )}
 
-      {/* Micro reviews */}
       {microReviews.length > 0 && (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {longReviews.length > 0 && (
-            <h3 className="mb-3 text-sm font-semibold text-text-primary">{tReview('quickReviews')}</h3>
+            <p style={{ margin: 0, fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+              {locale === 'fr' ? 'Avis rapides' : 'Quick Reviews'}
+            </p>
           )}
-          <div className="space-y-3">
-            {microReviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-                currentUserId={user?.id}
-              />
-            ))}
-          </div>
+          {microReviews.map((review) => (
+            <ReviewCard key={review.id} review={review} locale={locale} />
+          ))}
         </div>
       )}
 
-      {/* Pagination */}
       {total > 20 && (
-        <div className="mt-6 flex justify-center gap-2">
+        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
           {currentPage > 1 && (
-            <a
-              href={`/${locale}/manhwa/${slug}/reviews?sort=${sortBy}&page=${currentPage - 1}`}
-              className="rounded-md bg-elevated px-4 py-2 text-sm text-text-primary hover:bg-border"
-            >
-              Previous
+            <a href={`/${locale}/manhwa/${slug}/reviews?sort=${sortBy}&page=${currentPage - 1}`} className="btn-secondary" style={{ textDecoration: 'none' }}>
+              ‹ {locale === 'fr' ? 'Précédent' : 'Previous'}
             </a>
           )}
           {currentPage * 20 < total && (
-            <a
-              href={`/${locale}/manhwa/${slug}/reviews?sort=${sortBy}&page=${currentPage + 1}`}
-              className="rounded-md bg-elevated px-4 py-2 text-sm text-text-primary hover:bg-border"
-            >
-              Next
+            <a href={`/${locale}/manhwa/${slug}/reviews?sort=${sortBy}&page=${currentPage + 1}`} className="btn-secondary" style={{ textDecoration: 'none' }}>
+              {locale === 'fr' ? 'Suivant' : 'Next'} ›
             </a>
           )}
         </div>

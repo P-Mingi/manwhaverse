@@ -1,74 +1,47 @@
-import Image from 'next/image'
 import Link from 'next/link'
-import { formatCount } from '@/lib/utils/formatCount'
+import { Avatar } from '@/components/ui/Avatar'
+import { Badge } from '@/components/ui/Badge'
+import type { Prisma } from '@prisma/client'
 
-interface ListCardProps {
-  list: {
-    slug: string
-    title: string
-    item_count: number
-    likes_count: number
-    user: {
-      username: string | null
-      display_name: string | null
-    }
-    preview_covers: string[]
+type ListWithUser = Prisma.ManhwaListGetPayload<{
+  include: {
+    user: { select: { username: true; display_name: true; avatar_url: true } }
+    _count: { select: { items: true; likes: true } }
   }
+}>
+
+interface Props {
+  list: ListWithUser
   locale: string
 }
 
-export function ListCard({ list, locale }: ListCardProps) {
-  const author = list.user.display_name ?? list.user.username ?? 'Anonymous'
-  const covers = list.preview_covers.slice(0, 4)
-
+export function ListCard({ list, locale }: Props) {
   return (
-    <Link
-      href={`/${locale}/lists/${list.slug}`}
-      className="group flex flex-col overflow-hidden rounded-lg border border-electric-border bg-card card-hover"
-    >
-      {/* 2×2 cover mosaic */}
-      <div className="relative aspect-video w-full overflow-hidden bg-elevated">
-        {covers.length > 0 ? (
-          <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-px bg-void">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="overflow-hidden bg-elevated">
-                {covers[i] && (
-                  <Image
-                    src={covers[i]}
-                    alt=""
-                    width={160}
-                    height={90}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <span className="font-display text-4xl text-electric-border">♾</span>
-          </div>
-        )}
-        {/* Item count badge */}
-        <div className="absolute bottom-2 right-2 rounded bg-void/80 px-1.5 py-0.5 text-[10px] font-mono font-bold text-electric backdrop-blur-sm">
-          {list.item_count}
-        </div>
+    <div className="card" style={{ padding: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+        <Link
+          href={`/${locale}/lists/${list.slug}`}
+          style={{ textDecoration: 'none', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, flex: 1 }}
+        >
+          {list.title}
+        </Link>
+        {list.is_public && <Badge variant="status">{locale === 'fr' ? 'Public' : 'Public'}</Badge>}
       </div>
 
-      {/* Footer */}
-      <div className="flex flex-1 flex-col gap-1 p-3">
-        <h3 className="truncate text-sm font-semibold text-text-primary transition-colors group-hover:text-electric">
-          {list.title}
-        </h3>
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-text-muted">{author}</p>
-          {list.likes_count > 0 && (
-            <span className="text-xs text-text-muted">
-              ♥ {formatCount(list.likes_count)}
-            </span>
-          )}
-        </div>
+      {list.description && (
+        <p style={{ margin: '0 0 0.75rem', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+          {list.description}
+        </p>
+      )}
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '11px', color: 'var(--text-muted)' }}>
+        <Avatar src={list.user.avatar_url} username={list.user.username} size={20} />
+        <span>{list.user.display_name ?? list.user.username}</span>
+        <span>·</span>
+        <span>{list._count.items} {locale === 'fr' ? 'titres' : 'titles'}</span>
+        <span>·</span>
+        <span>❤ {list._count.likes}</span>
       </div>
-    </Link>
+    </div>
   )
 }

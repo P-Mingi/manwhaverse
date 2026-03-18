@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { requireSession } from '@/lib/auth/session'
 import { getUserLibrary, getLibraryCounts } from '@/lib/db/library'
 import type { LibrarySort } from '@/lib/db/library'
-import { ManhwaCard } from '@/components/features/ManhwaCard'
+import { ManhwaCard } from '@/components/features/manhwa/ManhwaCard'
 import { PageContainer } from '@/components/layouts/PageContainer'
 
 interface LibraryPageProps {
@@ -147,7 +147,7 @@ export default async function LibraryPage({ params, searchParams }: LibraryPageP
         <div className="py-20 text-center">
           <p className="text-text-muted">{t('empty')}</p>
           <Link
-            href={`/${locale}/search`}
+            href={`/${locale}/explore`}
             className="mt-2 inline-block text-sm text-crystal-blue hover:underline"
           >
             {t('addFirst')}

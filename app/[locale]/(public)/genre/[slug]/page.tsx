@@ -1,13 +1,7 @@
-export const dynamic = 'force-dynamic'
-
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
-import { getGenreBySlug, getManhwasByGenre, getAllGenres } from '@/lib/db/genre'
-import { getCurrentContentFilter } from '@/lib/nsfw'
-import { getUser } from '@/lib/auth/session'
-import { getUserLibraryMap } from '@/lib/db/library-map'
-import { ManhwaCard } from '@/components/features/ManhwaCard'
+import { getGenreBySlug, getManhwasByGenre } from '@/lib/db/genre'
+import { ManhwaCard } from '@/components/features/manhwa/ManhwaCard'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { generateBreadcrumbJsonLd } from '@/lib/seo/jsonld'
@@ -44,8 +38,6 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
   const name = locale === 'fr' ? genre.name_fr : genre.name_en
   const currentPage = parseInt(page ?? '1', 10)
   const sortBy = (sort as 'score' | 'popularity' | 'recent') ?? 'popularity'
-  const [contentFilter, user] = await Promise.all([getCurrentContentFilter(), getUser()])
-  const libraryMap = user ? await getUserLibraryMap(user.id) : new Map()
 
   const { results, total } = await getManhwasByGenre(slug, currentPage, 24, sortBy)
   const totalPages = Math.ceil(total / 24)
@@ -73,7 +65,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
             href={`/${locale}/genre/${slug}?sort=${s}`}
             className={`rounded-md px-3 py-1.5 text-xs font-medium ${
               sortBy === s
-                ? 'bg-crystal-blue text-white'
+                ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
                 : 'bg-elevated text-text-secondary hover:bg-border'
             }`}
           >
@@ -83,20 +75,9 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        {results.map((m) => {
-          const entry = libraryMap.get(m.id)
-          return (
-            <ManhwaCard
-              key={m.id}
-              manhwa={m}
-              locale={locale}
-              userContentFilter={contentFilter}
-              libraryStatus={entry?.status ?? null}
-              isFavorite={entry?.is_favorite ?? false}
-              isLoggedIn={!!user}
-            />
-          )
-        })}
+        {results.map((m) => (
+          <ManhwaCard key={m.id} manhwa={m} locale={locale} />
+        ))}
       </div>
 
       {results.length === 0 && (
@@ -118,7 +99,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
                 href={`/${locale}/genre/${slug}?sort=${sortBy}&page=${p}`}
                 className={`rounded-md px-3 py-1.5 text-sm ${
                   p === currentPage
-                    ? 'bg-crystal-blue text-white'
+                    ? 'bg-[rgba(0,255,255,0.08)] border border-[rgba(0,255,255,0.3)] text-[#00ffff]'
                     : 'bg-elevated text-text-secondary hover:bg-border'
                 }`}
               >

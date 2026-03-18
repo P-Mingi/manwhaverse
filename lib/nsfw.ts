@@ -1,5 +1,4 @@
 import type { ContentRating, ContentFilter } from '@prisma/client'
-import { prisma } from '@/lib/db/client'
 import { getUser } from '@/lib/auth/session'
 
 /**
@@ -29,15 +28,11 @@ export function needsMatureGate(
 }
 
 /**
- * Fetches the current user's content_filter preference.
- * Returns 'SAFE' for anonymous users (but this only affects blur/gate, not visibility).
+ * Returns the current user's content_filter preference from JWT session.
+ * No DB query — reads directly from the session token.
+ * Returns 'SAFE' for anonymous users.
  */
 export async function getCurrentContentFilter(): Promise<ContentFilter> {
   const user = await getUser()
-  if (!user) return 'SAFE'
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { content_filter: true },
-  })
-  return dbUser?.content_filter ?? 'SAFE'
+  return (user?.content_filter as ContentFilter) ?? 'SAFE'
 }

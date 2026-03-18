@@ -8,6 +8,7 @@ declare module 'next-auth' {
       locale: string
       avatar_url: string | null
       display_name: string | null
+      content_filter: string
     } & DefaultSession['user']
   }
 }
@@ -19,5 +20,6 @@ declare module 'next-auth/jwt' {
     locale: string
     avatar_url: string | null
     display_name: string | null
+    content_filter: string
   }
 }

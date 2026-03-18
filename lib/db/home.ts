@@ -43,18 +43,20 @@ export async function getTopRated(limit = 10): Promise<ManhwaCardPopupData[]> {
   })
 }
 
-export const getRecentManhwas = unstable_cache(
-  async (limit = 10): Promise<ManhwaCardPopupData[]> => {
-    return prisma.manhwa.findMany({
-      where: published,
-      select: manhwaCardWithPopupSelect,
-      orderBy: { created_at: 'desc' },
-      take: limit,
-    })
-  },
-  ['recent-manhwas'],
-  { revalidate: 300, tags: ['recent'] }
-)
+export function getRecentManhwas(limit = 10): Promise<ManhwaCardPopupData[]> {
+  return unstable_cache(
+    async () => {
+      return prisma.manhwa.findMany({
+        where: published,
+        select: manhwaCardWithPopupSelect,
+        orderBy: { created_at: 'desc' },
+        take: limit,
+      })
+    },
+    [`recent-manhwas-${limit}`],
+    { revalidate: 300, tags: ['recent'] }
+  )()
+}
 
 export async function getPopularManhwas(limit = 10): Promise<ManhwaCardPopupData[]> {
   return prisma.manhwa.findMany({
@@ -77,22 +79,24 @@ export async function getTopRatedManhwas(limit = 10): Promise<ManhwaCardPopupDat
   })
 }
 
-export const getHiddenGems = unstable_cache(
-  async (limit = 10): Promise<ManhwaCardPopupData[]> => {
-    return prisma.manhwa.findMany({
-      where: {
-        ...published,
-        display_score: { gte: 7.5 },
-        display_popularity: { lt: 1000 },
-      },
-      select: manhwaCardWithPopupSelect,
-      orderBy: { display_score: 'desc' },
-      take: limit,
-    })
-  },
-  ['hidden-gems'],
-  { revalidate: 3600, tags: ['hidden-gems'] }
-)
+export function getHiddenGems(limit = 10): Promise<ManhwaCardPopupData[]> {
+  return unstable_cache(
+    async () => {
+      return prisma.manhwa.findMany({
+        where: {
+          ...published,
+          display_score: { gte: 7.5 },
+          display_popularity: { lt: 1000 },
+        },
+        select: manhwaCardWithPopupSelect,
+        orderBy: { display_score: 'desc' },
+        take: limit,
+      })
+    },
+    [`hidden-gems-${limit}`],
+    { revalidate: 3600, tags: ['hidden-gems'] }
+  )()
+}
 
 export async function getPopularTropes(limit = 8) {
   return prisma.trope.findMany({

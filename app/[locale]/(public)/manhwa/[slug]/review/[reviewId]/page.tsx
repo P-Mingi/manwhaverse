@@ -4,9 +4,8 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { getReviewById } from '@/lib/db/review'
 import { getManhwaBySlug } from '@/lib/db/manhwa'
-import { getUser } from '@/lib/auth/session'
 import { formatScore, getCrystalColor } from '@/lib/utils/formatScore'
-import { ReviewCard } from '@/components/features/ReviewCard'
+import { ReviewCard } from '@/components/features/reviews/ReviewCard'
 
 interface Props {
   params: Promise<{ locale: string; slug: string; reviewId: string }>
@@ -37,10 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ReviewPage({ params }: Props) {
   const { locale, slug, reviewId } = await params
-  const [review, manhwa, user, t] = await Promise.all([
+  const [review, manhwa, t] = await Promise.all([
     getReviewById(reviewId),
     getManhwaBySlug(slug),
-    getUser(),
     getTranslations({ locale, namespace: 'review' }),
   ])
 
@@ -74,7 +72,7 @@ export default async function ReviewPage({ params }: Props) {
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-crystal-blue/20 to-elevated" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-base via-base/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-void via-void/60 to-transparent" />
 
         {/* Overlay text */}
         <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
@@ -106,13 +104,7 @@ export default async function ReviewPage({ params }: Props) {
         </Link>
 
         {/* Full review card */}
-        <ReviewCard
-          review={review}
-          currentUserId={user?.id}
-          locale={locale}
-          manhwaSlug={slug}
-          preview={false}
-        />
+        <ReviewCard review={review} locale={locale} />
 
         {/* Score breakdown */}
         {(review.score || dimensions.length > 0) && (
