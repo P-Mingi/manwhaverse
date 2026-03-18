@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { CoverImage } from '@/components/ui/CoverImage'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 import type { RankedManhwa } from '@/lib/db/ranking'
 
 interface Props {
@@ -10,14 +11,11 @@ interface Props {
 export function RankingsSidebar({ manhwas, locale }: Props) {
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-        <h2 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          {locale === 'fr' ? 'Top Rankings' : 'Top Rankings'}
-        </h2>
-        <Link href={`/${locale}/top`} style={{ fontSize: '11px', color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
-          {locale === 'fr' ? 'Voir tout →' : 'See all →'}
-        </Link>
-      </div>
+      <SectionHeader
+        title={locale === 'fr' ? 'Top Rankings' : 'Top Rankings'}
+        href={`/${locale}/top`}
+        seeAllLabel={locale === 'fr' ? 'Voir tout →' : 'See all →'}
+      />
 
       <div className="card" style={{ padding: '0.5rem' }}>
         {manhwas.map((m) => (

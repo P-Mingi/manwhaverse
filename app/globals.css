@@ -125,6 +125,13 @@ body {
 
 .btn-secondary:hover { background: var(--bg-elevated); }
 
+/* Homepage 2-column grid — collapses to single column on mobile */
+@media (max-width: 768px) {
+  .homepage-two-col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

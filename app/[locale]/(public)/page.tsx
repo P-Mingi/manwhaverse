@@ -12,6 +12,7 @@ import { RankingsSidebar } from '@/components/features/home/RankingsSidebar'
 import { ActivityFeed } from '@/components/features/home/ActivityFeed'
 import { RecentReviews } from '@/components/features/home/RecentReviews'
 import { ManhwaCard } from '@/components/features/manhwa/ManhwaCard'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 
 export const revalidate = 300
 
@@ -53,88 +54,166 @@ export default async function HomePage({ params }: HomeProps) {
 
   return (
     <>
-      {/* Hero */}
-      <section
-        style={{
-          background: 'var(--bg-surface)',
-          borderBottom: '1px solid var(--border)',
-          padding: '3rem 1rem',
-        }}
-      >
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <div style={{ maxWidth: 600 }}>
-            <p style={{ margin: '0 0 0.75rem', fontSize: '11px', fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              {locale === 'fr' ? 'La référence manhwa' : 'The manhwa reference'}
-            </p>
-            <h1
-              className="font-display"
-              style={{ margin: '0 0 1rem', fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: 'var(--text-primary)', lineHeight: 1.1 }}
-            >
-              {locale === 'fr' ? 'Découvrez les meilleurs manhwas' : 'Discover the best manhwas'}
-            </h1>
-            <p style={{ margin: '0 0 1.5rem', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              {locale === 'fr'
-                ? `${formatCount(stats.manhwaCount)} titres · ${formatCount(stats.userCount)} lecteurs · ${formatCount(stats.reviewCount)} avis`
-                : `${formatCount(stats.manhwaCount)} titles · ${formatCount(stats.userCount)} readers · ${formatCount(stats.reviewCount)} reviews`}
-            </p>
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <Link href={`/${locale}/explore`} className="btn-primary" style={{ textDecoration: 'none' }}>
-                {locale === 'fr' ? 'Explorer →' : 'Explore →'}
-              </Link>
-              <Link href={`/${locale}/top`} className="btn-secondary" style={{ textDecoration: 'none' }}>
-                {locale === 'fr' ? 'Classement' : 'Rankings'}
-              </Link>
-            </div>
+      {/* ── HERO ── cinematic full-bleed strip */}
+      <section style={{ position: 'relative', background: '#0a080e', overflow: 'hidden', marginBottom: 0 }}>
+        {/* Background: up to 5 covers tiled, darkened */}
+        {trending.length > 0 && (
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'grid',
+            gridTemplateColumns: `repeat(${Math.min(trending.length, 5)}, 1fr)`,
+            opacity: 0.35,
+          }}>
+            {trending.slice(0, 5).map((m) => (
+              <div key={m.slug} style={{ position: 'relative', overflow: 'hidden' }}>
+                {m.cover_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={m.cover_url}
+                    alt=""
+                    aria-hidden="true"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Gradient overlay — readable left, covers visible right */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(90deg, rgba(10,8,14,0.97) 0%, rgba(10,8,14,0.75) 45%, rgba(10,8,14,0.15) 100%)',
+        }} />
+
+        {/* Content */}
+        <div style={{
+          position: 'relative',
+          zIndex: 1,
+          maxWidth: '1024px',
+          margin: '0 auto',
+          padding: '64px 24px',
+        }}>
+          <p style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '12px', margin: '0 0 12px' }}>
+            {locale === 'fr' ? 'La référence manhwa' : 'The manhwa reference'}
+          </p>
+          <h1
+            className="font-display"
+            style={{ fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 800, fontStyle: 'italic', color: '#fff', lineHeight: 1.1, margin: '0 0 12px' }}
+          >
+            {locale === 'fr' ? 'Découvrez les meilleurs manhwas' : 'Discover the best manhwas'}
+          </h1>
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', margin: '0 0 24px', maxWidth: '480px', lineHeight: 1.6 }}>
+            {locale === 'fr'
+              ? 'Suivez votre lecture, découvrez de nouvelles séries, partagez vos avis.'
+              : 'Track your reading, discover new series, share your reviews.'}
+          </p>
+
+          {/* Stats row */}
+          <div style={{ display: 'flex', gap: '28px', marginBottom: '28px', flexWrap: 'wrap' }}>
+            {[
+              { val: formatCount(stats.manhwaCount), lbl: locale === 'fr' ? 'titres' : 'titles' },
+              { val: formatCount(stats.userCount), lbl: locale === 'fr' ? 'lecteurs' : 'readers' },
+              { val: formatCount(stats.reviewCount), lbl: locale === 'fr' ? 'avis' : 'reviews' },
+            ].map(({ val, lbl }) => (
+              <div key={lbl}>
+                <span style={{ display: 'block', fontSize: '20px', fontWeight: 800, color: '#fff' }}>{val}</span>
+                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>{lbl}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTAs */}
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <Link href={`/${locale}/explore`} className="btn-primary" style={{ padding: '10px 22px', fontSize: '12px', textDecoration: 'none' }}>
+              {locale === 'fr' ? 'Explorer →' : 'Explore →'}
+            </Link>
+            <Link href={`/${locale}/top`} style={{
+              background: 'rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.8)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              padding: '10px 22px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}>
+              {locale === 'fr' ? 'Classement' : 'Rankings'}
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Trending */}
+      {/* ── TRENDING ── */}
       {trending.length > 0 && <TrendingSection manhwas={trending} locale={locale} />}
 
-      {/* Main content */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '2rem 1rem' }}>
-        {/* Two-column: Rankings + Activity */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)',
-            gap: '2rem',
-            alignItems: 'start',
-          }}
-        >
-          <RankingsSidebar manhwas={ranked} locale={locale} />
+      {/* ── MAIN CONTENT — 2-col grid ── */}
+      <div
+        className="homepage-two-col"
+        style={{
+          maxWidth: '1024px',
+          margin: '0 auto',
+          padding: '24px 24px',
+          display: 'grid',
+          gridTemplateColumns: '1fr 280px',
+          gap: '20px',
+          alignItems: 'start',
+        }}
+      >
+        {/* LEFT — reviews + activity */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {reviews.length > 0 && <RecentReviews reviews={reviews} locale={locale} />}
           <ActivityFeed activities={activities} locale={locale} />
         </div>
 
-        {/* Recent Reviews */}
-        {reviews.length > 0 && (
-          <div style={{ marginTop: '2rem' }}>
-            <RecentReviews reviews={reviews} locale={locale} />
-          </div>
-        )}
+        {/* RIGHT SIDEBAR — rankings */}
+        <div>
+          <RankingsSidebar manhwas={ranked} locale={locale} />
+        </div>
+      </div>
 
-        {/* Hidden Gems */}
-        {hiddenGems.length > 0 && (
-          <div style={{ marginTop: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <h2 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {locale === 'fr' ? 'Pépites cachées' : 'Hidden Gems'}
-              </h2>
-              <Link
-                href={`/${locale}/explore?sort=score`}
-                style={{ fontSize: '11px', color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}
-              >
-                {locale === 'fr' ? 'Voir tout →' : 'See all →'}
-              </Link>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem' }}>
+      {/* ── HIDDEN GEMS ── tinted section */}
+      {hiddenGems.length > 0 && (
+        <section style={{
+          background: 'var(--bg-surface)',
+          borderTop: '1px solid var(--border)',
+          padding: '28px 0',
+          marginTop: '8px',
+        }}>
+          <div style={{ maxWidth: '1024px', margin: '0 auto', padding: '0 24px' }}>
+            <SectionHeader
+              title={locale === 'fr' ? 'Pépites cachées' : 'Hidden Gems'}
+              href={`/${locale}/explore?sort=score`}
+              seeAllLabel={locale === 'fr' ? 'Voir tout →' : 'See all →'}
+            />
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(6, 1fr)',
+              gap: '12px',
+            }}>
               {hiddenGems.map((m, i) => (
                 <ManhwaCard key={m.id} manhwa={m} locale={locale} priority={i < 3} />
               ))}
             </div>
           </div>
-        )}
+        </section>
+      )}
+
+      {/* ── PAGE CLOSER ── prevents abrupt end */}
+      <div style={{
+        borderTop: '1px solid var(--border)',
+        padding: '32px 24px',
+        textAlign: 'center',
+        color: 'var(--text-muted)',
+        fontSize: '12px',
+      }}>
+        <Link href={`/${locale}/explore`} style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}>
+          {locale === 'fr'
+            ? `Explorer les ${formatCount(stats.manhwaCount)} titres →`
+            : `Explore all ${formatCount(stats.manhwaCount)} titles →`}
+        </Link>
       </div>
     </>
   )
