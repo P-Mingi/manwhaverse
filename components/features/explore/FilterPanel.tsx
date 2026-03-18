@@ -17,7 +17,6 @@ interface Props {
 const TYPE_OPTS = [
   { value: '', label: { en: 'All types', fr: 'Tous les types' } },
   { value: 'MANHWA', label: { en: 'Manhwa', fr: 'Manhwa' } },
-  { value: 'MANGA', label: { en: 'Manga', fr: 'Manga' } },
   { value: 'MANHUA', label: { en: 'Manhua', fr: 'Manhua' } },
 ]
 
@@ -87,6 +86,7 @@ export function FilterPanel({ genres, locale }: Props) {
         style={selectStyle}
       >
         <option value="">{locale === 'fr' ? 'Tous les genres' : 'All genres'}</option>
+        <option value="__adult__">18+</option>
         {genres.map((g) => (
           <option key={g.slug} value={g.slug}>{locale === 'fr' ? g.name_fr : g.name_en}</option>
         ))}

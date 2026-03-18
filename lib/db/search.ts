@@ -39,7 +39,11 @@ export async function searchManhwas({
       : {}),
     ...(status ? { status: status as 'ONGOING' | 'COMPLETED' | 'HIATUS' | 'CANCELLED' } : {}),
     ...(type ? { type: type as 'MANHWA' | 'MANHUA' } : {}),
-    ...(genre ? { genre_links: { some: { genre: { slug: genre } } } } : {}),
+    ...(genre === '__adult__'
+      ? { content_rating: { in: ['R18', 'X'] } }
+      : genre
+      ? { genre_links: { some: { genre: { slug: genre } } } }
+      : {}),
     ...(trope ? { trope_links: { some: { trope: { slug: trope } } } } : {}),
     ...(year ? { release_year: year } : {}),
   }

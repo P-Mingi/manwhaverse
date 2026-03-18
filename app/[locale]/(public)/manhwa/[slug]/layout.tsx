@@ -50,9 +50,10 @@ export default async function ManhwaLayout({ children, params }: ManhwaLayoutPro
       <ManhwaHero manhwa={manhwa} locale={locale}>
         <LibraryActions
           manhwaId={manhwa.id}
-          currentEntry={libraryEntry ? { status: libraryEntry.status, score: libraryEntry.score } : null}
+          currentEntry={libraryEntry ? { status: libraryEntry.status, score: libraryEntry.score, progress: libraryEntry.progress } : null}
           isLoggedIn={!!user}
           locale={locale}
+          totalChapters={manhwa.chapter_count}
         />
       </ManhwaHero>
 

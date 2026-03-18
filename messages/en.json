@@ -333,7 +333,8 @@
     "recentActivity": "Recent Activity",
     "noActivity": "No activity yet",
     "viewJournal": "Reading Journal",
-    "challengeYear": "{year} Reading Challenge"
+    "challengeYear": "{year} Reading Challenge",
+    "findFriends": "Find Friends"
   },
   "journal": {
     "title": "Reading Journal",
@@ -364,7 +365,11 @@
     "notifReviewLiked": "Review liked",
     "notifNewChapter": "New chapter release",
     "notifWeeklyDigest": "Weekly digest",
-    "notifEmail": "Email notifications"
+    "notifEmail": "Email notifications",
+    "avatarLabel": "Profile Picture",
+    "avatarChange": "Change photo",
+    "avatarUploading": "Uploading...",
+    "avatarError": "Upload failed, please try again"
   },
   "auth": {
     "signIn": "Sign In",

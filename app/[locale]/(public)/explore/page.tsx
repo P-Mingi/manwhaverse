@@ -76,7 +76,7 @@ export default async function ExplorePage({ params, searchParams }: ExplorePageP
       {/* Results count */}
       <p style={{ margin: '0 0 1rem', fontSize: '13px', color: 'var(--text-muted)' }}>
         {total.toLocaleString()} {locale === 'fr' ? 'titres' : 'titles'}
-        {genre && ` — ${genres.find((g) => g.slug === genre)?.[locale === 'fr' ? 'name_fr' : 'name_en'] ?? genre}`}
+        {genre && ` — ${genre === '__adult__' ? '18+' : genres.find((g) => g.slug === genre)?.[locale === 'fr' ? 'name_fr' : 'name_en'] ?? genre}`}
       </p>
 
       {/* Grid */}

@@ -14,14 +14,17 @@ const sizeMap = {
   hero: { width: 280, height: 400, sizes: '(max-width: 640px) 160px, 280px' },
 }
 
+const fluidSizes = new Set<keyof typeof sizeMap>(['card', 'hero'])
+
 export function CoverImage({ src, alt, size, className, priority }: Props) {
   const dims = sizeMap[size]
+  const fluid = fluidSizes.has(size)
   if (!src) {
     return (
       <div
         style={{
-          width: dims.width,
-          height: dims.height,
+          width: fluid ? '100%' : dims.width,
+          aspectRatio: `${dims.width} / ${dims.height}`,
           background: 'var(--bg-elevated)',
           borderRadius: 8,
           flexShrink: 0,
@@ -38,7 +41,12 @@ export function CoverImage({ src, alt, size, className, priority }: Props) {
       sizes={dims.sizes}
       priority={priority}
       loading={priority ? undefined : 'lazy'}
-      style={{ objectFit: 'cover', borderRadius: 8, display: 'block' }}
+      style={{
+        objectFit: 'cover',
+        borderRadius: 8,
+        display: 'block',
+        ...(fluid ? { width: '100%', height: 'auto' } : {}),
+      }}
       className={className}
     />
   )

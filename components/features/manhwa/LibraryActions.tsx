@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { addToLibraryAction, removeFromLibraryAction, updateScoreAction } from '@/lib/actions/library'
 
 interface LibraryEntry {
   status: string
   score: number | null
+  progress: number | null
 }
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
   currentEntry: LibraryEntry | null
   isLoggedIn: boolean
   locale?: string
+  totalChapters?: number | null
 }
 
 const STATUSES = ['READING', 'COMPLETED', 'PLAN_TO_READ', 'ON_HOLD', 'DROPPED', 'REREADING'] as const
@@ -26,7 +28,7 @@ const STATUS_LABELS: Record<string, { fr: string; en: string }> = {
   REREADING: { fr: 'Relecteur', en: 'Rereading' },
 }
 
-export function LibraryActions({ manhwaId, currentEntry, isLoggedIn, locale = 'en' }: Props) {
+export function LibraryActions({ manhwaId, currentEntry, isLoggedIn, locale = 'en', totalChapters }: Props) {
   const [showPanel, setShowPanel] = useState(false)
   const [isPending, startTransition] = useTransition()
 
@@ -38,8 +40,14 @@ export function LibraryActions({ manhwaId, currentEntry, isLoggedIn, locale = 'e
     )
   }
 
+  const [localScore, setLocalScore] = useState(currentEntry?.score ?? null)
+  const [localProgress, setLocalProgress] = useState<number | ''>(currentEntry?.progress ?? '')
+  useEffect(() => { setLocalScore(currentEntry?.score ?? null) }, [currentEntry?.score])
+  useEffect(() => { setLocalProgress(currentEntry?.progress ?? '') }, [currentEntry?.progress])
+
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ position: 'relative', display: 'inline-block' }}>
       <button
         className={currentEntry ? 'btn-secondary' : 'btn-primary'}
         onClick={() => setShowPanel((p) => !p)}
@@ -84,10 +92,15 @@ export function LibraryActions({ manhwaId, currentEntry, isLoggedIn, locale = 'e
                   fontWeight: currentEntry?.status === status ? 600 : 400,
                 }}
                 onClick={() => {
+                  const progress = status === 'COMPLETED' && totalChapters
+                    ? totalChapters
+                    : (typeof localProgress === 'number' ? localProgress : undefined)
+                  if (status === 'COMPLETED' && totalChapters) setLocalProgress(totalChapters)
                   startTransition(async () => {
                     const form = new FormData()
                     form.append('manhwaId', manhwaId)
                     form.append('status', status)
+                    if (progress !== undefined) form.append('progress', String(progress))
                     await addToLibraryAction(form)
                     setShowPanel(false)
                   })
@@ -97,6 +110,48 @@ export function LibraryActions({ manhwaId, currentEntry, isLoggedIn, locale = 'e
                 {STATUS_LABELS[status]?.[locale as 'fr' | 'en'] ?? status}
               </button>
             ))}
+
+            <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0.25rem 0' }} />
+            <div style={{ padding: '0.5rem 0.75rem' }}>
+              <p style={{ margin: '0 0 0.4rem', fontSize: '11px', color: 'var(--text-muted)' }}>
+                {locale === 'fr' ? 'Chapitres lus' : 'Chapters read'}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <input
+                  type="number"
+                  min={0}
+                  max={totalChapters ?? undefined}
+                  value={localProgress}
+                  onChange={(e) => setLocalProgress(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))}
+                  onBlur={() => {
+                    const progress = typeof localProgress === 'number' ? localProgress : undefined
+                    if (currentEntry && progress !== undefined) {
+                      startTransition(async () => {
+                        const form = new FormData()
+                        form.append('manhwaId', manhwaId)
+                        form.append('status', currentEntry.status)
+                        form.append('progress', String(progress))
+                        await addToLibraryAction(form)
+                      })
+                    }
+                  }}
+                  style={{
+                    width: 64,
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 6,
+                    color: 'var(--text-primary)',
+                    fontSize: '13px',
+                    padding: '4px 8px',
+                    outline: 'none',
+                  }}
+                  disabled={isPending}
+                />
+                {totalChapters && (
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>/ {totalChapters}</span>
+                )}
+              </div>
+            </div>
 
             {currentEntry && (
               <>
@@ -157,6 +212,42 @@ export function LibraryActions({ manhwaId, currentEntry, isLoggedIn, locale = 'e
             )}
           </div>
         </>
+      )}
+      </div>
+
+      {/* Inline score row — always visible when in library */}
+      {isLoggedIn && currentEntry && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginRight: 2 }}>
+            {locale === 'fr' ? 'Note :' : 'Score:'}
+          </span>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+            <button
+              key={n}
+              disabled={isPending}
+              onClick={() => {
+                setLocalScore(n)
+                startTransition(async () => {
+                  await updateScoreAction(manhwaId, n)
+                })
+              }}
+              style={{
+                background: localScore === n ? 'var(--accent)' : 'var(--bg-elevated)',
+                color: localScore === n ? 'var(--accent-text)' : 'var(--text-muted)',
+                border: 'none',
+                cursor: 'pointer',
+                width: 24,
+                height: 24,
+                borderRadius: 4,
+                fontSize: '11px',
+                fontWeight: 600,
+                transition: 'background 100ms',
+              }}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   )

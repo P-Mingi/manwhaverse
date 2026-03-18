@@ -36,7 +36,7 @@ export function RecentReviews({ reviews, locale }: Props) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
                   <Avatar src={review.user.avatar_url} username={review.user.username} size={28} />
                   <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                    <strong style={{ color: 'var(--text-primary)' }}>{review.user.display_name ?? review.user.username}</strong>
+                    <Link href={`/${locale}/profile/${review.user.username}`} style={{ color: 'var(--text-primary)', fontWeight: 700, textDecoration: 'none' }}>{review.user.display_name ?? review.user.username}</Link>
                     {' '}{locale === 'fr' ? 'a noté' : 'reviewed'}{' '}
                     <Link href={`/${locale}/manhwa/${review.manhwa.slug}`} style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
                       {title}

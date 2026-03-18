@@ -28,6 +28,7 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
       <div className="mt-6 max-w-lg">
         <SettingsForm
           initialData={{
+            avatar_url: user.avatar_url ?? null,
             display_name: user.display_name ?? '',
             bio: user.bio ?? '',
             locale: user.locale,

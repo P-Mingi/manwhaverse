@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { StarRating } from '@/components/ui/StarRating'
@@ -24,9 +25,12 @@ export function ReviewCard({ review, locale }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <Avatar src={user.avatar_url} username={user.username} size={36} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+          <Link
+            href={`/${locale}/profile/${user.username}`}
+            style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', textDecoration: 'none' }}
+          >
             {user.display_name ?? user.username ?? 'User'}
-          </p>
+          </Link>
           <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-muted)' }}>{date}</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>

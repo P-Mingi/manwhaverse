@@ -333,7 +333,8 @@
     "recentActivity": "Activité récente",
     "noActivity": "Aucune activité",
     "viewJournal": "Journal de lecture",
-    "challengeYear": "Challenge lecture {year}"
+    "challengeYear": "Challenge lecture {year}",
+    "findFriends": "Trouver des amis"
   },
   "journal": {
     "title": "Journal de lecture",
@@ -364,7 +365,11 @@
     "notifReviewLiked": "Critique aimée",
     "notifNewChapter": "Nouveau chapitre",
     "notifWeeklyDigest": "Résumé hebdomadaire",
-    "notifEmail": "Notifications par e-mail"
+    "notifEmail": "Notifications par e-mail",
+    "avatarLabel": "Photo de profil",
+    "avatarChange": "Changer la photo",
+    "avatarUploading": "Téléchargement...",
+    "avatarError": "Échec du téléchargement, veuillez réessayer"
   },
   "auth": {
     "signIn": "Connexion",

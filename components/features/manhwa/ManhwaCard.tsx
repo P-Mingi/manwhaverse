@@ -16,9 +16,9 @@ export function ManhwaCard({ manhwa, locale, priority }: Props) {
   return (
     <Link
       href={`/${locale}/manhwa/${manhwa.slug}`}
-      style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+      style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}
     >
-      <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', width: '100%' }}>
         <CoverImage src={manhwa.cover_url} alt={title} size="card" priority={priority} />
         {manhwa.display_score && (
           <div

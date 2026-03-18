@@ -4,10 +4,12 @@ import { useTranslations } from 'next-intl'
 import { useRef, useState, useTransition } from 'react'
 import { updateProfileAction, updateNotificationPrefsAction } from '@/lib/actions/profile'
 import { updateContentFilterAction } from '@/lib/actions/nsfw'
+import { Avatar } from '@/components/ui/Avatar'
 import type { ContentFilter } from '@prisma/client'
 
 interface SettingsFormProps {
   initialData: {
+    avatar_url: string | null
     display_name: string
     bio: string
     locale: string
@@ -30,6 +32,10 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
   const formRef = useRef<HTMLFormElement>(null)
   const [contentFilter, setContentFilter] = useState<ContentFilter>(initialData.content_filter)
   const [filterPending, startFilterTransition] = useTransition()
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData.avatar_url)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarError, setAvatarError] = useState('')
+  const avatarInputRef = useRef<HTMLInputElement>(null)
 
   const [notifPrefs, setNotifPrefs] = useState({
     notif_new_chapter: initialData.notif_new_chapter,
@@ -71,6 +77,29 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
     })
   }
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setAvatarError('')
+    setAvatarUploading(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    try {
+      const res = await fetch('/api/upload-avatar', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) {
+        setAvatarError(data.error ?? t('avatarError'))
+      } else {
+        setAvatarUrl(data.url)
+      }
+    } catch {
+      setAvatarError(t('avatarError'))
+    } finally {
+      setAvatarUploading(false)
+      if (avatarInputRef.current) avatarInputRef.current.value = ''
+    }
+  }
+
   const notifToggles: { key: NotifKey; label: string }[] = [
     { key: 'notif_new_follower', label: t('notifNewFollower') },
     { key: 'notif_review_liked', label: t('notifReviewLiked') },
@@ -81,6 +110,35 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
 
   return (
     <form ref={formRef} action={handleSubmit} className="space-y-5">
+      {/* Avatar */}
+      <div>
+        <label className="mb-1 block text-sm font-medium text-text-secondary">
+          {t('avatarLabel')}
+        </label>
+        <div className="flex items-center gap-4">
+          <Avatar src={avatarUrl} username={initialData.display_name} size={72} />
+          <div>
+            <button
+              type="button"
+              disabled={avatarUploading}
+              onClick={() => avatarInputRef.current?.click()}
+              className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-text-primary transition-colors hover:bg-bg-elevated disabled:opacity-50"
+            >
+              {avatarUploading ? t('avatarUploading') : t('avatarChange')}
+            </button>
+            {avatarError && <p className="mt-1 text-xs text-error">{avatarError}</p>}
+            <p className="mt-1 text-xs text-text-muted">JPG, PNG, WebP — max 5MB</p>
+          </div>
+        </div>
+        <input
+          ref={avatarInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="hidden"
+          onChange={handleAvatarChange}
+        />
+      </div>
+
       {/* Display Name */}
       <div>
         <label htmlFor="display_name" className="mb-1 block text-sm font-medium text-text-secondary">

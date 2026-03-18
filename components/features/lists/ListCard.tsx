@@ -36,7 +36,7 @@ export function ListCard({ list, locale }: Props) {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '11px', color: 'var(--text-muted)' }}>
         <Avatar src={list.user.avatar_url} username={list.user.username} size={20} />
-        <span>{list.user.display_name ?? list.user.username}</span>
+        <Link href={`/${locale}/profile/${list.user.username}`} style={{ color: 'inherit', textDecoration: 'none', fontWeight: 600 }}>{list.user.display_name ?? list.user.username}</Link>
         <span>·</span>
         <span>{list._count.items} {locale === 'fr' ? 'titres' : 'titles'}</span>
         <span>·</span>
