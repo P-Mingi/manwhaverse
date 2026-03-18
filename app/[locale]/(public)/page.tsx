@@ -246,6 +246,7 @@ export default async function HomePage({ params }: HomeProps) {
               display: 'grid',
               gridTemplateColumns: 'repeat(6, 1fr)',
               gap: '12px',
+              alignItems: 'stretch',
             }}>
               {hiddenGems.map((m, i) => (
                 <ManhwaCard key={m.id} manhwa={m} locale={locale} priority={i < 3} />
@@ -263,7 +264,7 @@ export default async function HomePage({ params }: HomeProps) {
             href={`/${locale}/explore?sort=recent`}
             seeAllLabel={locale === 'fr' ? 'Voir tout →' : 'See all →'}
           />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', alignItems: 'stretch' }}>
             {recentManhwas.map((m) => (
               <ManhwaCard key={m.id} manhwa={m} locale={locale} />
             ))}

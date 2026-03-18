@@ -152,7 +152,7 @@ export default async function ManhwaPage({ params }: ManhwaPageProps) {
           <h2 className="font-display" style={{ margin: '0 0 0.75rem', fontSize: '1rem', color: 'var(--text-primary)' }}>
             {locale === 'fr' ? 'Titres similaires' : 'Similar Titles'}
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '0.75rem', alignItems: 'stretch' }}>
             {related.map((m) => (
               <ManhwaCard key={m.id} manhwa={m} locale={locale} />
             ))}

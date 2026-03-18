@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { CoverImage } from '@/components/ui/CoverImage'
 import { Badge } from '@/components/ui/Badge'
-import { StarRating } from '@/components/ui/StarRating'
 import type { ManhwaCardData } from '@/lib/db/manhwa'
 
 interface Props {
@@ -16,7 +15,7 @@ export function ManhwaCard({ manhwa, locale, priority }: Props) {
   return (
     <Link
       href={`/${locale}/manhwa/${manhwa.slug}`}
-      style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}
+      style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}
     >
       <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', width: '100%' }}>
         <CoverImage src={manhwa.cover_url} alt={title} size="card" priority={priority} />
@@ -38,7 +37,14 @@ export function ManhwaCard({ manhwa, locale, priority }: Props) {
           </div>
         )}
       </div>
-      <div style={{ height: 64, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <div style={{
+        padding: '8px 2px 0',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px',
+        flexGrow: 1,
+        justifyContent: 'flex-start',
+      }}>
         <p
           style={{
             margin: 0,
@@ -50,7 +56,7 @@ export function ManhwaCard({ manhwa, locale, priority }: Props) {
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
-            minHeight: '34px',
+            minHeight: '32px',
           }}
         >
           {title}

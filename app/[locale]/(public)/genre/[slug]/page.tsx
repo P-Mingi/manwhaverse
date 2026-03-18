@@ -71,7 +71,7 @@ export default async function GenrePage({ params, searchParams }: GenrePageProps
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 items-stretch">
         {results.map((m) => (
           <ManhwaCard key={m.id} manhwa={m} locale={locale} />
         ))}

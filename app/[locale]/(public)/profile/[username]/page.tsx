@@ -168,7 +168,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
       {recentLibrary.length > 0 && (
         <section className="mt-8">
           <h2 className="mb-4 font-display text-lg font-bold">{t('titles')}</h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 items-stretch">
             {recentLibrary.slice(0, 12).map((entry) => (
               <ManhwaCard key={entry.id} manhwa={entry.manhwa} locale={locale} />
             ))}
