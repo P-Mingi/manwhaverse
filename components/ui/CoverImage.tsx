@@ -45,7 +45,7 @@ export function CoverImage({ src, alt, size, className, priority }: Props) {
         objectFit: 'cover',
         borderRadius: 8,
         display: 'block',
-        ...(fluid ? { width: '100%', height: 'auto' } : {}),
+        ...(fluid ? { width: '100%', height: 'auto', aspectRatio: `${dims.width} / ${dims.height}` } : {}),
       }}
       className={className}
     />
