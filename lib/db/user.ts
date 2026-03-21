@@ -107,11 +107,12 @@ export async function updateUserProfile(
   data: {
     display_name?: string
     bio?: string
-    avatar_url?: string
+    avatar_url?: string | null
     locale?: string
     notif_new_chapter?: boolean
     notif_review_liked?: boolean
     notif_new_follower?: boolean
+    notif_friend_request?: boolean
     notif_weekly_digest?: boolean
     notif_email?: boolean
   }

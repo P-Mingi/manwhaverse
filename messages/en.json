@@ -457,8 +457,10 @@
   },
   "seo": {
     "siteName": "ManhwaVerse",
-    "defaultTitle": "ManhwaVerse — Track, Discover & Share Manhwa",
-    "defaultDescription": "The community-driven platform for manhwa & manhua readers. Track your reading, discover new titles, and share reviews."
+    "defaultTitle": "ManhwaVerse - Track every manhwa you've ever loved",
+    "defaultDescription": "Rate, review and discover manhwa & manhua. Join thousands of readers tracking 4,000+ titles. Find your next obsession.",
+    "ogTitle": "ManhwaVerse - Track every manhwa you've ever loved",
+    "ogDescription": "Rate, review and discover manhwa & manhua. Join thousands of readers tracking 4,000+ titles."
   },
   "store": {
     "title": "ManhwaVerse Store",

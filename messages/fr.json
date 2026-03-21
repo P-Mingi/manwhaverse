@@ -457,8 +457,10 @@
   },
   "seo": {
     "siteName": "ManhwaVerse",
-    "defaultTitle": "ManhwaVerse — Suivez, Découvrez et Partagez vos Manhwa",
-    "defaultDescription": "La plateforme communautaire pour les lecteurs de manhwa et manhua. Suivez vos lectures, découvrez de nouveaux titres et partagez vos critiques."
+    "defaultTitle": "ManhwaVerse - Suivez tous les manhwas que vous avez aimés",
+    "defaultDescription": "Notez, critiques et découvrez manhwa et manhua. Rejoignez des milliers de lecteurs sur 4 000+ titres. Trouvez votre prochaine obsession.",
+    "ogTitle": "ManhwaVerse - Suivez tous les manhwas que vous avez aimés",
+    "ogDescription": "Notez, critiques et découvrez manhwa et manhua. Rejoignez des milliers de lecteurs sur 4 000+ titres."
   },
   "store": {
     "title": "ManhwaVerse Store",

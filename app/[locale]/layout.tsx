@@ -26,27 +26,53 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'seo' })
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://manhwaverse.com'
 
   return {
     title: {
       default: t('defaultTitle'),
-      template: `%s | ${t('siteName')}`,
+      template: `%s | ManhwaVerse`,
     },
     description: t('defaultDescription'),
-    metadataBase: new URL('https://manhwaverse.com'),
+    metadataBase: new URL(baseUrl),
     alternates: {
-      canonical: '/',
-      languages: { en: '/en', fr: '/fr' },
+      canonical: `/${locale}`,
+      languages: {
+        en: '/en',
+        fr: '/fr',
+      },
     },
     openGraph: {
       type: 'website',
-      siteName: t('siteName'),
+      siteName: 'ManhwaVerse',
       title: t('defaultTitle'),
-      description: t('defaultDescription'),
+      description: t('ogDescription'),
       locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+      url: `${baseUrl}/${locale}`,
+      images: [
+        {
+          url: '/opengraph-image.svg',
+          width: 1200,
+          height: 630,
+          alt: "ManhwaVerse - Track every manhwa you've ever loved",
+        },
+      ],
     },
-    twitter: { card: 'summary_large_image' },
-    robots: { index: true, follow: true },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('defaultTitle'),
+      description: t('ogDescription'),
+      images: ['/twitter-image.svg'],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+      },
+    },
   }
 }
 
