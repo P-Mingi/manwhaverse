@@ -31,6 +31,10 @@ const STATUS_LABELS: Record<string, { fr: string; en: string }> = {
 export function LibraryActions({ manhwaId, currentEntry, isLoggedIn, locale = 'en', totalChapters }: Props) {
   const [showPanel, setShowPanel] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [localScore, setLocalScore] = useState(currentEntry?.score ?? null)
+  const [localProgress, setLocalProgress] = useState<number | ''>(currentEntry?.progress ?? '')
+  useEffect(() => { setLocalScore(currentEntry?.score ?? null) }, [currentEntry?.score])
+  useEffect(() => { setLocalProgress(currentEntry?.progress ?? '') }, [currentEntry?.progress])
 
   if (!isLoggedIn) {
     return (
@@ -39,11 +43,6 @@ export function LibraryActions({ manhwaId, currentEntry, isLoggedIn, locale = 'e
       </a>
     )
   }
-
-  const [localScore, setLocalScore] = useState(currentEntry?.score ?? null)
-  const [localProgress, setLocalProgress] = useState<number | ''>(currentEntry?.progress ?? '')
-  useEffect(() => { setLocalScore(currentEntry?.score ?? null) }, [currentEntry?.score])
-  useEffect(() => { setLocalProgress(currentEntry?.progress ?? '') }, [currentEntry?.progress])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

@@ -1,7 +1,12 @@
 import { prisma } from './client'
 import type { Prisma } from '@prisma/client'
 
-export type NotificationType = 'new_follower' | 'review_liked' | 'new_chapter'
+export type NotificationType =
+  | 'new_follower'
+  | 'review_liked'
+  | 'new_chapter'
+  | 'friend_request'
+  | 'friend_request_accepted'
 
 export type NotificationRow = Prisma.NotificationGetPayload<{}>
 
@@ -10,6 +15,8 @@ const PREF_MAP: Record<NotificationType, string> = {
   new_follower: 'notif_new_follower',
   review_liked: 'notif_review_liked',
   new_chapter: 'notif_new_chapter',
+  friend_request: 'notif_friend_request',
+  friend_request_accepted: 'notif_friend_request',
 }
 
 export async function createNotification(input: {
@@ -24,6 +31,7 @@ export async function createNotification(input: {
       notif_new_follower: true,
       notif_review_liked: true,
       notif_new_chapter: true,
+      notif_friend_request: true,
     },
   })
 

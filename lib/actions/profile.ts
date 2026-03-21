@@ -9,6 +9,7 @@ const updateProfileSchema = z.object({
   display_name: z.string().min(1).max(50).trim(),
   bio: z.string().max(300).trim().optional(),
   locale: z.enum(['en', 'fr']),
+  avatar_url: z.string().url().max(500).optional().or(z.literal('')),
 })
 
 export async function updateProfileAction(formData: FormData) {
@@ -19,16 +20,20 @@ export async function updateProfileAction(formData: FormData) {
     display_name: formData.get('display_name'),
     bio: formData.get('bio') || undefined,
     locale: formData.get('locale'),
+    avatar_url: formData.get('avatar_url') || undefined,
   })
 
   if (!parsed.success) {
-    return { error: 'Invalid input' }
+    return { error: 'Invalid URL' }
   }
 
   await updateUserProfile(user.id, {
     display_name: parsed.data.display_name,
     bio: parsed.data.bio ?? '',
     locale: parsed.data.locale,
+    ...(parsed.data.avatar_url !== undefined
+      ? { avatar_url: parsed.data.avatar_url || null }
+      : {}),
   })
 
   revalidatePath(`/${parsed.data.locale}/profile`)

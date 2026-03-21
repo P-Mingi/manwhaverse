@@ -485,6 +485,7 @@ model User {
   notif_new_chapter       Boolean           @default(true)
   notif_review_liked      Boolean           @default(true)
   notif_new_follower      Boolean           @default(true)
+  notif_friend_request    Boolean           @default(true)
   notif_weekly_digest     Boolean           @default(true)
   notif_email             Boolean           @default(true)
 
@@ -533,6 +534,8 @@ model User {
   product_wishlists       ProductWishlist[]
   follows                 Follow[]          @relation("follower")
   followers               Follow[]          @relation("following")
+  sent_requests           FriendRequest[]   @relation("sent_requests")
+  received_requests       FriendRequest[]   @relation("received_requests")
   creator_follows         CreatorFollow[]
   quotes                  Quote[]
   quote_votes             QuoteVote[]
@@ -853,6 +856,26 @@ model Follow {
 
   @@id([follower_id, following_id])
   @@index([following_id])
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model FriendRequest {
+  id          String              @id @default(cuid())
+  sender_id   String
+  sender      User                @relation("sent_requests", fields: [sender_id], references: [id])
+  receiver_id String
+  receiver    User                @relation("received_requests", fields: [receiver_id], references: [id])
+  status      FriendRequestStatus @default(PENDING)
+  created_at  DateTime            @default(now())
+  updated_at  DateTime            @updatedAt
+
+  @@unique([sender_id, receiver_id])
+  @@index([receiver_id, status])
 }
 
 model Activity {

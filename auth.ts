@@ -54,7 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const isLoggedIn = !!auth?.user
       const pathname = nextUrl.pathname
 
-      const protectedPatterns = [/^\/[a-z]{2}\/library/, /^\/[a-z]{2}\/settings/, /^\/[a-z]{2}\/profile$/]
+      const protectedPatterns = [/^\/[a-z]{2}\/library/, /^\/[a-z]{2}\/settings/, /^\/[a-z]{2}\/profile$/, /^\/[a-z]{2}\/admin/]
       const isProtected = protectedPatterns.some((p) => p.test(pathname))
 
       if (isProtected && !isLoggedIn) {

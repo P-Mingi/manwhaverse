@@ -28,3 +28,14 @@ export async function requireSession(locale: string = 'en') {
   }
   return session.user
 }
+
+export async function requireAdmin(locale: string = 'en') {
+  const session = await auth()
+  if (!session?.user) {
+    redirect(`/${locale}/sign-in`)
+  }
+  const admin = await isAdmin()
+  if (!admin) {
+    redirect(`/${locale}`)
+  }
+}

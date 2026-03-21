@@ -7,7 +7,7 @@ import { getUserActivity } from '@/lib/db/activity'
 import { getFollowerPreview } from '@/lib/db/follow'
 import { ManhwaCard } from '@/components/features/manhwa/ManhwaCard'
 import { ActivityRow } from '@/components/features/social/ActivityRow'
-import { UserSearchBar } from '@/components/features/social/UserSearchBar'
+import { AddFriendSearch } from '@/components/features/social/AddFriendSearch'
 import { PageContainer } from '@/components/layouts/PageContainer'
 
 interface MyProfilePageProps {
@@ -132,7 +132,7 @@ export default async function MyProfilePage({ params }: MyProfilePageProps) {
       {/* Find friends */}
       <section className="mt-8">
         <h2 className="mb-3 font-display text-lg font-bold">{t('findFriends')}</h2>
-        <UserSearchBar locale={locale} isLoggedIn={true} />
+        <AddFriendSearch locale={locale} />
       </section>
 
       {/* Library */}

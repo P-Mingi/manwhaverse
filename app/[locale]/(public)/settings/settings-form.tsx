@@ -33,6 +33,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
   const [contentFilter, setContentFilter] = useState<ContentFilter>(initialData.content_filter)
   const [filterPending, startFilterTransition] = useTransition()
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialData.avatar_url)
+  const [avatarUrlInput, setAvatarUrlInput] = useState(initialData.avatar_url ?? '')
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [avatarError, setAvatarError] = useState('')
   const avatarInputRef = useRef<HTMLInputElement>(null)
@@ -91,6 +92,7 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
         setAvatarError(data.error ?? t('avatarError'))
       } else {
         setAvatarUrl(data.url)
+        setAvatarUrlInput(data.url)
       }
     } catch {
       setAvatarError(t('avatarError'))
@@ -115,19 +117,39 @@ export function SettingsForm({ initialData }: SettingsFormProps) {
         <label className="mb-1 block text-sm font-medium text-text-secondary">
           {t('avatarLabel')}
         </label>
-        <div className="flex items-center gap-4">
+        <div className="flex items-start gap-4">
           <Avatar src={avatarUrl} username={initialData.display_name} size={72} />
-          <div>
-            <button
-              type="button"
-              disabled={avatarUploading}
-              onClick={() => avatarInputRef.current?.click()}
-              className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-text-primary transition-colors hover:bg-bg-elevated disabled:opacity-50"
-            >
-              {avatarUploading ? t('avatarUploading') : t('avatarChange')}
-            </button>
-            {avatarError && <p className="mt-1 text-xs text-error">{avatarError}</p>}
-            <p className="mt-1 text-xs text-text-muted">JPG, PNG, WebP — max 5MB</p>
+          <div className="flex-1 space-y-2">
+            {/* URL input */}
+            <div>
+              <input
+                name="avatar_url"
+                type="url"
+                value={avatarUrlInput}
+                onChange={(e) => {
+                  setAvatarUrlInput(e.target.value)
+                  setAvatarUrl(e.target.value || null)
+                }}
+                placeholder="https://..."
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-crystal-blue focus:outline-none focus:ring-1 focus:ring-crystal-blue"
+              />
+              <p className="mt-1 text-xs text-text-muted">
+                {initialData.locale === 'fr' ? "Collez l'URL d'une image" : 'Paste an image URL'}
+              </p>
+            </div>
+            {/* Or upload a file */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={avatarUploading}
+                onClick={() => avatarInputRef.current?.click()}
+                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-text-primary transition-colors hover:bg-elevated disabled:opacity-50"
+              >
+                {avatarUploading ? t('avatarUploading') : t('avatarChange')}
+              </button>
+              <span className="text-xs text-text-muted">JPG, PNG, WebP — max 5MB</span>
+            </div>
+            {avatarError && <p className="text-xs text-error">{avatarError}</p>}
           </div>
         </div>
         <input
