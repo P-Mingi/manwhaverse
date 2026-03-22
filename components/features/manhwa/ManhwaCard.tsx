@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CoverImage } from '@/components/ui/CoverImage'
 import { Badge } from '@/components/ui/Badge'
+import { getCurrentContentFilter, shouldBlurCover } from '@/lib/nsfw'
 import type { ManhwaCardData } from '@/lib/db/manhwa'
 
 interface Props {
@@ -9,8 +10,10 @@ interface Props {
   priority?: boolean
 }
 
-export function ManhwaCard({ manhwa, locale, priority }: Props) {
+export async function ManhwaCard({ manhwa, locale, priority }: Props) {
   const title = locale === 'fr' && manhwa.title_fr ? manhwa.title_fr : manhwa.title_en
+  const contentFilter = await getCurrentContentFilter()
+  const blurCover = shouldBlurCover(manhwa, contentFilter)
 
   return (
     <Link
@@ -18,8 +21,24 @@ export function ManhwaCard({ manhwa, locale, priority }: Props) {
       style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}
     >
       <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', width: '100%', aspectRatio: '180 / 256' }}>
-        <CoverImage src={manhwa.cover_url} alt={title} size="card" priority={priority} />
-        {manhwa.display_score && (
+        <div style={blurCover ? { filter: 'blur(10px)', transform: 'scale(1.05)' } : undefined}>
+          <CoverImage src={manhwa.cover_url} alt={title} size="card" priority={priority} />
+        </div>
+        {blurCover && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.5rem',
+            }}
+          >
+            🔞
+          </div>
+        )}
+        {!blurCover && manhwa.display_score && (
           <div
             style={{
               position: 'absolute',

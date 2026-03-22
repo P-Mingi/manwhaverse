@@ -3,15 +3,15 @@ import { getUser } from '@/lib/auth/session'
 
 /**
  * Returns true if a cover should be blurred.
- * Blur if the cover is marked NSFW — unless the user has opted into ALL content.
+ * Blur if the cover is R18 or marked NSFW — unless the user has opted into ALL content.
  */
 export function shouldBlurCover(
-  manhwa: { cover_is_nsfw: boolean },
+  manhwa: { cover_is_nsfw: boolean; content_rating?: ContentRating },
   userFilter: ContentFilter,
 ): boolean {
-  if (!manhwa.cover_is_nsfw) return false
   if (userFilter === 'ALL') return false
-  return true
+  if (manhwa.cover_is_nsfw || manhwa.content_rating === 'R18') return true
+  return false
 }
 
 /**

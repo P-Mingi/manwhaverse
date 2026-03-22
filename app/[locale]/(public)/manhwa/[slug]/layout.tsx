@@ -24,14 +24,15 @@ export default async function ManhwaLayout({ children, params }: ManhwaLayoutPro
 
   if (!manhwa) notFound()
 
-  const contentFilter = await getCurrentContentFilter()
+  const [contentFilter, user] = await Promise.all([
+    getCurrentContentFilter(),
+    getUser(),
+  ])
   const showGate = needsMatureGate(manhwa.content_rating, contentFilter)
 
   if (showGate) {
-    return <MatureGate locale={locale} />
+    return <MatureGate locale={locale} isLoggedIn={!!user} />
   }
-
-  const user = await getUser()
   const libraryEntry = user ? await getLibraryEntry(user.id, manhwa.id) : null
 
   const title = locale === 'fr' ? (manhwa.title_fr ?? manhwa.title_en) : manhwa.title_en
