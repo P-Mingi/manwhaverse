@@ -11,10 +11,10 @@ interface Props {
 
 export function ReviewForm({ manhwaId, locale = 'en', existingReview }: Props) {
   const [content, setContent] = useState(existingReview?.content ?? '')
-  const [score, setScore] = useState<number | null>(existingReview?.score ?? null)
   const [isMicro, setIsMicro] = useState(existingReview?.is_micro ?? true)
   const [hasSpoilers, setHasSpoilers] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,12 +28,27 @@ export function ReviewForm({ manhwaId, locale = 'en', existingReview }: Props) {
       const result = await createReviewAction({
         manhwaId,
         content: content.trim(),
-        score: score ?? null,
+        score: null,
         isMicro,
         hasSpoilers,
       })
-      if (result?.error) setError(result.error)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setContent('')
+        setHasSpoilers(false)
+        setIsMicro(true)
+        setSuccess(true)
+      }
     })
+  }
+
+  if (success) {
+    return (
+      <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0 }}>
+        {locale === 'fr' ? 'Avis publié ✓' : 'Review published ✓'}
+      </p>
+    )
   }
 
   return (
@@ -68,34 +83,8 @@ export function ReviewForm({ manhwaId, locale = 'en', existingReview }: Props) {
         }}
       />
 
-      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div>
-          <p style={{ margin: '0 0 0.25rem', fontSize: '11px', color: 'var(--text-muted)' }}>Score (1-10)</p>
-          <div style={{ display: 'flex', gap: 4 }}>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-              <button
-                type="button"
-                key={n}
-                onClick={() => setScore(n === score ? null : n)}
-                style={{
-                  background: score === n ? 'var(--accent)' : 'var(--bg-elevated)',
-                  color: score === n ? 'var(--accent-text)' : 'var(--text-secondary)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  width: 28,
-                  height: 28,
-                  borderRadius: 4,
-                  fontSize: '11px',
-                  fontWeight: 600,
-                }}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '12px', color: 'var(--text-secondary)', cursor: 'pointer', marginTop: 'auto' }}>
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '12px', color: 'var(--text-secondary)', cursor: 'pointer' }}>
           <input type="checkbox" checked={hasSpoilers} onChange={(e) => setHasSpoilers(e.target.checked)} />
           Spoilers
         </label>

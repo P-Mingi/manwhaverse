@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { getManhwaBySlug } from '@/lib/db/manhwa'
 import { getLibraryEntry } from '@/lib/db/library'
 import { getUser } from '@/lib/auth/session'
@@ -24,11 +25,13 @@ export default async function ManhwaLayout({ children, params }: ManhwaLayoutPro
 
   if (!manhwa) notFound()
 
-  const [contentFilter, user] = await Promise.all([
+  const [contentFilter, user, cookieStore] = await Promise.all([
     getCurrentContentFilter(),
     getUser(),
+    cookies(),
   ])
-  const showGate = needsMatureGate(manhwa.content_rating, contentFilter)
+  const bypassCookie = cookieStore.get('mature_bypass')
+  const showGate = !bypassCookie && needsMatureGate(manhwa.content_rating, contentFilter)
 
   if (showGate) {
     return <MatureGate locale={locale} isLoggedIn={!!user} />

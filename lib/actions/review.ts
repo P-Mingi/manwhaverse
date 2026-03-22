@@ -71,6 +71,7 @@ export async function createReviewAction(data: {
 
   await recalculateSingleManhwaScore(data.manhwaId)
   revalidatePath('/[locale]/manhwa/[slug]', 'page')
+  revalidatePath('/[locale]/manhwa/[slug]/reviews', 'page')
   return { success: true }
 }
 
