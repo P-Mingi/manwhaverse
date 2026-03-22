@@ -17,7 +17,7 @@ const addToLibrarySchema = z.object({
 
 function revalidateLibrary() {
   revalidatePath('/[locale]/library', 'page')
-  revalidatePath('/[locale]/manhwa/[slug]', 'page')
+  revalidatePath('/[locale]/manhwa/[slug]', 'layout')
 }
 
 export async function addToLibraryAction(formData: FormData) {

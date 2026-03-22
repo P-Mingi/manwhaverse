@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { getUser } from '@/lib/auth/session'
 import { createReview, deleteReview, toggleReviewLike, toggleReviewDislike, toggleReaction } from '@/lib/db/review'
 import { createActivity } from '@/lib/db/activity'
@@ -70,6 +70,8 @@ export async function createReviewAction(data: {
   })
 
   await recalculateSingleManhwaScore(data.manhwaId)
+  revalidateTag(`manhwa-${data.manhwaId}`)
+  revalidateTag('reviews')
   revalidatePath('/[locale]/manhwa/[slug]', 'page')
   revalidatePath('/[locale]/manhwa/[slug]/reviews', 'page')
   return { success: true }
