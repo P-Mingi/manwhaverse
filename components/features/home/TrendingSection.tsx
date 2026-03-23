@@ -1,138 +1,275 @@
+'use client'
+
+import { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { Badge } from '@/components/ui/Badge'
-import { SectionHeader } from '@/components/ui/SectionHeader'
+import Image from 'next/image'
 import type { ManhwaCardPopupData } from '@/lib/db/manhwa'
+import { getAnilistCover } from '@/lib/utils/anilist-image'
+import { formatScore } from '@/lib/utils/formatScore'
 
 interface Props {
   manhwas: ManhwaCardPopupData[]
   locale: string
 }
 
-export function TrendingSection({ manhwas, locale }: Props) {
-  if (manhwas.length === 0) return null
-  const [featured, ...rest] = manhwas
-  if (!featured) return null
+// Fan carousel positions — 7 visible slots centred on index 3
+const FAN_POSITIONS = [
+  { x: -52, scale: 0.55, opacity: 0.25, zIndex: 1,  rotate: -18 },
+  { x: -34, scale: 0.65, opacity: 0.40, zIndex: 2,  rotate: -12 },
+  { x: -20, scale: 0.78, opacity: 0.60, zIndex: 3,  rotate:  -6 },
+  { x:   0, scale: 1.00, opacity: 1.00, zIndex: 10, rotate:   0 }, // active
+  { x:  20, scale: 0.78, opacity: 0.60, zIndex: 3,  rotate:   6 },
+  { x:  34, scale: 0.65, opacity: 0.40, zIndex: 2,  rotate:  12 },
+  { x:  52, scale: 0.55, opacity: 0.25, zIndex: 1,  rotate:  18 },
+]
 
-  const featuredTitle = locale === 'fr' && featured.title_fr ? featured.title_fr : featured.title_en
-  const featuredSynopsis = locale === 'fr' && featured.synopsis_fr ? featured.synopsis_fr : featured.synopsis_en
+export function TrendingSection({ manhwas, locale }: Props) {
+  const [active, setActive] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const count = manhwas.length
+
+  const advance = useCallback(() => {
+    setActive(prev => (prev + 1) % count)
+  }, [count])
+
+  const goTo = (idx: number) => setActive((idx + count) % count)
+
+  useEffect(() => {
+    if (isHovered) {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      return
+    }
+    intervalRef.current = setInterval(advance, 4500)
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
+  }, [isHovered, advance])
+
+  if (!manhwas.length) return null
+
+  const current = manhwas[active]
+  const title = locale === 'fr' ? (current.title_fr || current.title_en) : current.title_en
+  const synopsis = locale === 'fr' ? (current.synopsis_fr || current.synopsis_en) : current.synopsis_en
+  const score = current.display_score ?? current.ext_score_composite ?? current.score_avg
+  const genres = current.genre_links.slice(0, 3)
+
+  // Build 7-slot window
+  const window7 = FAN_POSITIONS.map((_, i) => {
+    const offset = i - 3
+    return manhwas[(active + offset + count * 10) % count]
+  })
 
   return (
-    <div style={{ borderBottom: '1px solid var(--border)', padding: '28px 24px' }}>
-      <div style={{ maxWidth: '1024px', margin: '0 auto' }}>
-        <SectionHeader
-          title={locale === 'fr' ? 'Tendances' : 'Trending'}
-          href={`/${locale}/explore?sort=trending`}
-          seeAllLabel={locale === 'fr' ? 'Voir tout →' : 'See all →'}
+    <section
+      className="relative overflow-hidden"
+      style={{ background: 'var(--bg-void)', minHeight: '480px' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Blurred background from active cover */}
+      <div
+        key={`bg-${active}`}
+        className="absolute inset-0 transition-opacity duration-700"
+        style={{ zIndex: 0 }}
+        aria-hidden
+      >
+        {current.cover_url && (
+          <Image
+            src={getAnilistCover(current.cover_url, 'hero')}
+            alt=""
+            fill
+            className="object-cover opacity-20 blur-2xl scale-110"
+            sizes="100vw"
+            priority
+          />
+        )}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to right, var(--bg-void) 0%, var(--bg-void) 15%, transparent 45%, var(--bg-void) 80%, var(--bg-void) 100%)',
+          }}
         />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, transparent 0%, var(--bg-void) 92%)',
+          }}
+        />
+      </div>
 
-          {/* Featured card — cover left, info right */}
-          <Link href={`/${locale}/manhwa/${featured.slug}`} style={{ textDecoration: 'none' }}>
-            <div style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              borderRadius: '10px',
-              overflow: 'hidden',
-              display: 'flex',
-              height: '180px',
-            }}>
-              {/* Cover */}
-              <div style={{ width: '120px', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-                {featured.cover_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={featured.cover_url}
-                    alt={featuredTitle}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      <div className="relative" style={{ zIndex: 1 }}>
+        {/* Fan carousel */}
+        <div
+          className="flex items-end justify-center"
+          style={{ height: '340px', paddingTop: '32px', position: 'relative' }}
+        >
+          {window7.map((manhwa, i) => {
+            const pos = FAN_POSITIONS[i]
+            const isCenter = i === 3
+            const slotIndex = (active + (i - 3) + count * 10) % count
+
+            return (
+              <button
+                key={`${slotIndex}-${i}`}
+                onClick={() => goTo(slotIndex)}
+                className="absolute"
+                style={{
+                  left: `calc(50% + ${pos.x}%)`,
+                  transform: `translateX(-50%) scale(${pos.scale}) rotate(${pos.rotate}deg)`,
+                  transformOrigin: 'bottom center',
+                  zIndex: pos.zIndex,
+                  opacity: pos.opacity,
+                  transition: 'all 0.55s cubic-bezier(0.34, 1.2, 0.64, 1)',
+                  cursor: isCenter ? 'default' : 'pointer',
+                  bottom: 0,
+                  width: '160px',
+                  height: '240px',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  boxShadow: isCenter
+                    ? '0 24px 64px rgba(0,0,0,0.7), 0 0 0 2px var(--accent)'
+                    : '0 8px 24px rgba(0,0,0,0.5)',
+                  outline: 'none',
+                }}
+                tabIndex={isCenter ? -1 : 0}
+                aria-label={isCenter ? undefined : `Go to ${locale === 'fr' ? (manhwa.title_fr || manhwa.title_en) : manhwa.title_en}`}
+              >
+                {manhwa.cover_url ? (
+                  <Image
+                    src={getAnilistCover(manhwa.cover_url, 'card')}
+                    alt={locale === 'fr' ? (manhwa.title_fr || manhwa.title_en) : manhwa.title_en}
+                    fill
+                    className="object-cover"
+                    sizes="200px"
                   />
                 ) : (
-                  <div style={{ width: '100%', height: '100%', background: 'var(--bg-elevated)' }} />
+                  <div style={{ background: 'var(--bg-elevated)', width: '100%', height: '100%' }} />
                 )}
-                <div style={{
-                  position: 'absolute', top: '8px', left: '8px',
-                  background: 'var(--accent)', color: 'var(--accent-text)',
-                  fontSize: '8px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
-                  letterSpacing: '0.06em', textTransform: 'uppercase',
-                }}>
-                  #1 {locale === 'fr' ? 'Cette semaine' : 'This week'}
-                </div>
-              </div>
 
-              {/* Info */}
-              <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
-                <div>
-                  <h3 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                    {featuredTitle}
-                  </h3>
-                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    {featured.genre_links.slice(0, 3).map((gl) => (
-                      <Badge key={gl.genre.slug} variant="genre">
-                        {locale === 'fr' ? gl.genre.name_fr : gl.genre.name_en}
-                      </Badge>
-                    ))}
+                {/* Score badge on active */}
+                {isCenter && score != null && (
+                  <div
+                    className="absolute top-2 left-2 flex items-center gap-1"
+                    style={{
+                      background: 'rgba(0,0,0,0.75)',
+                      backdropFilter: 'blur(6px)',
+                      borderRadius: '8px',
+                      padding: '4px 8px',
+                    }}
+                  >
+                    <span style={{ color: 'var(--star)', fontSize: '11px' }}>★</span>
+                    <span style={{ color: '#fff', fontSize: '12px', fontWeight: 600 }}>
+                      {formatScore(score)}
+                    </span>
                   </div>
-                  {featuredSynopsis && (
-                    <p style={{
-                      fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0,
-                      display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                    }}>
-                      {featuredSynopsis}
-                    </p>
-                  )}
-                </div>
-                {featured.display_score && (
-                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--star)', fontWeight: 600 }}>
-                    ★ {featured.display_score.toFixed(1)}
-                  </p>
                 )}
-              </div>
-            </div>
+
+                {/* Gradient overlay on active */}
+                {isCenter && (
+                  <div
+                    className="absolute bottom-0 left-0 right-0"
+                    style={{
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
+                      borderBottomLeftRadius: '8px',
+                      borderBottomRightRadius: '8px',
+                      height: '64px',
+                    }}
+                  />
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Info panel below carousel */}
+        <div
+          className="mx-auto px-4 pb-10 pt-5"
+          style={{ maxWidth: '680px', textAlign: 'center' }}
+        >
+          {/* Genres */}
+          <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
+            {genres.map(gl => (
+              <Link
+                key={gl.genre.slug}
+                href={`/${locale}/genre/${gl.genre.slug}`}
+                className="text-xs px-3 py-1 rounded-full transition-colors"
+                style={{
+                  background: 'var(--bg-elevated)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                {locale === 'fr' ? gl.genre.name_fr : gl.genre.name_en}
+              </Link>
+            ))}
+          </div>
+
+          {/* Title */}
+          <Link href={`/${locale}/manhwa/${current.slug}`}>
+            <h2
+              className="font-display mb-2 hover:opacity-80 transition-opacity"
+              style={{
+                fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
+                color: 'var(--text-primary)',
+                lineHeight: 1.15,
+              }}
+            >
+              {title}
+            </h2>
           </Link>
 
-          {/* Rest — 2×2 grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            {rest.slice(0, 4).map((m, i) => {
-              const title = locale === 'fr' && m.title_fr ? m.title_fr : m.title_en
-              return (
-                <Link key={m.id} href={`/${locale}/manhwa/${m.slug}`} style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    gap: '8px',
-                    padding: '8px',
-                    alignItems: 'flex-start',
-                  }}>
-                    <div style={{ width: '40px', height: '56px', flexShrink: 0, borderRadius: '4px', overflow: 'hidden' }}>
-                      {m.cover_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={m.cover_url}
-                          alt={title}
-                          loading={i < 2 ? 'eager' : 'lazy'}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                        />
-                      ) : (
-                        <div style={{ width: '100%', height: '100%', background: 'var(--bg-elevated)' }} />
-                      )}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ margin: '0 0 3px', fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.3 }}>
-                        #{i + 2} {title}
-                      </p>
-                      {m.display_score && (
-                        <p style={{ margin: 0, fontSize: '11px', color: 'var(--star)' }}>★ {m.display_score.toFixed(1)}</p>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
+          {/* Synopsis */}
+          {synopsis && (
+            <p
+              className="mx-auto mb-5"
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: '0.875rem',
+                lineHeight: '1.6',
+                maxWidth: '520px',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {synopsis}
+            </p>
+          )}
+
+          {/* CTA */}
+          <Link
+            href={`/${locale}/manhwa/${current.slug}`}
+            className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium transition-all hover:scale-105"
+            style={{
+              background: 'var(--accent)',
+              color: 'var(--accent-text)',
+            }}
+          >
+            {locale === 'fr' ? 'Voir la fiche →' : 'View title →'}
+          </Link>
+
+          {/* Dot indicators */}
+          <div className="flex items-center justify-center gap-2 mt-6">
+            {manhwas.slice(0, 10).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Slide ${i + 1}`}
+                style={{
+                  width: i === active ? '20px' : '6px',
+                  height: '6px',
+                  borderRadius: '3px',
+                  background: i === active ? 'var(--accent)' : 'var(--border-strong)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  transition: 'all 0.3s ease',
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
-    </div>
+    </section>
   )
 }

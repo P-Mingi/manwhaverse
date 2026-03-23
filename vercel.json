@@ -2,6 +2,10 @@
   "regions": ["lhr1"],
   "crons": [
     {
+      "path": "/api/ping",
+      "schedule": "*/5 * * * *"
+    },
+    {
       "path": "/api/cron/recalculate-scores",
       "schedule": "0 3 * * *"
     }

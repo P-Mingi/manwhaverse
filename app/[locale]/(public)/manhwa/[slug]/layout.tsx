@@ -10,6 +10,7 @@ import { ManhwaHero } from '@/components/features/manhwa/ManhwaHero'
 import { ManhwaTabNav } from '@/components/features/manhwa/ManhwaTabNav'
 import { LibraryActions } from '@/components/features/manhwa/LibraryActions'
 import { MatureGate } from '@/components/features/manhwa/MatureGate'
+import ManhwaReadLinks from '@/components/features/manhwa/ManhwaReadLinks'
 import { formatCount } from '@/lib/utils/formatCount'
 
 export const revalidate = 3600
@@ -54,7 +55,7 @@ export default async function ManhwaLayout({ children, params }: ManhwaLayoutPro
       <ManhwaHero manhwa={manhwa} locale={locale}>
         <LibraryActions
           manhwaId={manhwa.id}
-          currentEntry={libraryEntry ? { status: libraryEntry.status, score: libraryEntry.score, progress: libraryEntry.progress } : null}
+          currentEntry={libraryEntry ? { status: libraryEntry.status, score: libraryEntry.score, progress: libraryEntry.progress, is_favorite: libraryEntry.is_favorite } : null}
           isLoggedIn={!!user}
           locale={locale}
           totalChapters={manhwa.chapter_count}
@@ -124,6 +125,12 @@ export default async function ManhwaLayout({ children, params }: ManhwaLayoutPro
                     <li key={i} style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{alt}</li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {manhwa.read_links && manhwa.read_links.length > 0 && (
+              <div className="card" style={{ padding: '1rem', marginTop: '0.75rem' }}>
+                <ManhwaReadLinks readLinks={manhwa.read_links} locale={locale} />
               </div>
             )}
           </aside>
