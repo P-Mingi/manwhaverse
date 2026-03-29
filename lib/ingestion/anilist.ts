@@ -107,10 +107,11 @@ async function seedTropes(): Promise<void> {
   console.log(`[seed] ${rules.length} tropes seeded`)
 }
 
-// ── Seed genres ──
+// ── Seed genres (with cache) ──
 
-async function seedGenre(name: string): Promise<string> {
+async function seedGenre(name: string, cache: Map<string, string>): Promise<string> {
   const slug = slugify(name)
+  if (cache.has(slug)) return cache.get(slug)!
   const genre = await prisma.genre.upsert({
     where: { slug },
     update: { manhwa_count: { increment: 1 } },
@@ -121,17 +122,19 @@ async function seedGenre(name: string): Promise<string> {
       manhwa_count: 1,
     },
   })
+  cache.set(slug, genre.id)
   return genre.id
 }
 
-// ── Upsert creator ──
+// ── Upsert creator (with cache) ──
 
-async function upsertCreator(staff: {
-  id: number
-  name: { full: string | null; native: string | null }
-}): Promise<string> {
+async function upsertCreator(
+  staff: { id: number; name: { full: string | null; native: string | null } },
+  cache: Map<string, string>
+): Promise<string> {
   const name = staff.name.full ?? `Creator ${staff.id}`
   const slug = slugify(name) || `creator-${staff.id}`
+  if (cache.has(slug)) return cache.get(slug)!
 
   const creator = await prisma.creator.upsert({
     where: { slug },
@@ -143,6 +146,7 @@ async function upsertCreator(staff: {
       anilist_id: staff.id,
     },
   })
+  cache.set(slug, creator.id)
   return creator.id
 }
 
@@ -150,7 +154,9 @@ async function upsertCreator(staff: {
 
 async function importManhwa(
   media: AniListMedia,
-  country: string
+  country: string,
+  genreCache: Map<string, string>,
+  creatorCache: Map<string, string>
 ): Promise<{ created: boolean; slug: string }> {
   const slug = buildSlug(media)
   const synopsis = stripHtml(media.description)
@@ -218,7 +224,7 @@ async function importManhwa(
 
   // Link genres
   for (const genreName of media.genres) {
-    const genreId = await seedGenre(genreName)
+    const genreId = await seedGenre(genreName, genreCache)
     await prisma.manhwaGenre.create({
       data: { manhwa_id: manhwa.id, genre_id: genreId },
     }).catch(() => {
@@ -231,7 +237,7 @@ async function importManhwa(
     const role = mapCreatorRole(edge.role)
     if (!role) continue
 
-    const creatorId = await upsertCreator(edge.node)
+    const creatorId = await upsertCreator(edge.node, creatorCache)
     await prisma.manhwaCreator.create({
       data: { manhwa_id: manhwa.id, creator_id: creatorId, role },
     }).catch(() => {
@@ -310,13 +316,15 @@ async function importManhwa(
 export async function bootstrapFromAniList(options?: {
   maxPages?: number
   countries?: string[]
+  startPages?: Record<string, number>
+  onPageComplete?: (country: string, page: number) => void
 }): Promise<{
   total: number
   created: number
   updated: number
   errors: number
 }> {
-  const maxPages = options?.maxPages ?? 40 // 40 pages × 50 = 2000 titles
+  const maxPages = options?.maxPages ?? 500 // AniList hard cap: 500 pages × 50 = 25,000 items
   const countries = options?.countries ?? ['KR', 'CN']
 
   console.log('[bootstrap] Starting AniList import...')
@@ -325,14 +333,19 @@ export async function bootstrapFromAniList(options?: {
   // Seed tropes first
   await seedTropes()
 
+  // In-memory caches to avoid redundant DB lookups across pages
+  const genreCache = new Map<string, string>()
+  const creatorCache = new Map<string, string>()
+
   let totalCreated = 0
   let totalUpdated = 0
   let totalErrors = 0
   let totalProcessed = 0
 
   for (const country of countries) {
-    console.log(`\n[bootstrap] Fetching ${country} titles...`)
-    let page = 1
+    const startPage = options?.startPages?.[country] ?? 1
+    console.log(`\n[bootstrap] Fetching ${country} titles (starting at page ${startPage})...`)
+    let page = startPage
     let hasNextPage = true
 
     while (hasNextPage && page <= maxPages) {
@@ -345,11 +358,11 @@ export async function bootstrapFromAniList(options?: {
         })
 
         const { pageInfo, media } = result.Page
-        console.log(`[bootstrap] Page ${page}/${pageInfo.lastPage} — ${media.length} titles`)
+        console.log(`[bootstrap] ${country} page ${page}/${pageInfo.lastPage} — ${media.length} titles`)
 
         for (const item of media) {
           try {
-            const { created } = await importManhwa(item, country)
+            const { created } = await importManhwa(item, country, genreCache, creatorCache)
             if (created) totalCreated++
             else totalUpdated++
             totalProcessed++
@@ -361,6 +374,7 @@ export async function bootstrapFromAniList(options?: {
         }
 
         hasNextPage = pageInfo.hasNextPage
+        options?.onPageComplete?.(country, page)
         page++
 
         // Rate limit

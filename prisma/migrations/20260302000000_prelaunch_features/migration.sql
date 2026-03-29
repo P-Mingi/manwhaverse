@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "KoreanReaction" AS ENUM ('HEOL', 'DAEBAK', 'GAMDONG', 'KINGBAT', 'MICHYEO', 'JUKGET');
+
+-- CreateEnum
 CREATE TYPE "ArticleCategory" AS ENUM ('NEWS', 'GUIDE', 'LIST', 'OPINION', 'ANALYSIS');
 
 -- CreateEnum
